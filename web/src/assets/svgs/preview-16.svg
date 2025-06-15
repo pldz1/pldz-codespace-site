@@ -1,0 +1,22 @@
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="16" height="16" viewBox="0 0 16 16" id="svg2" version="1.1" inkscape:version="0.91 r13725" sodipodi:docname="file-preview.svg">
+  <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="0.98994949" inkscape:cx="337.14194" inkscape:cy="277.94583" inkscape:document-units="px" inkscape:current-layer="layer1" showgrid="true" fit-margin-top="448" fit-margin-right="384" fit-margin-left="0" fit-margin-bottom="0" units="px" inkscape:window-width="1196" inkscape:window-height="852" inkscape:window-x="132" inkscape:window-y="423" inkscape:window-maximized="0" inkscape:snap-bbox="true" inkscape:bbox-nodes="true">
+    <inkscape:grid type="xygrid" id="grid3347" spacingx="16" spacingy="16" empspacing="2" originx="0" originy="-1.7498462e-005"/>
+  </sodipodi:namedview>
+  <metadata id="metadata7">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>
+          image/svg+xml
+        </dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <dc:title>
+          file-preview
+        </dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g inkscape:label="Layer 1" inkscape:groupmode="layer" id="layer1" transform="translate(0 -604.362)">
+    <path style="fill-opacity:1;stroke:none;stroke-width:36;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="M3.429 0v5.714h1.143V1.143h6.857v3.429h3.429v10.286H3.429v1.143h12.571V3.965L12.035 0H3.429" transform="translate(0 604.362)" id="rect3338"/>
+    <path style="fill-opacity:1;stroke:none;stroke-width:36;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="M5.714 6.857a3.429 3.429 0 0 0 -3.429 3.429 3.429 3.429 0 0 0 0.504 1.782L0 14.857l1.143 1.143 2.789 -2.789A3.429 3.429 0 0 0 5.714 13.714a3.429 3.429 0 0 0 3.429 -3.429 3.429 3.429 0 0 0 -3.429 -3.429m0 1.143a2.286 2.286 0 0 1 2.286 2.286 2.286 2.286 0 0 1 -2.286 2.286 2.286 2.286 0 0 1 -2.286 -2.286 2.286 2.286 0 0 1 2.286 -2.286" transform="translate(0 604.362)" id="path3336"/>
+  </g>
+</svg>

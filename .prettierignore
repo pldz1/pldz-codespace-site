@@ -1,0 +1,11 @@
+# node_modules 下的都不格式化
+node_modules/
+dist/
+build/
+coverage/
+vendor/
+.git/
+.vscode/
+.idea/
+.cache/
+data/

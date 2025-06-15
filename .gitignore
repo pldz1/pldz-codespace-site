@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+.dbpath/
+.cache/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+.env
+.venv/
+
+# Do not track user avatar
+images/avatar/*

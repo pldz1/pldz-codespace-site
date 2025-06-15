@@ -1,0 +1,14 @@
+---
+author: admin@pldz1.com
+category: others
+date: '2025-01-01'
+serialNo: 1
+status: publish
+summary: VSCode相关配置, 工欲善其事必先利其器.
+tags:
+- VSCode配置
+thumbnail: /api/v1/website/image/others/other_vscode_thumbnail.png
+title: VSCode相关配置
+---
+
+`editor.stickyScroll.enabled`，默认是 true，改为 false 即可

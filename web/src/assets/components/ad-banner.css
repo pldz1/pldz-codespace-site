@@ -1,0 +1,89 @@
+.ad-banner-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  flex: 1;
+}
+
+.ad-banner-container-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding: 8px;
+  border-bottom: 1px solid #e4e6ea;
+}
+
+.ad-banner {
+  height: 160px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ad-content {
+  position: absolute;
+  bottom: 48px;
+  color: white;
+  padding: 8px;
+}
+
+.ad-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.ad-title a {
+  color: unset;
+  text-decoration: none;
+}
+
+.ad-title a:hover {
+  text-decoration: underline;
+}
+
+.ad-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  /*  */
+}
+
+@media (max-width: 992px) {
+  /*  */
+}
+
+@media (max-width: 768px) {
+  .ad-banner {
+    height: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-banner {
+    height: 120px;
+  }
+
+  .ad-content {
+    bottom: 15px;
+    left: 15px;
+  }
+
+  .ad-title {
+    font-size: 16px;
+  }
+
+  .ad-subtitle {
+    font-size: 13px;
+  }
+}
+
+/* 横屏小屏幕优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  /*  */
+}

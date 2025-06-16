@@ -244,7 +244,7 @@ watch(
     if (newWidth > 768) {
       onCloseMobileMenu();
     }
-  }
+  },
 );
 
 /**

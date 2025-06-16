@@ -160,7 +160,7 @@ watch(
     if (newWidth > 768) {
       closeMobileMenu();
     }
-  }
+  },
 );
 </script>
 

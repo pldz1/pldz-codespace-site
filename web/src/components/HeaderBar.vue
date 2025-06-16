@@ -59,7 +59,7 @@ const props = defineProps({
   routeName: {
     type: String,
     required: false,
-    default: "首页",
+    default: "",
   },
   showMobileMenu: {
     type: Boolean,

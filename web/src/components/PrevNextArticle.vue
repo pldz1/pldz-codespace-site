@@ -93,7 +93,9 @@ onMounted(async () => {
   color: #007bff;
   font-size: 16px;
   padding: 8px 12px;
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

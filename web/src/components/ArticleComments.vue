@@ -47,7 +47,9 @@ import { ref } from "vue";
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s, transform 0.1s;
+  transition:
+    background 0.3s,
+    transform 0.1s;
 }
 .comment-submit-container button:hover {
   background: linear-gradient(135deg, #6d5dfc 0%, #48a9fe 100%);

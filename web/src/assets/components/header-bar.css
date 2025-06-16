@@ -143,8 +143,9 @@
   }
 
   .search-box {
-    width: 160px;
+    width: 100px;
     padding: 6px 12px;
+    font-size: 14px;
   }
 }
 
@@ -157,11 +158,6 @@
     font-size: 14px;
     margin-right: 16px;
     margin-left: 8px;
-  }
-
-  .search-box {
-    width: 120px;
-    font-size: 14px;
   }
 }
 

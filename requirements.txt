@@ -10,3 +10,4 @@ python-dotenv
 python-multipart
 passlib
 bcrypt<4.1.0
+autopep8

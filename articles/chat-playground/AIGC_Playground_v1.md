@@ -4,7 +4,7 @@ category: chat-playground
 serialNo: 4
 tags: [AIGC, Playground]
 date: 2025-05-08
-thumbnail: /images/chat-playground/4_chat-playground_v1_thumbnail.png
+thumbnail: /api/v1/image/chat-playground/4_chat-playground_v1_thumbnail.png
 summary: chat-playground的前言部分内容, 主要是推荐内容的导读页。
 ---
 
@@ -32,7 +32,7 @@ v1 版本对于 Python 只是提供一个存储 Sqlite 和 web server 的功能
 
 👉 在线体验地址 3: [pldz1.com](https://pldz1.com/_codespace/chat-playground_v1/index.html#/login)
 
-![v1效果预览](/images/CodeSpace_Blog/chat-playground_v1_preview.gif)
+![v1效果预览](/api/v1/image/CodeSpace_Blog/chat-playground_v1_preview.gif)
 
 ---
 

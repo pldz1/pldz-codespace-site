@@ -4,7 +4,7 @@ category: CMake
 serialNo: 1
 tags: [CMake]
 date: 2025-01-01
-thumbnail: /images/CMake/1_cmake_preview_thumbnail.png
+thumbnail: /api/v1/image/CMake/1_cmake_preview_thumbnail.png
 summary: CMake在linux系统上的开发过程.
 ---
 
@@ -16,7 +16,7 @@ summary: CMake在linux系统上的开发过程.
 
 1. `VSCode`: 自行下载安装, 然后安装插件
 
-![vscode_c/cpp开发插件](/images/CMake/20230811132535.png)
+![vscode_c/cpp开发插件](/api/v1/image/CMake/20230811132535.png)
 
 2. `Cmake`:在 Ubuntu 系统上, 可以采用 apt 工具安装：`sudo apt-get install cmake`, 查看安装的版本`cmake --version`, 如下所示
 
@@ -84,7 +84,7 @@ int main()
 
 3. 直接采用 gcc 编译：`gcc main.c -lm -o test`, 或者是`gcc main.c hex.h -lm -o test`
 
-![gcc编译简单的可执行文件](/images/CMake/20230811150710.png)
+![gcc编译简单的可执行文件](/api/v1/image/CMake/20230811150710.png)
 
 4. 做个总结：
 
@@ -126,7 +126,7 @@ pldz@pldz-pc:~/share/Temp/cmakeTest/simpleGCC$ nm -D test.so
 > C/C++教材经常提到的 C 代码的实现过程, 就是从源码 `.c` 然后经过编译生成 `.obj` 文件, 然后再链接生成可执行的文件 `.exe`.
 > CMake 的操作流程也是类似，只不过，需要初始化为 CMake 工程, 然后 `1.项目源码 -> 2.CMakeLists.txt-> 3.执行cmake命令 -> 4.生成Makefile -> 5.make指令-> 6.生成执行文件`
 
-![cmake工程的基本流程](/images/CMake/20230811175312.png)
+![cmake工程的基本流程](/api/v1/image/CMake/20230811175312.png)
 
 1. 创建`CMakeLists.txt`文件.
 
@@ -163,8 +163,8 @@ pldz@pldz-pc:~/share/Temp/cmakeTest/simpleGCC$ tree
 
 1. 执行`cmake .`指令，创建出`Makefile`.
 
-![生成Makefile](/images/CMake/20230811152959.png)
+![生成Makefile](/api/v1/image/CMake/20230811152959.png)
 
 4. 执行`make`指令，生成可执行文件`test`
 
-![执行CMake编译的可执行文件](/images/CMake/20230811153834.png)
+![执行CMake编译的可执行文件](/api/v1/image/CMake/20230811153834.png)

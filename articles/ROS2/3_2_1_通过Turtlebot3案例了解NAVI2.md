@@ -4,7 +4,7 @@ category: ROS2
 serialNo: 202
 tags: [ROS2智能车]
 date: 2025-01-01
-thumbnail: /images/ROS2/2_ros2_navi2_demo_thumbnail.jpg
+thumbnail: /api/v1/image/ROS2/2_ros2_navi2_demo_thumbnail.jpg
 summary: 用仿真环境快速体验ROS2的navigation.
 ---
 
@@ -57,11 +57,11 @@ pldz@pldz-pc:~$
 
 - 1. 访问 `https://tool.lu/ip/` 并输入域名 `raw.githubusercontent.com`，查询 ip 地址，这里查询到的是 `185.199.108.133`
 
-![IP地址查询](/images/ROS2/2_get_ip_address.png)
+![IP地址查询](/api/v1/image/ROS2/2_get_ip_address.png)
 
 - 2. 修改 `sudo gedit /etc/hosts`文件,并手动添加 DNS 解析：
 
-![手动添加IP](/images/ROS2/2_add_ip_into_linux_host.png)
+![手动添加IP](/api/v1/image/ROS2/2_add_ip_into_linux_host.png)
 
 5. 添加 ROS2 的仓库：`echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null`
 
@@ -75,7 +75,7 @@ pldz@pldz-pc:~$
 
 10. 激活环境变量验证安装：`source ~/.bashrc`，然后输入`ros2 run turtlesim turtlesim_node`如果能够看到小乌龟则代表成功
 
-![ROS2 小乌龟例子](/images/ROS2/2_ros2_turtlesim_demo.png)
+![ROS2 小乌龟例子](/api/v1/image/ROS2/2_ros2_turtlesim_demo.png)
 
 # 1.2 运行 ROS2 NAVI 例子
 
@@ -104,11 +104,11 @@ sudo apt install ros-foxy-gazebo*
 
 4. 到 gazebo 的 github 官方网页: [osrf/gazebo_models](https://github.com/osrf/gazebo_models)，下载全部模型为 zip 文件
 
-![gazebo模型仓库](/images/ROS2/2_gazebo_models_repo.png)
+![gazebo模型仓库](/api/v1/image/ROS2/2_gazebo_models_repo.png)
 
 5. 解压 zip 文件夹并重命名为`models`，然后拷贝到`~/.gazebo`的目录下
 
-![移动gazebo模型](/images/ROS2/2_put_gazebo_models.png)
+![移动gazebo模型](/api/v1/image/ROS2/2_put_gazebo_models.png)
 
 ## 1.2.2 建立导航的地图(Mapping)
 
@@ -120,7 +120,7 @@ export TURTLEBOT3_MODEL=burger
 ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 ```
 
-![启动trutlebot3的gazebo物理环境](/images/ROS2/2_run_gazebo.png)
+![启动trutlebot3的gazebo物理环境](/api/v1/image/ROS2/2_run_gazebo.png)
 
 第一次启动，可能会出现一直在等待的状态，并且提示`Spawn service failed. Exiting.`， 错误的解决办法可以参考 1.3.1 的内容，杀死 gazebo 再次启动即可
 
@@ -134,7 +134,7 @@ ros2 launch turtlebot3_cartographer cartographer.launch.py use_sim_time:=True
 
 启动成功之后，会出现 rviz2 的界面：
 
-![建图的rviz2画面](/images/ROS2/2_gazebo_rviz2_map.png)
+![建图的rviz2画面](/api/v1/image/ROS2/2_gazebo_rviz2_map.png)
 
 3. 控制机器人移动生成地图文件，输入命令：`ros2 run turtlebot3_teleop teleop_keyboard`启动键盘控制小车运动的节点，在此之前可以指定小车的类型：`export TURTLEBOT3_MODEL=burger`，例如下面的 telep.sh
 
@@ -144,7 +144,7 @@ export TURTLEBOT3_MODEL=burger
 ros2 run turtlebot3_teleop teleop_keyboard
 ```
 
-![控制机器人运动生成大概的地图文件](/images/ROS2/2_generate_map.png)
+![控制机器人运动生成大概的地图文件](/api/v1/image/ROS2/2_generate_map.png)
 
 4. 完成建图，生成导航的地图文件和信息，通过`teleop_keyboard`打开的终端控制机器人移动，等待图片大部分被扫描成功后，输入命令行调用`map_server`存储地图，其中的地图名称为 test，之后会生成以该名字命名的`.pgm`/`yaml`等文件：`ros2 run nav2_map_server map_saver_cli -f testMap`
 
@@ -186,11 +186,11 @@ export TURTLEBOT3_MODEL=burger
 ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=true map:=testMap.yaml
 ```
 
-![启动RVIZ导航](/images/ROS2/2_run_navi.png)
+![启动RVIZ导航](/api/v1/image/ROS2/2_run_navi.png)
 
 3. 给出起始点：在`rviz2`工具上拖动`2D Pose Estimate`，给出小车位置，完成坐标的变换：
 
-![RVIZ2启动导航仿真](/images/ROS2/2_navi_demo.gif)
+![RVIZ2启动导航仿真](/api/v1/image/ROS2/2_navi_demo.gif)
 
 ## 1.2.4 可能出现的问题汇总（持续更新）
 

@@ -4,7 +4,7 @@ category: chat-playground
 serialNo: 0
 tags: [AIGC, Playground]
 date: 2025-01-11
-thumbnail: /images/chat-playground/0_category.png
+thumbnail: /api/v1/image/chat-playground/0_category.png
 summary: chat-playground的前言部分内容, 主要是推荐内容的导读页。
 ---
 

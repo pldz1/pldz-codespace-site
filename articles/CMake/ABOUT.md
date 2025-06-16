@@ -4,7 +4,7 @@ category: CMake
 serialNo: 0
 tags: [CMake]
 date: 2025-01-01
-thumbnail: /images/CMake/cmake_about_thumbnail.png
+thumbnail: /api/v1/image/CMake/cmake_about_thumbnail.png
 summary: CMake的导读页面.
 ---
 

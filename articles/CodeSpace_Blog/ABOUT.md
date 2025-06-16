@@ -4,7 +4,7 @@ category: CodeSpace_Blog
 serialNo: 0
 tags: [VUE3]
 date: 2025-01-08
-thumbnail: /images/CodeSpace_Blog/0_category.jpg
+thumbnail: /api/v1/image/CodeSpace_Blog/0_category.jpg
 summary: 存放各个博客网页的推送文章
 ---
 

@@ -4,7 +4,7 @@ category: ROS2
 serialNo: 1
 tags: [ROS2基础]
 date: 2025-01-01
-thumbnail: /images/ROS2/1_ros2_ubuntu_thumbnail.jpg
+thumbnail: /api/v1/image/ROS2/1_ros2_ubuntu_thumbnail.jpg
 summary: ROS2的下载和安装和ROS2是什么的介绍.
 ---
 
@@ -14,7 +14,7 @@ summary: ROS2的下载和安装和ROS2是什么的介绍.
 
 1. 下载 Ubuntu22.04：本文选择 [中科大镜像网](https://mirrors.ustc.edu.cn/) ，选择 Ubuntu22.04 镜像下载，后续放入 VMware 进行 **断网安装**
 
-![下载镜像](/images/ROS2/1_download_ubuntu_mirror.png)
+![下载镜像](/api/v1/image/ROS2/1_download_ubuntu_mirror.png)
 
 > VMware15 链接：
 > 链接：https://pan.baidu.com/s/1BbaGtDhjVXCWeS2vuk3bRw
@@ -35,7 +35,7 @@ deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-proposed main restricted universe 
 deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
 ```
 
-![Ubuntu换源](/images/ROS2/1_change_apt_source.png)
+![Ubuntu换源](/api/v1/image/ROS2/1_change_apt_source.png)
 
 ## 1.1.2 下载安装 ROS2
 
@@ -57,11 +57,11 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 
 - 1. 访问 `https://tool.lu/ip/` 并输入域名 `raw.githubusercontent.com`，查询 ip 地址，这里查询到的是 `185.199.108.133`
 
-![IP地址查询](/images/ROS2/1_request_ip_address.png)
+![IP地址查询](/api/v1/image/ROS2/1_request_ip_address.png)
 
 - 2. 修改 `sudo gedit /etc/hosts`文件,并手动添加 DNS 解析：
 
-![手动添加IP](/images/ROS2/1_modify_dns_information.png)
+![手动添加IP](/api/v1/image/ROS2/1_modify_dns_information.png)
 
 4. 下载 ROS2-humble：更新软件到最新版本，然后下载 ROS2-humble：
 
@@ -79,7 +79,7 @@ sudo apt install ros-humble-desktop
 
 2. 测试 ROS2：`ros2 run turtlesim turtlesim_node`和`ros2 run turtlesim turtle_teleop_key`运行小乌龟
 
-![小乌龟测试程序](/images/ROS2/1_download_ubuntu_mirror.png)
+![小乌龟测试程序](/api/v1/image/ROS2/1_download_ubuntu_mirror.png)
 
 # 1.2 使用 VSCode 搭建 ROS2 开发环境
 
@@ -89,7 +89,7 @@ sudo apt install ros-humble-desktop
 
 2. 下载完成后安装 VSCode 插件：插件主要包括 `C/C++` 和 `Python` 以及 `CMake` 的插件，如下图所示：
 
-![VSCode插件](/images/ROS2/1_download_vscode_ros2_plugin.png)
+![VSCode插件](/api/v1/image/ROS2/1_download_vscode_ros2_plugin.png)
 
 ## 1.2.2 创建 ROS2 工程的方法
 
@@ -144,7 +144,7 @@ options:
 
 > Tips：这里补充还是推荐才有下划线割开的功能包命名方法而不是大小写混合，否则会出错
 >
-> ![命名的问题](/images/ROS2/1_node_name_build_warning.png)
+> ![命名的问题](/api/v1/image/ROS2/1_node_name_build_warning.png)
 
 ```shell
 ros2 pkg create demo --build-type ament_cmake --node-name demo_node --dependencies rclcpp
@@ -156,7 +156,7 @@ ros2 pkg create demo --build-type ament_cmake --node-name demo_node --dependenci
 
 > Tips：这里补充还是推荐才有下划线割开的功能包命名方法而不是大小写混合，否则会出错
 >
-> ![命名的问题](/images/ROS2/1_node_name_build_warning.png)
+> ![命名的问题](/api/v1/image/ROS2/1_node_name_build_warning.png)
 
 2. 查看工程目录结构：`tree . `，可以发现在`src`目录下 **存在了节点名称的 cpp 文件** ，即 ROS2 项目已经构建了配置好节点内容的工程
 
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 }
 ```
 
-![VSCode Settings配置](/images/ROS2/1_config_vscode_settings.gif)
+![VSCode Settings配置](/api/v1/image/ROS2/1_config_vscode_settings.gif)
 
 5. 配置 ROS2 项目的 `package.xml` 文件：`package.xml` 文件是 ROS2 项目的功能包管理文件，下面添加了一点注释：
 
@@ -429,7 +429,7 @@ pldz@pldz-pc:~/share/ROS2_DEMO/1_Chapter/code$ tree -L 3
 
 > Tips：这里补充还是推荐才有下划线割开的功能包命名方法而不是大小写混合，否则会出错
 >
-> ![命名的问题](/images/ROS2/1_node_name_build_warning.png)
+> ![命名的问题](/api/v1/image/ROS2/1_node_name_build_warning.png)
 
 ```shell
 pldz@pldz-pc:~/share/ROS2_DEMO/1_Chapter/code$ ros2 pkg create vscodePythonDemo --build-type ament_python --dependencies rclpy std_msgs --node-name vscodePythonDemoNode
@@ -515,7 +515,7 @@ def main():
 
 3. Python 的 VSCode 环境配置：默认情况下 VSCode 的 Python 解析器，能够定位到`rclpy.py`的位置在`/opt/ros/humble/local/lib/python3.10/dist-packages/`下，如果无法找到，可以手动配置`.vscode` 文件夹下的 `settings.json`文件，加入`"python.analysis.extraPaths": ["/opt/ros/humble/local/lib/python3.10/dist-packages/"],`，这样的配置同样能够将自己安装的的 Python 依赖项加入到 vscode 的开发环境中
 
-![Python项目的VSCode配置](/images/ROS2/1_config_python_vscode_env.png)
+![Python项目的VSCode配置](/api/v1/image/ROS2/1_config_python_vscode_env.png)
 
 4. ROS2 的 Python 项目的简单配置：与 C/C++项目不同，Python 项目主要配置`packages.xml`文件来管理依赖项和 Python 包，`setup.py`主要给 Python 项目进行打包配置
 
@@ -651,7 +651,7 @@ pldz@pldz-pc:~/share/ROS2_DEMO/1_Chapter/code$ tree -L 3
 
 ROS2 的介绍中，有这么一张图，习惯划分说 ROS2 分为三层[来源于 B 站 UP](https://www.bilibili.com/video/BV1HD4y1q7UH/)：
 
-![ROS2架构](/images/ROS2/1_ros2_structure.png)
+![ROS2架构](/api/v1/image/ROS2/1_ros2_structure.png)
 
 1. 操作系统层（OS Layer）：如前所述，ROS 虽然称之为机器人操作系统，但实质只是构建机器人应用程序的软件开发工具包，ROS 必须依赖于传统意义的操作系统，目前 ROS2 可以运行在 Linux、Windows、Mac 或 RTOS 上。
 

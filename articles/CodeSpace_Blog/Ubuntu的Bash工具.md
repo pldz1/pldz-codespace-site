@@ -4,7 +4,7 @@ category: CodeSpace_Blog
 serialNo: 3
 tags: [Ubuntu]
 date: 2025-01-09
-thumbnail: /images/CodeSpace_Blog/ut_ubuntu_tool_thumbnail.png
+thumbnail: /api/v1/image/CodeSpace_Blog/ut_ubuntu_tool_thumbnail.png
 summary: 简单的更新一点这个指令bash脚本.
 ---
 
@@ -240,4 +240,4 @@ pldzlt -b
 
 结果如下图
 
-![软连接结果](/images/CodeSpace_Blog/ut_ubuntu_tool_thumbnail.png)
+![软连接结果](/api/v1/image/CodeSpace_Blog/ut_ubuntu_tool_thumbnail.png)

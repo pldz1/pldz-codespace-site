@@ -4,7 +4,7 @@ category: CMake
 serialNo: 3
 tags: [CMake]
 date: 2025-01-01
-thumbnail: /images/CMake/3_cmake_project_thumbnail.png
+thumbnail: /api/v1/image/CMake/3_cmake_project_thumbnail.png
 summary: 介绍怎么用CMake配置一个项目
 ---
 
@@ -14,7 +14,7 @@ summary: 介绍怎么用CMake配置一个项目
 
 > 对于生成项目的可执行文件的操作, 实际上不管是采用 GCC 还是 CMake 工具，都是类似的，也就是从项目的`mian()`函数出发，找到项目依赖的全部的头文件/库文件/源文件等, 打包生成可执行程序;
 
-![GCC/CMake生成可执行文件的流程](/images/CMake/20230814155900.png)
+![GCC/CMake生成可执行文件的流程](/api/v1/image/CMake/20230814155900.png)
 
 ### 3.1.1 GCC 配置项目的快速体验
 
@@ -145,7 +145,7 @@ int main()
 
 7. 采用 GCC 编译的指令: `gcc ./src/main.c -I ./include/ -o test`
 
-![gcc编译项目](/images/CMake/20230814133811.png)
+![gcc编译项目](/api/v1/image/CMake/20230814133811.png)
 
 ### 3.1.2 解决 VSCode CMake 文件目录的配置
 
@@ -178,7 +178,7 @@ add_executable(test ${WORKSPACE_PATH}/src/main.c ${WORKSPACE_PATH}/src/hexCov.c)
 
 4. 编译运行：跳转到项目的`build`文件夹，输入指令`cmake ..`, CMake 语法没有问题之后，也在`build`文件夹下输入`make`生成可执行文件.
 
-![CMake包含头文件](/images/CMake/20230814142123.png)
+![CMake包含头文件](/api/v1/image/CMake/20230814142123.png)
 
 ### 3.1.4 包含源文件 aux_source_directory
 
@@ -322,7 +322,7 @@ add_library(hexCov0 STATIC ${SRCS})
 add_library(hexCov1 SHARED ${SRCS})
 ```
 
-![CMake生成动态库](/images/CMake/20230814164810.png)
+![CMake生成动态库](/api/v1/image/CMake/20230814164810.png)
 
 ## 3.2 配置复杂项目的思路
 
@@ -332,7 +332,7 @@ add_library(hexCov1 SHARED ${SRCS})
 
 > 以本文的工程为例子，讨论根和子 `CMakeLists.txt` 的注意事项.
 
-![复杂CMake项目的层级](/images/CMake/2023-09-14-23-58-07.png)
+![复杂CMake项目的层级](/api/v1/image/CMake/2023-09-14-23-58-07.png)
 
 ```shell
 .
@@ -409,9 +409,9 @@ add_library(hexCov1 SHARED ${SRCS})
 
 - 6. 在子目录中，可以定义自己的库、可执行文件或其他编译目标，并根据需要进行配置;子目录的构建结果可以在父目录中进行链接和使用, 也可以作为库供其他子目录或父目录使用，也可以作为可执行文件独立运行，也就是说习惯将入口函数的项目放在最后这样可以让它去调用一些子项目的库文件.这段话可以这么理解，首先子项目作为单独的内容编译生成了库文件，然后它的源码不暴露，头文件保留声明，保护源码不被修改，例如这里的`libm`库内的`pow`函数，只有声明，源码在`libm.so`内
 
-![库文件的作用](/images/CMake/2023-09-15-08-19-41.png)
+![库文件的作用](/api/v1/image/CMake/2023-09-15-08-19-41.png)
 
-![库文件的例子libm](/images/CMake/2023-09-15-08-09-46.png)
+![库文件的例子libm](/api/v1/image/CMake/2023-09-15-08-09-46.png)
 
 1. 那么本个例子的父节点的`CMakeLists.txt`可以这么写
 
@@ -524,11 +524,11 @@ target_link_libraries(test.elf deccov hexcov octcov m)
 
 9. 观察`cmake`指令的输出：
 
-![CMake输出内容](/images/CMake/2023-09-15-23-53-51.png)
+![CMake输出内容](/api/v1/image/CMake/2023-09-15-23-53-51.png)
 
 10. 查看构建的文件：
 
-![构建成功](/images/CMake/2023-09-15-23-56-27.png)
+![构建成功](/api/v1/image/CMake/2023-09-15-23-56-27.png)
 
 ## 3.3 CMake 工具的交叉编译
 
@@ -641,6 +641,6 @@ add_subdirectory(${PROPATH}/src)
 
 ```
 
-![交叉编译cmake](/images/CMake/2023-09-17-23-33-19.png)
+![交叉编译cmake](/api/v1/image/CMake/2023-09-17-23-33-19.png)
 
-![交叉编译后的文件类型](/images/CMake/2023-09-17-23-34-50.png)
+![交叉编译后的文件类型](/api/v1/image/CMake/2023-09-17-23-34-50.png)

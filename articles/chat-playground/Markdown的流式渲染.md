@@ -4,7 +4,7 @@ category: chat-playground
 serialNo: 2
 tags: [AIGC, Playground, SSE, JavaScript]
 date: 2025-01-12
-thumbnail: /images/chat-playground/2_markdown_sse_thumbnail.png
+thumbnail: /api/v1/image/chat-playground/2_markdown_sse_thumbnail.png
 summary: 用 markdown-it 这个库在 HTML 上动态更新 markdown 内容(不是重新刷新).
 ---
 
@@ -31,7 +31,7 @@ summary: 用 markdown-it 这个库在 HTML 上动态更新 markdown 内容(不�
 
 预览的效果如下所示:
 
-![预览效果](/images/chat-playground/2_sse_md_preview.gif)
+![预览效果](/api/v1/image/chat-playground/2_sse_md_preview.gif)
 
 # 1️⃣ 实现介绍
 

@@ -4,7 +4,7 @@ category: ROS2
 serialNo: 4
 tags: [ROS2和单片机]
 date: 2025-01-01
-thumbnail: /images/ROS2/4_microros_ros2_thumbnail.png
+thumbnail: /api/v1/image/ROS2/4_microros_ros2_thumbnail.png
 summary: MircoROS初步体验, 搭建一个MircoROS环境.
 ---
 
@@ -66,7 +66,7 @@ colcon build
 source install/local_setup.bash
 ```
 
-![快速项目](/images/ROS2/4_mirco_ros_project.png)
+![快速项目](/api/v1/image/ROS2/4_mirco_ros_project.png)
 
 - 如果出现下面的错误，就手动安装依赖性，例如下下面的`sudo apt-get install ros-$ROS_DISTRO-xxx`
 - 如果手动安装还是解决不了，很大可能你不是`ros-humble`造成的，因为在`rosdep update`时候可能被`Skip end-of-life distro "foxy"`或者是其他版本那么，需要`rosdepc update --include-eol-distros`了
@@ -81,7 +81,7 @@ rclc: Cannot locate rosdep definition for [osrf_testing_tools_cpp]
 Continuing to install resolvable dependencies...
 ```
 
-![rosdep问题解决](/images/ROS2/4_fix_rosdep_issue.jpg)
+![rosdep问题解决](/api/v1/image/ROS2/4_fix_rosdep_issue.jpg)
 
 ## 4.1.1 创建 mirco-ros fireware workspace
 
@@ -108,7 +108,7 @@ source install/local_setup.bash && ros2 run micro_ros_setup create_firmware_ws.s
 
 当命令执行完毕后，工作区中应该存在一个名为 firmware 的文件夹，并且 这个步骤的目的是下载一组 micro-ROS 应用程序，到 src/uros/micro-ROS-demos/rclc 路径下，这个 repo 再 GitHub 也是有的，如果你没有出现这两个文件夹 那说明 你这一步操作失败了，用`tree -L 2 -I 'install|log'`查看
 
-![build_fireware_ws](/images/ROS2/4_build_fireware_ws.png)
+![build_fireware_ws](/api/v1/image/ROS2/4_build_fireware_ws.png)
 
 如果你已经有了上面这些文件夹的内容，那么可以开始构建这个 mirco-ros 的全部依赖项了
 
@@ -118,7 +118,7 @@ source install/local_setup.bash && ros2 run micro_ros_setup build_firmware.sh
 
 如果 build 成功后大概是有 38 个功能包安装好了的:
 
-![build_fireware_deps](/images/ROS2/4_build_fireware_deps.png)
+![build_fireware_deps](/api/v1/image/ROS2/4_build_fireware_deps.png)
 
 > 解释一下这个 micro-ROS-demos，里面的代码都包括两个文件：
 >
@@ -139,7 +139,7 @@ source install/local_setup.bash && ros2 run micro_ros_setup build_firmware.sh
 mkdir mkdir src/demo_pub && touch src/demo_pub/main.c && touch src/demo_pub/CMakeLists.txt && mkdir src/demo_sub && touch src/demo_sub/main.c && touch src/demo_sub/CMakeLists.txt
 ```
 
-![1_创建Linux发布订阅demo](/images/ROS2/4_create_mirco_ros_linux_demo.png)
+![1_创建Linux发布订阅demo](/api/v1/image/ROS2/4_create_mirco_ros_linux_demo.png)
 
 2. 直接上能跑的发布者代码，注释在代码里，了解基本的内容即可，不得不说现在的 GPT 太强了：
 
@@ -393,11 +393,11 @@ colcon build
 
 - 到 GitHub 仓库的 release 下，下载对应 ROS 版本的 zip 包：[micro-ROS/micro_ros_arduino](https://github.com/micro-ROS/micro_ros_arduino/releases)
 
-![1_arduino_micrros下载](/images/ROS2/4_arduino_micrros_download.png)
+![1_arduino_micrros下载](/api/v1/image/ROS2/4_arduino_micrros_download.png)
 
 - 添加 Zip 包到`arduino-ide`内:
 
-![1_添加microros包](/images/ROS2/4_add_microros_package.png)
+![1_添加microros包](/api/v1/image/ROS2/4_add_microros_package.png)
 
 3. 跑 demo 例子
 
@@ -409,11 +409,11 @@ colcon build
 
 - 选择 `micro-ros-publish`例子烧录
 
-![烧录esp32demo](/images/ROS2/4_deploy_esp32_demo.png)
+![烧录esp32demo](/api/v1/image/ROS2/4_deploy_esp32_demo.png)
 
 - 查看你的板卡烧录情况
 
-![esp32烧录完成](/images/ROS2/4_esp32_deploy_success.png)
+![esp32烧录完成](/api/v1/image/ROS2/4_esp32_deploy_success.png)
 
 4. 主机测试连接情况
 

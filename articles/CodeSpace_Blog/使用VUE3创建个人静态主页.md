@@ -4,7 +4,7 @@ category: CodeSpace_Blog
 serialNo: 1
 tags: [VUE3]
 date: 2025-01-08
-thumbnail: /images/CodeSpace_Blog/v3_sbw_static_website_thumbnail.png
+thumbnail: /api/v1/image/CodeSpace_Blog/v3_sbw_static_website_thumbnail.png
 summary: VUE3 来做这个静态的网站.
 ---
 
@@ -28,11 +28,11 @@ summary: VUE3 来做这个静态的网站.
 
 - 主页预览
 
-![主页预览](/images/CodeSpace_Blog/v3_sbw_home_preview.gif)
+![主页预览](/api/v1/image/CodeSpace_Blog/v3_sbw_home_preview.gif)
 
 - 博客页预览
 
-![博客页预览](/images/CodeSpace_Blog/v3_sbw_preview_blog.gif)
+![博客页预览](/api/v1/image/CodeSpace_Blog/v3_sbw_preview_blog.gif)
 
 # 🔨 具体实现
 

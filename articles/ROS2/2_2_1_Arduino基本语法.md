@@ -4,7 +4,7 @@ category: ROS2
 serialNo: 102
 tags: [ROS2和单片机]
 date: 2025-01-01
-thumbnail: /images/ROS2/2_arduino_language_thumbnail.png
+thumbnail: /api/v1/image/ROS2/2_arduino_language_thumbnail.png
 summary: Arduino单片机的基本语法.
 ---
 
@@ -18,7 +18,7 @@ summary: Arduino单片机的基本语法.
 
 话不多说 直接上结果，打开窗口 就能看见获得的红外信号
 
-![IRemote_result](/images/ROS2/2_IRemote_result.gif)
+![IRemote_result](/api/v1/image/ROS2/2_IRemote_result.gif)
 
 ## 2.2.2 接线
 
@@ -30,7 +30,7 @@ summary: Arduino单片机的基本语法.
 | Data | Pin 11                 |
 | GND  | Common GND             |
 
-![IRremote_wiring](/images/ROS2/2_IRremote_wiring.png)
+![IRremote_wiring](/api/v1/image/ROS2/2_IRremote_wiring.png)
 
 ## 2.2.3 实现代码
 
@@ -113,7 +113,7 @@ void loop()
 | Echo | Echo Output Pin 12     |
 | GND  | Common GND             |
 
-![HCSR04_wiring](/images/ROS2/2_HCSR04_wiring.png)
+![HCSR04_wiring](/api/v1/image/ROS2/2_HCSR04_wiring.png)
 
 ## 2.3.3 代码实现
 
@@ -163,7 +163,7 @@ void loop()
 
 同时运行红外和距离传感器功能，而且不会阻塞一方
 
-![multi_arduino_func_demo](/images/ROS2/2_multi_arduino_func_demo.gif)
+![multi_arduino_func_demo](/api/v1/image/ROS2/2_multi_arduino_func_demo.gif)
 
 ## 2.4.2 文件结构
 
@@ -453,7 +453,7 @@ void loop() {
 
 ## 2.5.1 结果
 
-![python_read_serial.gif](/images/ROS2/2_python_read_serial.gif)
+![python_read_serial.gif](/api/v1/image/ROS2/2_python_read_serial.gif)
 
 ## 2.5.2 代码实现
 

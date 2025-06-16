@@ -14,13 +14,12 @@ export default defineConfig({
     host: "127.0.0.1",
     port: 10060,
     proxy: {
-      "/api": {
+      // 以 /api和/codespace 开头的请求都走同一套配置
+      "^/(api|codespace)": {
         target: "http://127.0.0.1:10058",
         changeOrigin: true,
-      },
-      "/images": {
-        target: "http://127.0.0.1:10058",
-        changeOrigin: true,
+        // （可选）如果想在转发时删掉前缀：
+        // rewrite: path => path.replace(/^\/(api|codespace)/, '')
       },
     },
   },

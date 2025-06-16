@@ -35,6 +35,15 @@
   margin-bottom: 8px;
 }
 
+.ad-title a {
+  color: unset;
+  text-decoration: none;
+}
+
+.ad-title a:hover {
+  text-decoration: underline;
+}
+
 .ad-subtitle {
   font-size: 14px;
   opacity: 0.9;

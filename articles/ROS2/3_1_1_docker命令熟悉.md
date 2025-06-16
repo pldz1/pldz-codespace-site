@@ -4,7 +4,7 @@ category: ROS2
 serialNo: 201
 tags: [ROS2智能车]
 date: 2025-01-01
-thumbnail: /images/ROS2/1_ros2_docker_basic_thumbnail.jpg
+thumbnail: /api/v1/image/ROS2/1_ros2_docker_basic_thumbnail.jpg
 summary: Docker搭建ROS2环境, 和Docker指令的熟悉.
 ---
 
@@ -41,7 +41,7 @@ root@jeston-desktop:/# apt-get update
 sudo docker ps -l
 ```
 
-![1_查看docker容器的id](/images/ROS2/1_get_docker_container_id.png)
+![1_查看docker容器的id](/api/v1/image/ROS2/1_get_docker_container_id.png)
 
 - 根据 id 进行 commit, 如果 commit 的内容和原来的 docker 的 tag 一致，那么会替换掉之前 docker 的内容，达到保存的效果
 
@@ -49,7 +49,7 @@ sudo docker ps -l
 sudo docker commit <commit id> <tag>
 ```
 
-![1_保存docker镜像](/images/ROS2/1_save_docker_image.png)
+![1_保存docker镜像](/api/v1/image/ROS2/1_save_docker_image.png)
 
 # 1.3 docker 内 Ubuntu20.04 安装 ros2-foxy
 

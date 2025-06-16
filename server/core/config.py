@@ -50,6 +50,13 @@ class ProjectConfig:
         return cls.get_abs_path('server/statics')
 
     @classmethod
+    def get_templates_path(cls) -> str:
+        '''
+        获得模板文件的绝对路径
+        '''
+        return cls.get_abs_path('server/templates')
+
+    @classmethod
     def get_images_path(self) -> str:
         '''
         获得存储图像的绝对路径

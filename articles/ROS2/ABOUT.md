@@ -4,7 +4,7 @@ category: ROS2
 serialNo: 0
 tags: [ROS2基础]
 date: 2025-01-01
-thumbnail: /images/ROS2/0_ros2_basic.jpg
+thumbnail: /api/v1/image/ROS2/0_ros2_basic.jpg
 summary: ROS2系列的开篇.
 ---
 

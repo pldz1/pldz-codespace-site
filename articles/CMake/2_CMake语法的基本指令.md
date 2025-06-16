@@ -4,7 +4,7 @@ category: CMake
 serialNo: 2
 tags: [CMake]
 date: 2025-01-01
-thumbnail: /images/CMake/2_cmake_language_thumbnail.png
+thumbnail: /api/v1/image/CMake/2_cmake_language_thumbnail.png
 summary: CMake的最简单的基础的语法.
 ---
 
@@ -16,7 +16,7 @@ summary: CMake的最简单的基础的语法.
 >
 > 我希望带大家一起了解的内容如下图所示，从这些基本的指令使用方法开始，了解 CMake 这个工具，也为了方便进行 CMake 的其他知识学习！
 
-![CMake了解的基本内容](/images/CMake/20230814104107.png)
+![CMake了解的基本内容](/api/v1/image/CMake/20230814104107.png)
 
 ## 2.1 最小 CMakeLists.txt 文件包含的内容
 
@@ -83,7 +83,7 @@ message(WARNING "This is a warning") # 输出警告信息
 message(FATAL_ERROR "This is a fatal error") # 输出致命错误并终止构建过程
 ```
 
-![CMake的输出指令](/images/CMake/20230812191723.png)
+![CMake的输出指令](/api/v1/image/CMake/20230812191723.png)
 
 ### 2.2.2 CMake 的预定义宏
 
@@ -126,7 +126,7 @@ message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 ```
 
-![打印CMake预定义宏](/images/CMake/20230812193102.png)
+![打印CMake预定义宏](/api/v1/image/CMake/20230812193102.png)
 
 ## 2.3 CMake 的变量
 
@@ -199,7 +199,7 @@ message("MY_PATH_TEST: ${MY_PATH_TEST}")
 message("MY_PATH_SRC: " ${MY_PATH_SRC})
 ```
 
-![CMake路径拼接](/images/CMake/20230814093707.png)
+![CMake路径拼接](/api/v1/image/CMake/20230814093707.png)
 
 ### 2.3.4 列表变量值的增加操作
 
@@ -248,7 +248,7 @@ list(APPEND MY_OTHER_LIST itemC)
 message("MY_OTHER_LIST: ${MY_OTHER_LIST}")
 ```
 
-![CMake列表变量增加](/images/CMake/20230814085516.png)
+![CMake列表变量增加](/api/v1/image/CMake/20230814085516.png)
 
 ### 2.3.5 路径变量回到上一级
 
@@ -265,7 +265,7 @@ get_filename_component(MY_PARENT_DIR ${MY_PATH} DIRECTORY)
 message("MY_PARENT_DIR: ${MY_PARENT_DIR}")
 ```
 
-![CMake路径跳回上一级](/images/CMake/20230814094214.png)
+![CMake路径跳回上一级](/api/v1/image/CMake/20230814094214.png)
 
 ### 2.3.6 列表变量删除元素
 
@@ -288,7 +288,7 @@ list(REMOVE_ITEM MY_LIST "banana")
 message("Modified list: ${MY_LIST}")
 ```
 
-![CMake](/images/CMake/20230814094638.png)
+![CMake](/api/v1/image/CMake/20230814094638.png)
 
 ## 2.4 CMake 文件操作
 
@@ -363,7 +363,7 @@ file(GLOB_RECURSE CMAKE_DEEP_FILES ${CMAKE_SOURCE_DIR}/CMakeFiles/*.cmake)
 message("RESULT: ${CMAKE_DEEP_FILES}")
 ```
 
-![CMake搜索文件](/images/CMake/20230814121236.png)
+![CMake搜索文件](/api/v1/image/CMake/20230814121236.png)
 
 ### 2.4.2 其他指令
 
@@ -384,7 +384,7 @@ message("NOW RESULT: ${CMAKE_NOW_FILES}")
 
 ```
 
-![aux_source_directory用法](/images/CMake/20230814122159.png)
+![aux_source_directory用法](/api/v1/image/CMake/20230814122159.png)
 
 ## 2.5 CMake 的逻辑语法指令
 
@@ -417,7 +417,7 @@ message("Sorry i dont know.")
 endif()
 ```
 
-![CMake条件语句体验](/images/CMake/20230814122935.png)
+![CMake条件语句体验](/api/v1/image/CMake/20230814122935.png)
 
 ### 2.5.2 循环语句 foreach
 
@@ -437,7 +437,7 @@ message("Fruit: ${item}")
 endforeach()
 ```
 
-![CMake循环语句](/images/CMake/20230814123117.png)
+![CMake循环语句](/api/v1/image/CMake/20230814123117.png)
 
 ### 2.5.3 选项指令 option
 
@@ -461,7 +461,7 @@ message("Feature disabled")
 endif()
 ```
 
-![CMake选项语句](/images/CMake/20230814123414.png)
+![CMake选项语句](/api/v1/image/CMake/20230814123414.png)
 
 ### 2.5.4 其他指令的主要功能
 

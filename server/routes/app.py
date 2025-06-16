@@ -11,6 +11,8 @@ from .article import ARTICLES_ROUTE
 from .image import IMAGES_ROUTE
 from .auth import AUTH_ROUTER
 
+from .codespace import AIGC_PLAYGROUND_V1_APP, MD_SSE_APP
+
 
 # 生命周期具体执行的内容
 @asynccontextmanager
@@ -23,6 +25,11 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(ARTICLES_ROUTE)
 app.include_router(IMAGES_ROUTE)
 app.include_router(AUTH_ROUTER)
+
+# 挂载其他的应用
+# 用法: app.mount("/path", other_app)
+app.mount("/codespace/aigcv1", AIGC_PLAYGROUND_V1_APP)
+app.mount("/codespace/mdsse", MD_SSE_APP)
 
 
 def start_dev():

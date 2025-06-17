@@ -1,5 +1,6 @@
 ---
 title: 对话和图像API简单体验
+author: admin@pldz1.com
 category: chat-playground
 serialNo: 1
 tags: [AIGC, Playground, Python, JavaScript]

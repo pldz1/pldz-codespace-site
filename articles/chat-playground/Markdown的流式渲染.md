@@ -1,5 +1,6 @@
 ---
 title: Markdown的流式渲染
+author: admin@pldz1.com
 category: chat-playground
 serialNo: 2
 tags: [AIGC, Playground, SSE, JavaScript]

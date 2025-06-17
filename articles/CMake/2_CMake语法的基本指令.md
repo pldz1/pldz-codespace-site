@@ -1,5 +1,6 @@
 ---
 title: CMake 语法的基本指令
+author: admin@pldz1.com
 category: CMake
 serialNo: 2
 tags: [CMake]

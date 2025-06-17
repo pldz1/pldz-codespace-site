@@ -4,10 +4,10 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from core import Logger, ProjectConfig
 
-IMAGES_ROUTE = APIRouter()
+IMAGES_ROUTE = APIRouter(prefix="/api/v1/image", tags=["image"])
 
 
-@IMAGES_ROUTE.get("/api/v1/image/{category}/{image}")
+@IMAGES_ROUTE.get("/{category}/{image}")
 async def api_get_image(category: str, image: str):
     """
     获取指定分类下的图片文件

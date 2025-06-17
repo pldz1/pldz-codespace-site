@@ -49,7 +49,7 @@ export const apiPost = (path, body) =>
  * @returns {Promise<Array>}
  */
 export async function getAllArticles() {
-  return apiGet("/api/v1/articles/all");
+  return apiGet("/api/v1/article/all/article");
 }
 
 /**
@@ -57,7 +57,15 @@ export async function getAllArticles() {
  * @returns {Promise<Array>}
  */
 export async function getAllCategories() {
-  return apiGet("/api/v1/categories");
+  return apiGet("/api/v1/article/all/category");
+}
+
+/**
+ * 获取全部的tag的统计数据
+ * @returns {Promise<Array>}
+ */
+export async function getTagCounts() {
+  return apiGet("/api/v1/article/all/tag");
 }
 
 /**
@@ -66,7 +74,7 @@ export async function getAllCategories() {
  * @returns {Promise<Array>}
  */
 export async function getArticlesByCategory(categoryId) {
-  return apiGet(`/api/v1/articles/category/${categoryId}`);
+  return apiGet(`/api/v1/article/category/${categoryId}`);
 }
 
 /**
@@ -75,15 +83,7 @@ export async function getArticlesByCategory(categoryId) {
  * @returns {Promise<Object>}
  */
 export async function getArticle(articleId) {
-  return apiGet(`/api/v1/articles/id/${articleId}`);
-}
-
-/**
- * 获取全部的tag的统计数据
- * @returns {Promise<Array>}
- */
-export async function getTagCounts() {
-  return apiGet("/api/v1/tag/counts");
+  return apiGet(`/api/v1/article/id/${articleId}`);
 }
 
 /**
@@ -92,7 +92,7 @@ export async function getTagCounts() {
  * @returns {Promise<Array>} - 相关文章列表
  */
 export async function getArticlesByTag(tag) {
-  return apiGet(`/api/v1/articles/tag/${tag}`);
+  return apiGet(`/api/v1/article/tag/${tag}`);
 }
 
 /**
@@ -102,7 +102,7 @@ export async function getArticlesByTag(tag) {
  * @returns {Promise<Object>}
  */
 export async function editArticle(articleId, articleData) {
-  return apiPost("/api/v1/articles/edit", { article_id: articleId, content: articleData });
+  return apiPost("/api/v1/article/edit/content", { article_id: articleId, content: articleData });
 }
 
 /**
@@ -112,7 +112,7 @@ export async function editArticle(articleId, articleData) {
  * @returns {Promise<Object>}
  */
 export async function editMeta(articleId, metaData) {
-  return apiPost("/api/v1/articles/metaedit", { article_id: articleId, ...metaData });
+  return apiPost("/api/v1/article/edit/meta", { article_id: articleId, ...metaData });
 }
 
 /**
@@ -120,21 +120,21 @@ export async function editMeta(articleId, metaData) {
  * @returns {Promise<Object>} - 返回用户信息
  */
 export async function getPrivacyPolicy() {
-  return apiGet("/api/v1/auth/privacy");
+  return apiGet("/api/v1/authorization/privacy");
 }
 
 /***
  * 用户登录
  */
 export async function login(username, password) {
-  return apiPost("/api/v1/auth/login", { username, password });
+  return apiPost("/api/v1/authorization/login", { username, password });
 }
 
 /**
  * 用户注册
  */
 export async function register(username, password) {
-  return apiPost("/api/v1/auth/register", { username, password });
+  return apiPost("/api/v1/authorization/register", { username, password });
 }
 
 /**
@@ -142,7 +142,7 @@ export async function register(username, password) {
  * @returns {Promise<Object>} - 返回新的用户信息
  */
 export async function refresh() {
-  return apiPost("/api/v1/auth/refresh");
+  return apiPost("/api/v1/authorization/refresh");
 }
 
 /**
@@ -150,5 +150,13 @@ export async function refresh() {
  * @returns {Promise<Object>} - 返回用户信息
  */
 export async function logout() {
-  return apiGet("/api/v1/auth/logout");
+  return apiGet("/api/v1/authorization/logout");
+}
+
+/**
+ *  获取全部的代码空间项目
+ * @returns {Promise<Array>} - 返回代码空间项目列表
+ */
+export async function getAllCodeSpaceItem() {
+  return apiGet("/api/v1/codespace/all");
 }

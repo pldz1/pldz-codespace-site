@@ -8,10 +8,10 @@ import random
 
 from scripts.mongodb import AuthorizedHandler, SECRET_KEY, ALGORITHM
 
-AUTH_ROUTER = APIRouter()
+AUTH_ROUTER = APIRouter(prefix="/api/v1/authorization", tags=["Authorization"])
 
 
-@AUTH_ROUTER.get("/api/v1/auth/privacy")
+@AUTH_ROUTER.get("/privacy")
 async def api_privacy_get():
     """
     处理隐私政策的请求
@@ -28,7 +28,7 @@ class LoginData(BaseModel):
     password: str
 
 
-@AUTH_ROUTER.post('/api/v1/auth/login')
+@AUTH_ROUTER.post('/login')
 async def login(data: LoginData):
     """
     处理登录请求
@@ -36,7 +36,16 @@ async def login(data: LoginData):
     :param password: 密码
     """
     user = AuthorizedHandler.get_user_by_username(data.username)
-    if not user or not AuthorizedHandler.verify_password(data.password, user['password']):
+    if not user:
+        time.sleep(random.uniform(0.1, 0.3))
+        return {'data': {"flag": False, 'log': '用户名或密码错误'}}
+    # 验证密码
+    if not data.password:
+        time.sleep(random.uniform(0.1, 0.3))
+        return {'data': {"flag": False, 'log': '密码不能为空'}}
+
+    password = AuthorizedHandler.get_user_password(data.username)
+    if not password or not AuthorizedHandler.verify_password(data.password, password):
         return {'data': {"flag": False, 'log': '用户名或密码错误'}}
 
     # 生成访问令牌和刷新令牌
@@ -44,17 +53,23 @@ async def login(data: LoginData):
     refresh = AuthorizedHandler.create_refresh_token(data.username)
 
     # 设置响应头和Cookie
-    is_admin = AuthorizedHandler.check_admin(data.username)
-    resp = JSONResponse(
-        {'data': {"flag": True, "isAdmin": is_admin, 'log': '登录成功'}})
+    resp = JSONResponse({'data': {"flag": True, **user, 'log': '登录成功'}})
+
     # 设置Cookie，httponly和samesite属性
     resp.set_cookie('access_token', access, httponly=True, samesite='lax')
     resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax')
     return resp
 
 
-@AUTH_ROUTER.post('/api/v1/auth/register')
-async def register(data: LoginData):
+class RegisterData(BaseModel):
+    username: str = ''
+    password: str = ''
+    nickname: str = ''
+    avatar: str = ''
+
+
+@AUTH_ROUTER.post('/register')
+async def register(data: RegisterData):
     """
     处理注册请求
     :param username: 用户名
@@ -65,7 +80,7 @@ async def register(data: LoginData):
         return {'data': {'flag': False, 'log': '用户名已存在'}}
     # 存储新用户
     AuthorizedHandler.add_user(
-        data.username, AuthorizedHandler.hash_password(data.password))
+        data.username, AuthorizedHandler.hash_password(data.password), data.nickname, data.avatar)
     access = AuthorizedHandler.create_access_token(data.username)
     refresh = AuthorizedHandler.create_refresh_token(data.username)
     resp = JSONResponse({'data': {'flag': True, 'log': '注册成功'}})
@@ -76,7 +91,7 @@ async def register(data: LoginData):
     return resp
 
 
-@AUTH_ROUTER.get('/api/v1/auth/logout')
+@AUTH_ROUTER.get('/logout')
 async def logout(request: Request):
     """ 
     处理登出请求
@@ -92,7 +107,7 @@ async def logout(request: Request):
     return resp
 
 
-@AUTH_ROUTER.post('/api/v1/auth/refresh')
+@AUTH_ROUTER.post('/refresh')
 async def refresh(request: Request):
     """
     刷新访问令牌
@@ -109,9 +124,8 @@ async def refresh(request: Request):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)
 
     new_access = AuthorizedHandler.create_access_token(payload['sub'])
-    username = AuthorizedHandler.get_current_user(request)
-    is_admin = AuthorizedHandler.check_admin(username)
+    user = AuthorizedHandler.get_current_user(request)
     resp = JSONResponse(
-        {'data': {'flag': True, 'username': username, 'isAdmin': is_admin, 'log': '刷新成功'}})
+        {'data': {'flag': True, **user, 'log': '刷新成功'}})
     resp.set_cookie('access_token', new_access, httponly=True, samesite='lax')
     return resp

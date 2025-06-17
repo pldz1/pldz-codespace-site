@@ -57,6 +57,13 @@ class ProjectConfig:
         return cls.get_abs_path('server/templates')
 
     @classmethod
+    def get_resource_path(cls) -> str:
+        '''
+        获得资源文件的绝对路径
+        '''
+        return cls.get_abs_path('server/resources')
+
+    @classmethod
     def get_images_path(self) -> str:
         '''
         获得存储图像的绝对路径
@@ -71,3 +78,11 @@ class ProjectConfig:
         '''
         ARTICLES_PATH = os.environ.get('ARTICLES_PATH', "articles")
         return self.get_abs_path(ARTICLES_PATH)
+
+    @classmethod
+    def get_codespace_config_path(cls) -> dict:
+        """
+        获取Codespace配置的json文件
+        """
+        templates_path = cls.get_templates_path()
+        return os.path.join(templates_path, 'codespace.json')

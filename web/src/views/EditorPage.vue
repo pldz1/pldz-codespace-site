@@ -8,6 +8,7 @@
       </div>
       <button class="close-btn" @click="closeMetaSetting">×</button>
     </div>
+    <!-- 侧边栏内容 -->
     <div class="meta-setting-sidebar-container">
       <div class="meta-setting-item">
         <span>专栏</span>
@@ -43,8 +44,10 @@
     </div>
   </div>
 
-  <HeaderBar :show-mobile-menu="false" @invalid-login="handleInvalidLogin" />
+  <!-- 头部导航, 但是不显示移动菜单 -->
+  <HeaderBar :show-mobile-menu="false" />
 
+  <!-- 编辑器标题和操作按钮 -->
   <div class="edit-header">
     <div class="edit-title"><input placeholder="输入标题" v-model="articleMeta.title" @change="saveMeta" /></div>
     <div class="edit-header-actions">
@@ -53,6 +56,7 @@
     </div>
   </div>
 
+  <!-- 工具栏 -->
   <div class="toolbar">
     <div class="toolbar-left">
       <button class="toolbar-btn image" @click="insertText('![]()', '')" title="图片"></button>
@@ -76,7 +80,9 @@
     </div>
   </div>
 
+  <!-- 主界面 -->
   <div class="main-container">
+    <!-- 编辑器区域 -->
     <div class="editor-panel">
       <div class="panel-header">编辑界面</div>
       <textarea
@@ -89,6 +95,7 @@
       ></textarea>
     </div>
 
+    <!-- 预览区域 -->
     <div class="preview-panel" v-show="isShowPreviw">
       <div class="panel-header">预览界面</div>
       <div ref="previewRef" class="article-content"></div>
@@ -115,15 +122,23 @@ const props = defineProps({
 const router = useRouter();
 const store = useStore();
 
+// 控制元数据设置和预览的显示状态
 const isShowMetaSetting = ref(false);
 const isShowPreviw = ref(true);
+
+// 编辑器和预览的引用
 const editorRef = ref(null);
 const previewRef = ref(null);
+
+// 编辑器内容和文章元数据
 const editorText = ref("");
 const articleID = ref("");
 const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "" });
 const articleTags = ref("");
 
+/**
+ * 打开/关闭元数据设置
+ */
 async function closeMetaSetting() {
   isShowMetaSetting.value = !isShowMetaSetting.value;
   if (!isShowMetaSetting.value) {
@@ -131,14 +146,23 @@ async function closeMetaSetting() {
   }
 }
 
+/**
+ * 打开/关闭预览
+ */
 function closeOpenPreview() {
   isShowPreviw.value = !isShowPreviw.value;
 }
 
+/**
+ * 处理标签变化
+ */
 function onTagsChange() {
   articleMeta.value.tags = JSON.parse(articleTags.value) || "";
 }
 
+/**
+ * 保存文章元数据
+ */
 async function saveMeta() {
   await editMeta(articleID.value, articleMeta.value);
 }
@@ -213,22 +237,14 @@ function insertTab(e) {
 }
 
 /**
- * 处理无效登录
- * @returns {void}
- */
-function handleInvalidLogin() {
-  router.push({ path: "/" });
-}
-
-/**
  * 编辑器的初始化函数
  * 在组件挂载时调用，获取文章内容并初始化编辑器
  * @returns {void}
  */
 onMounted(async () => {
   // 检查是否为管理员
-  const isAdmin = store.state.authState.isAdmin;
-  if (!isAdmin) {
+  const isadmin = store.state.authState.isAdmin;
+  if (!isadmin) {
     router.push({ path: "/" });
     return;
   }

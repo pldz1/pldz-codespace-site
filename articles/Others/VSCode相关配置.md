@@ -1,5 +1,6 @@
 ---
 title: VSCode相关配置
+author: admin@pldz1.com
 category: Others
 serialNo: 1
 tags: [VSCode配置]

@@ -35,7 +35,7 @@ class AuthorizedHandler:
         """ 
         初始化管理员账号
         """
-        cls.add_user(ADMIN_USERNAME, cls.hash_password(ADMIN_PASSWORD))
+        cls.add_user(ADMIN_USERNAME, cls.hash_password(ADMIN_PASSWORD), "爬楼的猪", "/api/v1/image/avatar/admin-avatar-1.jpg")
         Logger.info(f"✔ 初始化管理员账号: {ADMIN_USERNAME}")
 
     @classmethod
@@ -47,8 +47,7 @@ class AuthorizedHandler:
         :param token_type: 令牌类型(access或refresh)
         :return: JWT令牌字符串
         """
-        payload = {"sub": username, "type": token_type,
-                   "exp": datetime.utcnow()+expires}
+        payload = {"sub": username, "type": token_type, "exp": datetime.now() + expires}
         return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
     @classmethod
@@ -85,8 +84,9 @@ class AuthorizedHandler:
             if data.get('type') != 'access':
                 raise HTTPException(
                     status_code=401, detail="Invalid token type")
-            user = data.get('sub')
-            if not cls.get_user_by_username(user):
+            username = data.get('sub')
+            user = cls.get_user_by_username(username)
+            if not user:
                 raise HTTPException(status_code=404, detail="User not found")
             return user
         except PyJWTError as e:
@@ -153,23 +153,25 @@ class AuthorizedHandler:
         return user is not None
 
     @classmethod
-    def add_user(cls, username: str, password: str) -> bool:
+    def add_user(cls, username: str, password: str, nickname: str, avatar: str) -> bool:
         """
         添加新用户到数据库, 如果存在就更新, 如果不存在就创建
         Args:
             username (str): 用户名
             password (str): 密码
+            nickname (str): 昵称
+            avatar (str): 头像URL
         Returns:
             bool: 添加成功返回 True, 失败返回 False
         """
         coll = get_user_mongo_collection()
+        isadmin = cls.check_admin(username)
         try:
             # 使用 upsert 更新或插入用户
-
             result = coll.update_one(
                 {'username': username},
                 {
-                    '$set': {'password': password},
+                    '$set': {'password': password, 'nickname': nickname, 'avatar': avatar, 'isadmin': isadmin, 'blacklisted': False},
                     '$setOnInsert': {'id': str(uuid.uuid4())}
                 },
                 upsert=True
@@ -229,6 +231,24 @@ class AuthorizedHandler:
         user = coll.find_one({'username': username})
         if not user:
             return None
-        # 去掉_id 字段
+        # 去掉_id 字段和其他隐私数据
         user.pop('_id', None)
+        user.pop('password', None)
+        user.pop('token', None)
+        user.pop('blacklisted', None)
         return user
+
+    @classmethod
+    def get_user_password(cls, username: str) -> str:
+        """
+        获取用户密码
+        Args:
+            username (str): 用户名
+        Returns:
+            str: 用户密码哈希，如果用户不存在则返回 None
+        """
+        coll = get_user_mongo_collection()
+        user = coll.find_one({'username': username})
+        if not user:
+            return None
+        return user.get('password', None)

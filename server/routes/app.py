@@ -9,9 +9,9 @@ from core import ProjectConfig
 
 from .article import ARTICLES_ROUTE
 from .image import IMAGES_ROUTE
-from .auth import AUTH_ROUTER
-
-from .codespace import AIGC_PLAYGROUND_V1_APP, MD_SSE_APP
+from .authorization import AUTH_ROUTER
+from .codespace import CODE_SPACE_ROUTER, mount_codespace_app
+from .resource import RESOURCE_ROUTE
 
 
 # 生命周期具体执行的内容
@@ -25,11 +25,12 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(ARTICLES_ROUTE)
 app.include_router(IMAGES_ROUTE)
 app.include_router(AUTH_ROUTER)
+app.include_router(CODE_SPACE_ROUTER)
+app.include_router(RESOURCE_ROUTE)
 
 # 挂载其他的应用
 # 用法: app.mount("/path", other_app)
-app.mount("/codespace/aigcv1", AIGC_PLAYGROUND_V1_APP)
-app.mount("/codespace/mdsse", MD_SSE_APP)
+mount_codespace_app(app)
 
 
 def start_dev():

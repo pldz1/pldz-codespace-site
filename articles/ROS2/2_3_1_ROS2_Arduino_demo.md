@@ -1,5 +1,6 @@
 ---
 title: ROS2 和 arduino 通讯
+author: admin@pldz1.com
 category: ROS2
 serialNo: 3
 tags: [ROS2和单片机]

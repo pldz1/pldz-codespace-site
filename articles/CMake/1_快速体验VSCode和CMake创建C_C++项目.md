@@ -1,5 +1,6 @@
 ---
 title: 快速体验 VSCode 和 CMake 创建 C/C++项目
+author: admin@pldz1.com
 category: CMake
 serialNo: 1
 tags: [CMake]

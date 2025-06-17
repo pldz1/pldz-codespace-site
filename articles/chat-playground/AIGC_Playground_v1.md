@@ -1,5 +1,6 @@
 ---
 title: AIGC Playground v1 介绍
+author: admin@pldz1.com
 category: chat-playground
 serialNo: 4
 tags: [AIGC, Playground]

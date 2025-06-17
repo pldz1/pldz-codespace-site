@@ -1,5 +1,6 @@
 ---
 title: MircoROS 初步体验
+author: admin@pldz1.com
 category: ROS2
 serialNo: 4
 tags: [ROS2和单片机]

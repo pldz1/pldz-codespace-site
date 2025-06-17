@@ -5,10 +5,10 @@ from scripts.mongodb import ArticleHandler, AuthorizedHandler
 
 
 # 这里的 ARTICLES_ROUTE 是一个 FastAPI 的路由对象，用于定义与文章相关的 API 路径
-ARTICLES_ROUTE = fastapi.APIRouter()
+ARTICLES_ROUTE = fastapi.APIRouter(prefix="/api/v1/article", tags=["article"])
 
 
-@ARTICLES_ROUTE.get("/api/v1/articles/categories")
+@ARTICLES_ROUTE.get("/all/category")
 async def api_all_categories():
     """
     获取所有文章的分类列表
@@ -20,7 +20,7 @@ async def api_all_categories():
     return {"data": categories}
 
 
-@ARTICLES_ROUTE.get("/api/v1/articles/all")
+@ARTICLES_ROUTE.get("/all/article")
 async def api_all_articles():
     """
     获取所有文章的列表
@@ -31,7 +31,7 @@ async def api_all_articles():
     return {"data": all_articles}
 
 
-@ARTICLES_ROUTE.get("/api/v1/articles/id/{article_id}")
+@ARTICLES_ROUTE.get("/id/{article_id}")
 async def api_articles_by_id(article_id: str):
     """
     根据文章ID获取文章内容
@@ -42,18 +42,7 @@ async def api_articles_by_id(article_id: str):
     return {"data": article}
 
 
-@ARTICLES_ROUTE.get("/api/v1/categories")
-async def api_all_categories():
-    """
-    获取所有文章的分类列表
-    Returns:
-        list: 包含所有分类的列表
-    """
-    categories = ArticleHandler.get_all_categories()
-    return {"data": categories}
-
-
-@ARTICLES_ROUTE.get("/api/v1/tag/counts")
+@ARTICLES_ROUTE.get("/all/tag")
 async def api_all_tags():
     """
     获取所有文章的标签及其对应的文章数量
@@ -64,7 +53,7 @@ async def api_all_tags():
     return {"data": tag_counts}
 
 
-@ARTICLES_ROUTE.get("/api/v1/articles/tag/{tag_name}")
+@ARTICLES_ROUTE.get("/tag/{tag_name}")
 async def api_articles_by_tag(tag_name: str):
     """
     根据标签获取文章列表
@@ -77,7 +66,7 @@ async def api_articles_by_tag(tag_name: str):
     return {"data": articles}
 
 
-@ARTICLES_ROUTE.get("/api/v1/articles/category/{category_name}")
+@ARTICLES_ROUTE.get("/category/{category_name}")
 async def api_articles_by_category(category_name: str):
     """
     根据分类获取文章列表
@@ -95,7 +84,7 @@ class ArticleEdit(BaseModel):
     content: str
 
 
-@ARTICLES_ROUTE.post("/api/v1/articles/edit")
+@ARTICLES_ROUTE.post("/edit/content")
 async def api_edit_article(article_edit: ArticleEdit, username: str = fastapi.Depends(AuthorizedHandler.get_current_user)):
     """
     编辑文章
@@ -104,8 +93,8 @@ async def api_edit_article(article_edit: ArticleEdit, username: str = fastapi.De
     Returns:
         dict: 编辑后的文章数据
     """
-    is_admin = AuthorizedHandler.check_admin(username)
-    if not is_admin:
+    isadmin = AuthorizedHandler.check_admin(username)
+    if not isadmin:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to edit articles."
@@ -127,7 +116,7 @@ class ArticleMetaEdit(BaseModel):
     summary: str = ""
 
 
-@ARTICLES_ROUTE.post("/api/v1/articles/metaedit")
+@ARTICLES_ROUTE.post("/edit/meta")
 async def api_edit_article_meta(article_meta_edit: ArticleMetaEdit, username: str = fastapi.Depends(AuthorizedHandler.get_current_user)):
     """
     编辑文章元数据
@@ -136,8 +125,8 @@ async def api_edit_article_meta(article_meta_edit: ArticleMetaEdit, username: st
     Returns:
         dict: 编辑后的文章元数据
     """
-    is_admin = AuthorizedHandler.check_admin(username)
-    if not is_admin:
+    isadmin = AuthorizedHandler.check_admin(username)
+    if not isadmin:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to edit articles."

@@ -1,5 +1,6 @@
 ---
 title: Docker 搭建 ROS2 嵌入式运行环境
+author: admin@pldz1.com
 category: ROS2
 serialNo: 201
 tags: [ROS2智能车]

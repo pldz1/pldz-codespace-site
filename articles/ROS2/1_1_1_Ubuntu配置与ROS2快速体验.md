@@ -1,5 +1,6 @@
 ---
 title: Ubuntu配置与ROS2快速体验
+author: admin@pldz1.com
 category: ROS2
 serialNo: 1
 tags: [ROS2基础]

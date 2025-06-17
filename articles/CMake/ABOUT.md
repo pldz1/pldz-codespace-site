@@ -1,5 +1,6 @@
 ---
 title: ABOUT
+author: admin@pldz1.com
 category: CMake
 serialNo: 0
 tags: [CMake]

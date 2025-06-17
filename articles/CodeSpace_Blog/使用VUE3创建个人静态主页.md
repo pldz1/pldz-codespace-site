@@ -1,5 +1,6 @@
 ---
 title: 使用VUE3创建个人静态主页
+author: admin@pldz1.com
 category: CodeSpace_Blog
 serialNo: 1
 tags: [VUE3]

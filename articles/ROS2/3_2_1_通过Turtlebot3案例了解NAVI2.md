@@ -1,5 +1,6 @@
 ---
 title: 通过 Turtlebot3 案例了解 NAVI2
+author: admin@pldz1.com
 category: ROS2
 serialNo: 202
 tags: [ROS2智能车]

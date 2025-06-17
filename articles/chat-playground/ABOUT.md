@@ -1,5 +1,6 @@
 ---
 title: ABOUT
+author: admin@pldz1.com
 category: chat-playground
 serialNo: 0
 tags: [AIGC, Playground]

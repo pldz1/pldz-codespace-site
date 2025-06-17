@@ -1,5 +1,6 @@
 ---
 title: CMake 配置项目的基本指令
+author: admin@pldz1.com
 category: CMake
 serialNo: 3
 tags: [CMake]

@@ -1,5 +1,6 @@
 ---
 title: Ubuntu的Bash工具
+author: admin@pldz1.com
 category: CodeSpace_Blog
 serialNo: 3
 tags: [Ubuntu]

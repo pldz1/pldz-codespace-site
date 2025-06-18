@@ -32,9 +32,9 @@
       </div>
       <div class="meta-setting-item">
         <span>封面</span>
-        <div class="thumbnail-container">
+        <div class="thumbnail-container" @click="onShowUploadImageDialog(false)">
           <img class="thumbnail-image" :src="articleMeta.thumbnail" />
-          <button class="overlay-button" @click="sayHello">+</button>
+          <div class="overlay-button">+</div>
         </div>
       </div>
       <div class="meta-setting-item">
@@ -59,7 +59,7 @@
   <!-- 工具栏 -->
   <div class="toolbar">
     <div class="toolbar-left">
-      <button class="toolbar-btn image" @click="insertText('![]()', '')" title="图片"></button>
+      <button class="toolbar-btn image" @click="onShowUploadImageDialog(true)" title="图片"></button>
       <div class="separator"></div>
       <button class="toolbar-btn bold" @click="insertText('**', '**')" title="粗体"></button>
       <button class="toolbar-btn italic" @click="insertText('*', '*')" title="斜体"></button>
@@ -101,6 +101,34 @@
       <div ref="previewRef" class="article-content"></div>
     </div>
   </div>
+
+  <!-- 上传图像的位置 -->
+  <teleport to="body">
+    <div v-if="isShowImageUpload" class="image-upload-overlay">
+      <div class="image-upload-container">
+        <div class="image-upload-header">
+          <h2>上传专栏图片</h2>
+          <div class="image-upload-close" @click="onCloseUploadImageDialog"></div>
+        </div>
+        <div class="image-upload-content">
+          <div class="image-upload-item">
+            <span class="label">专栏:</span>
+            <span>{{ articleMeta.category }}</span>
+          </div>
+          <div class="image-upload-item">
+            <span class="label">名称* :</span>
+            <input type="text" placeholder="请输入名称" @change="onCheckImageName" v-model="imageName" />
+          </div>
+          <div :style="{ color: 'red', fontSize: '16px', maxHeight: '32px' }">
+            {{ imageUploadError }}
+          </div>
+          <div class="image-upload-item upload-image-preview" @click="onUploadImage">
+            <img v-if="imagePreviewUrl" :src="imagePreviewUrl" alt="Image Preview" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <script setup>
@@ -109,7 +137,8 @@ import { ref, watch, nextTick, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { renderMdBlock } from "../utils/md-render.js";
-import { getArticle, editArticle, editMeta } from "../utils/apis.js";
+import { getArticle, editArticle, editMeta, checkImageExit } from "../utils/apis.js";
+import { uploadArticleImage } from "../utils/image-upload.js";
 
 const props = defineProps({
   id: {
@@ -125,6 +154,7 @@ const store = useStore();
 // 控制元数据设置和预览的显示状态
 const isShowMetaSetting = ref(false);
 const isShowPreviw = ref(true);
+const isShowImageUpload = ref(false);
 
 // 编辑器和预览的引用
 const editorRef = ref(null);
@@ -135,6 +165,80 @@ const editorText = ref("");
 const articleID = ref("");
 const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "" });
 const articleTags = ref("");
+
+// 上传的图像的URL
+const imageName = ref("");
+const imagePreviewUrl = ref("");
+const imageUploadError = ref("图像名称只能包含字母、数字和下划线");
+const editContentImg = ref(true);
+
+/**
+ * 校验上传的图像名字
+ */
+async function onCheckImageName() {
+  // 只支持字母数字下划线
+  const regex = /^[a-zA-Z0-9_]+$/;
+  if (!regex.test(imageName.value)) {
+    imageUploadError.value = "图像名称只能包含字母、数字和下划线";
+    return;
+  } else {
+    imageUploadError.value = "";
+  }
+
+  const res = await checkImageExit(articleMeta.value.category, imageName.value);
+  if (!res) {
+    imageUploadError.value = "图像已经存在！";
+    return;
+  }
+}
+
+/**
+ *
+ */
+async function onUploadImage() {
+  if (!imageUploadError.value) {
+    try {
+      const res = await uploadArticleImage(articleMeta.value.category, imageName.value);
+      if (res.data && res.url) {
+        imagePreviewUrl.value = res.url;
+        if (editContentImg.value) {
+          insertText(`![${imageName.value}](${imagePreviewUrl.value})`, "");
+          await editArticle(articleID.value, editorText.value);
+        } else {
+          articleMeta.value.thumbnail = res.url;
+          await saveMeta();
+        }
+        imageUploadError.value = "";
+      } else {
+        imageUploadError.value = "上传失败！";
+      }
+    } catch (e) {
+      imageUploadError.value = String(e);
+      return;
+    }
+  } else {
+    imageUploadError.value = "图像已经存在, 重新命名之后再上传!";
+    return;
+  }
+}
+
+/**
+ * 显示上传图片对话框
+ */
+function onShowUploadImageDialog(isContent = true) {
+  isShowImageUpload.value = true;
+  imageName.value = "";
+  imagePreviewUrl.value = "";
+  imageUploadError.value = "图像名称只能包含字母、数字和下划线";
+  editContentImg.value = isContent;
+}
+
+/**
+ * 关闭上传图片对话框
+ */
+function onCloseUploadImageDialog() {
+  isShowImageUpload.value = false;
+}
 
 /**
  * 打开/关闭元数据设置
@@ -214,11 +318,12 @@ function insertText(before = "", after = "") {
 
   editorText.value = editorText.value.substring(0, start) + newContent + editorText.value.substring(end);
 
-  nextTick(() => {
+  nextTick(async () => {
     // 更新光标位置
     const pos = start + before.length + selected.length;
     el.focus();
     el.setSelectionRange(pos, pos);
+    await editArticle(articleID.value, editorText.value);
   });
 }
 
@@ -243,7 +348,7 @@ function insertTab(e) {
  */
 onMounted(async () => {
   // 检查是否为管理员
-  const isadmin = store.state.authState.isAdmin;
+  const isadmin = store.state.authState.isadmin;
   if (!isadmin) {
     router.push({ path: "/" });
     return;
@@ -633,6 +738,103 @@ watch(saveBtnText, (val) => {
 
 .thumbnail-container:hover .overlay-button {
   opacity: 1;
+}
+
+.image-upload-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-upload-container {
+  width: 360px;
+  margin: 80px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.image-upload-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.image-upload-close {
+  height: 32px;
+  width: 32px;
+
+  display: inline-block;
+  background: url("../assets/svgs/close-24.svg") no-repeat center;
+}
+
+.image-upload-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.image-upload-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.image-upload-item:last-child {
+  margin-bottom: 0;
+}
+
+.image-upload-item .label {
+  flex: 0 0 100px;
+  font-weight: 500;
+  color: #333;
+}
+
+.image-upload-item span:not(.label) {
+  flex: 1;
+  color: #555;
+}
+
+.image-upload-item input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.image-upload-item input:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
+}
+
+.upload-image-preview {
+  width: 280px;
+  height: 150px;
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+}
+
+.upload-image-preview img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 /* 移动端响应式设计 */

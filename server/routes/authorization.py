@@ -1,6 +1,6 @@
 import os
 import jwt
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import time
@@ -65,7 +65,6 @@ class RegisterData(BaseModel):
     username: str = ''
     password: str = ''
     nickname: str = ''
-    avatar: str = ''
 
 
 @AUTH_ROUTER.post('/register')
@@ -80,10 +79,12 @@ async def register(data: RegisterData):
         return {'data': {'flag': False, 'log': '用户名已存在'}}
     # 存储新用户
     AuthorizedHandler.add_user(
-        data.username, AuthorizedHandler.hash_password(data.password), data.nickname, data.avatar)
+        data.username, AuthorizedHandler.hash_password(data.password), data.nickname)
     access = AuthorizedHandler.create_access_token(data.username)
     refresh = AuthorizedHandler.create_refresh_token(data.username)
-    resp = JSONResponse({'data': {'flag': True, 'log': '注册成功'}})
+
+    user = AuthorizedHandler.get_user_by_username(data.username)
+    resp = JSONResponse({'data': {'flag': True, **user, 'log': '注册成功'}})
     # 设置Cookie，httponly和samesite属性
     resp.set_cookie('access_token', access, httponly=True, samesite='lax')
     resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax')
@@ -129,3 +130,22 @@ async def refresh(request: Request):
         {'data': {'flag': True, **user, 'log': '刷新成功'}})
     resp.set_cookie('access_token', new_access, httponly=True, samesite='lax')
     return resp
+
+
+class AvatarData(BaseModel):
+    avatar: str
+
+
+@AUTH_ROUTER.post('/update/avatar')
+async def api_update_avatar(data: AvatarData, user: dict = Depends(AuthorizedHandler.get_current_user)):
+    """
+    更新用户头像
+    """
+    if not user or not data.avatar:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="用户名和头像不能为空")
+
+    username = user.get('username')
+    # 更新头像
+    AuthorizedHandler.update_user_avatar(username, data.avatar)
+
+    return JSONResponse({'data': {'flag': True, 'log': '头像更新成功'}})

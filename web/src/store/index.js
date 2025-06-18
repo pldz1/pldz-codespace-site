@@ -13,17 +13,25 @@ const authState = {
   actions: {
     // 通过 dispatch 调用这个 action，来提交 mutation
     update({ commit }, data) {
-      commit("setAuthData", data);
+      commit("update", data);
+    },
+    avatar({ commit }, data) {
+      commit("avatar", data);
     },
   },
   mutations: {
     // mutation 来更新 authState
-    setAuthData(state, data) {
+    update(state, data) {
       if (data) {
         state.username = data?.username || "";
         state.isadmin = data?.isadmin || false;
         state.nickname = data?.nickname || "";
         state.avatar = data?.avatar || "";
+      }
+    },
+    avatar(state, data) {
+      if (data) {
+        state.avatar = data;
       }
     },
   },

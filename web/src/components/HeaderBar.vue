@@ -36,7 +36,7 @@
         <!-- 头像 -->
         <div class="info-avatar">
           <img :src="avatar" alt="头像" />
-          <div class="avatar-overlay">+</div>
+          <div class="avatar-overlay" @click="onUploadAvatar($event)">+</div>
         </div>
 
         <!-- 其他信息 -->
@@ -65,13 +65,6 @@
         <div class="error">{{ error }}</div>
         <!-- 表单 -->
         <form method="post" @submit.prevent="onLoginOrRegister">
-          <!-- 注册头像 -->
-          <div v-if="showRegister" class="register-avatar">
-            <div class="info-avatar">
-              <img v-if="ava" :src="ava" />
-              <div class="avatar-overlay">+</div>
-            </div>
-          </div>
           <!-- 用户名 -->
           <input type="text" placeholder="邮箱地址(示例:user@example.com)" required v-model="name" @change="onCheckName" />
           <!-- 密码 -->
@@ -96,7 +89,8 @@
 <script setup>
 import { useStore } from "vuex";
 import { ref, computed, onMounted } from "vue";
-import { login, register, logout } from "../utils/apis.js";
+import { login, register, logout, updateAvatar } from "../utils/apis.js";
+import { uploadAvatar } from "../utils/image-upload.js";
 
 const props = defineProps({
   routeName: {
@@ -110,7 +104,7 @@ const props = defineProps({
     default: true,
   },
 });
-const emit = defineEmits(["toggle-mobile-menu", "invalid-login"]);
+const emit = defineEmits(["toggle-mobile-menu"]);
 
 // 引入 Vuex store
 const store = useStore();
@@ -167,32 +161,23 @@ async function onLoginOrRegister() {
   }
 
   // 如果是注册界面，则调用注册接口
+  let res;
   if (showRegister.value) {
-    const res = await register(name.value, pwd.value);
-    if (res.flag) {
-      await store.dispatch("authState/update", {
-        username: name.value,
-        isAdmin: false,
-      });
-      onCloseLoginForm();
-    } else {
-      error.value = res.log || "注册失败，请稍后再试";
-    }
+    res = await register(name.value, pwd.value, nick.value);
   } else {
-    const res = await login(name.value, pwd.value);
+    res = await login(name.value, pwd.value);
+  }
+
+  if (res.flag) {
     await store.dispatch("authState/update", {
-      username: name.value || "",
+      username: res.username || "",
       isadmin: res.isadmin || false,
       avatar: res.avatar || "",
       nickname: res.nickname || "",
     });
-
-    if (res.flag) {
-      error.value = "";
-      onCloseLoginForm();
-    } else {
-      error.value = res.log || "登录失败，请稍后再试";
-    }
+    onCloseLoginForm();
+  } else {
+    error.value = res.log || "操作失败，请稍后再试";
   }
 }
 
@@ -241,10 +226,34 @@ function onCloseLoginForm() {
   app.style.cssText = "";
 }
 
+/**
+ * 处理点击遮罩事件
+ * @param event
+ */
 function onClickOverlay(event) {
   // 点击遮罩时关闭登录表单
   if (event.target.classList.contains("auth-overlay") && !!username.value) {
     onCloseLoginForm();
+  }
+}
+
+/**
+ * 上传头像
+ * @returns {Promise<void>}
+ */
+async function onUploadAvatar(event) {
+  // 阻止事件冒泡，避免触发关闭登录表单
+  event.stopPropagation();
+
+  const res1 = await uploadAvatar(username.value);
+  if (res1.data && res1.url) {
+    ava.value = res1.url;
+
+    // 更新 中的头像
+    await store.dispatch("authState/avatar", res1.url);
+    await updateAvatar(res1.url);
+  } else {
+    error.value = "头像上传失败，请稍后再试";
   }
 }
 
@@ -336,11 +345,6 @@ onMounted(async () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-}
-.register-avatar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
 }
 
 .action-buttons {

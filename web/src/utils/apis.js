@@ -133,8 +133,8 @@ export async function login(username, password) {
 /**
  * 用户注册
  */
-export async function register(username, password) {
-  return apiPost("/api/v1/authorization/register", { username, password });
+export async function register(username, password, nickname) {
+  return apiPost("/api/v1/authorization/register", { username, password, nickname });
 }
 
 /**
@@ -151,6 +151,21 @@ export async function refresh() {
  */
 export async function logout() {
   return apiGet("/api/v1/authorization/logout");
+}
+
+/**
+ * 更新用户头像
+ * @param {string} avatar - 头像的 Base64 编码字符串
+ */
+export async function updateAvatar(avatar) {
+  return apiPost("/api/v1/authorization/update/avatar", { avatar });
+}
+
+/**
+ * 判断图像是不是存在
+ */
+export async function checkImageExit(category, name) {
+  return apiPost("/api/v1/image/upload/check", { category, name });
 }
 
 /**

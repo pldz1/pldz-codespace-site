@@ -85,7 +85,7 @@ class ArticleEdit(BaseModel):
 
 
 @ARTICLES_ROUTE.post("/edit/content")
-async def api_edit_article(article_edit: ArticleEdit, username: str = fastapi.Depends(AuthorizedHandler.get_current_user)):
+async def api_edit_article(article_edit: ArticleEdit, user: dict = fastapi.Depends(AuthorizedHandler.get_current_user)):
     """
     编辑文章
     Args:
@@ -93,6 +93,12 @@ async def api_edit_article(article_edit: ArticleEdit, username: str = fastapi.De
     Returns:
         dict: 编辑后的文章数据
     """
+    if not user:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to edit articles."
+        )
+    username = user.get('username')
     isadmin = AuthorizedHandler.check_admin(username)
     if not isadmin:
         raise fastapi.HTTPException(
@@ -117,7 +123,7 @@ class ArticleMetaEdit(BaseModel):
 
 
 @ARTICLES_ROUTE.post("/edit/meta")
-async def api_edit_article_meta(article_meta_edit: ArticleMetaEdit, username: str = fastapi.Depends(AuthorizedHandler.get_current_user)):
+async def api_edit_article_meta(article_meta_edit: ArticleMetaEdit, user: dict = fastapi.Depends(AuthorizedHandler.get_current_user)):
     """
     编辑文章元数据
     Args:
@@ -125,6 +131,13 @@ async def api_edit_article_meta(article_meta_edit: ArticleMetaEdit, username: st
     Returns:
         dict: 编辑后的文章元数据
     """
+    if not user:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
+            detail="You must be logged in to edit articles."
+        )
+
+    username = user.get('username')
     isadmin = AuthorizedHandler.check_admin(username)
     if not isadmin:
         raise fastapi.HTTPException(

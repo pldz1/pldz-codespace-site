@@ -35,7 +35,7 @@ class AuthorizedHandler:
         """ 
         初始化管理员账号
         """
-        cls.add_user(ADMIN_USERNAME, cls.hash_password(ADMIN_PASSWORD), "爬楼的猪", "/api/v1/image/avatar/admin-avatar-1.jpg")
+        cls.add_user(ADMIN_USERNAME, cls.hash_password(ADMIN_PASSWORD), "爬楼的猪", "/api/v1/image/avatar/admin@pldz1_com_00000001.jpg")
         Logger.info(f"✔ 初始化管理员账号: {ADMIN_USERNAME}")
 
     @classmethod
@@ -153,7 +153,7 @@ class AuthorizedHandler:
         return user is not None
 
     @classmethod
-    def add_user(cls, username: str, password: str, nickname: str, avatar: str) -> bool:
+    def add_user(cls, username: str, password: str, nickname: str, avatar: str = "/api/v1/image/avatar/default.jpg") -> bool:
         """
         添加新用户到数据库, 如果存在就更新, 如果不存在就创建
         Args:
@@ -252,3 +252,24 @@ class AuthorizedHandler:
         if not user:
             return None
         return user.get('password', None)
+
+    @classmethod
+    def update_user_avatar(cls, username: str, avatar: str) -> bool:
+        """
+        更新用户头像
+        Args:
+            username (str): 用户名
+            avatar (str): 新的头像URL
+        Returns:
+            bool: 更新成功返回 True, 失败返回 False
+        """
+        coll = get_user_mongo_collection()
+        try:
+            result = coll.update_one(
+                {'username': username},
+                {'$set': {'avatar': avatar}}
+            )
+            return result.modified_count > 0
+        except PyMongoError as e:
+            Logger.error(f"✖ MongoDB 错误: {e}")
+            return False

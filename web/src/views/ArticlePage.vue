@@ -32,7 +32,7 @@
           <span class="article-meta-item"> 最新日期: {{ article.meta.date }}</span>
           <span>👀 {{ article.views }} 次</span>
           <span>🏷️ 专栏：{{ article.meta.category }}</span>
-          <span v-if="isAdmin" class="article-edit" @click="onEditArticle"> 重新编辑 </span>
+          <span v-if="isadmin" class="article-edit" @click="onEditArticle"> 重新编辑 </span>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ const articleChapterRef = ref(null);
 
 // 引入 Vuex store
 const store = useStore();
-const isAdmin = computed(() => store.state.authState?.isAdmin || false);
+const isadmin = computed(() => store.state.authState.isadmin);
 
 const isArticleLoaded = ref(false);
 const mdDivRef = ref(null);
@@ -160,7 +160,7 @@ watch(
     if (newWidth > 768) {
       closeMobileMenu();
     }
-  },
+  }
 );
 </script>
 

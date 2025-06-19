@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@file   : articles.py
-@time   : 2025/06/08
-@desc   : 处理与文章相关的数据库操作
-"""
-
 from pymongo import DESCENDING
 from pymongo.errors import PyMongoError
 

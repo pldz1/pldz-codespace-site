@@ -103,42 +103,25 @@
   </div>
 
   <!-- 上传图像的位置 -->
-  <teleport to="body">
-    <div v-if="isShowImageUpload" class="image-upload-overlay">
-      <div class="image-upload-container">
-        <div class="image-upload-header">
-          <h2>上传专栏图片</h2>
-          <div class="image-upload-close" @click="onCloseUploadImageDialog"></div>
-        </div>
-        <div class="image-upload-content">
-          <div class="image-upload-item">
-            <span class="label">专栏:</span>
-            <span>{{ articleMeta.category }}</span>
-          </div>
-          <div class="image-upload-item">
-            <span class="label">名称* :</span>
-            <input type="text" placeholder="请输入名称" @change="onCheckImageName" v-model="imageName" />
-          </div>
-          <div :style="{ color: 'red', fontSize: '16px', maxHeight: '32px' }">
-            {{ imageUploadError }}
-          </div>
-          <div class="image-upload-item upload-image-preview" @click="onUploadImage">
-            <img v-if="imagePreviewUrl" :src="imagePreviewUrl" alt="Image Preview" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </teleport>
+  <UploadImage
+    v-if="isShowImageUpload"
+    :article-meta="articleMeta"
+    :show-confirm-button="isShowImageUploadConfirm"
+    @upload-image-success="onUploadImageSuccess"
+    @close-upload-image-dialog="onCloseUploadImageDialog"
+  ></UploadImage>
 </template>
 
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
-import { ref, watch, nextTick, onMounted } from "vue";
+import UploadImage from "../components/UploadImage.vue";
+
+import { ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { renderMdBlock } from "../utils/md-render.js";
-import { getArticle, editArticle, editMeta, checkImageExit } from "../utils/apis.js";
-import { uploadArticleImage } from "../utils/image-upload.js";
+import { getArticle, editArticle, editMeta } from "../utils/apis.js";
+import { setCopyImageFile } from "../utils/image-upload.js";
 
 const props = defineProps({
   id: {
@@ -155,6 +138,7 @@ const store = useStore();
 const isShowMetaSetting = ref(false);
 const isShowPreviw = ref(true);
 const isShowImageUpload = ref(false);
+const isShowImageUploadConfirm = ref(false);
 
 // 编辑器和预览的引用
 const editorRef = ref(null);
@@ -165,79 +149,47 @@ const editorText = ref("");
 const articleID = ref("");
 const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "" });
 const articleTags = ref("");
-
-// 上传的图像的URL
-const imageName = ref("");
-const imagePreviewUrl = ref("");
-const imageUploadError = ref("图像名称只能包含字母、数字和下划线");
-const editContentImg = ref(true);
-
-/**
- * 校验上传的图像名字
- */
-async function onCheckImageName() {
-  // 只支持字母数字下划线
-  const regex = /^[a-zA-Z0-9_]+$/;
-  if (!regex.test(imageName.value)) {
-    imageUploadError.value = "图像名称只能包含字母、数字和下划线";
-    return;
-  } else {
-    imageUploadError.value = "";
-  }
-
-  const res = await checkImageExit(articleMeta.value.category, imageName.value);
-  if (!res) {
-    imageUploadError.value = "图像已经存在！";
-    return;
-  }
-}
-
-/**
- *
- */
-async function onUploadImage() {
-  if (!imageUploadError.value) {
-    try {
-      const res = await uploadArticleImage(articleMeta.value.category, imageName.value);
-      if (res.data && res.url) {
-        imagePreviewUrl.value = res.url;
-        if (editContentImg.value) {
-          insertText(`![${imageName.value}](${imagePreviewUrl.value})`, "");
-          await editArticle(articleID.value, editorText.value);
-        } else {
-          articleMeta.value.thumbnail = res.url;
-          await saveMeta();
-        }
-        imageUploadError.value = "";
-      } else {
-        imageUploadError.value = "上传失败！";
-      }
-    } catch (e) {
-      imageUploadError.value = String(e);
-      return;
-    }
-  } else {
-    imageUploadError.value = "图像已经存在, 重新命名之后再上传!";
-    return;
-  }
-}
+const isEditContent = ref(true);
 
 /**
  * 显示上传图片对话框
  */
 function onShowUploadImageDialog(isContent = true) {
   isShowImageUpload.value = true;
-  imageName.value = "";
-  imagePreviewUrl.value = "";
-  imageUploadError.value = "图像名称只能包含字母、数字和下划线";
-  editContentImg.value = isContent;
+  isEditContent.value = isContent;
+
+  const app = document.getElementById("app");
+  app.style.opacity = 0.41;
 }
 
 /**
  * 关闭上传图片对话框
  */
 function onCloseUploadImageDialog() {
+  const app = document.getElementById("app");
+  app.style.cssText = "";
   isShowImageUpload.value = false;
+}
+
+/**
+ * 上传图片成功后处理
+ * @param {Object} data - 包含图片URL和名称的对象
+ * @param {string} data.url - 图片的URL
+ * @param {string} data.imageName - 图片的名称
+ * @returns {Promise<void>}
+ */
+async function onUploadImageSuccess(data) {
+  const { url, imageName } = data;
+  if (isEditContent.value) {
+    insertText(`![${imageName}](${url})`, "");
+    await editArticle(articleID.value, editorText.value);
+  } else {
+    articleMeta.value.thumbnail = url;
+    await saveMeta();
+  }
+
+  onCloseUploadImageDialog();
+  onEditorInput();
 }
 
 /**
@@ -274,20 +226,24 @@ async function saveMeta() {
 const saveBtnText = ref("已保存");
 const saveBtn = ref(null);
 let saveTimeout = null;
+let renderTimer = null;
 
 // 更新预览内容
 function updatePreview() {
-  const previewEl = previewRef.value;
-  if (!previewEl) return;
-
-  if (editorText.value.trim() === "") {
-    previewEl.innerHTML = `
-      <h1>MARKDOWN 实时编辑</h1>
-      <p>开始在左侧编辑器中输入Markdown内容，右侧将实时显示预览效果。</p>
-    `;
-  } else {
-    renderMdBlock("article-content", previewEl, editorText.value);
+  // 输入为空或预览隐藏，直接跳过
+  if (editorText.value.trim() === "" || !isShowPreviw.value) {
+    return;
   }
+
+  // 清除上次尚未执行的渲染
+  clearTimeout(renderTimer);
+
+  // 延迟 1s 后渲染（如果 1s 内无新输入）
+  renderTimer = setTimeout(() => {
+    const previewEl = previewRef.value;
+    if (!previewEl) return;
+    renderMdBlock("article-content", previewEl, editorText.value);
+  }, 1000);
 }
 
 // 处理编辑器输入：更新预览并模拟自动保存
@@ -342,6 +298,23 @@ function insertTab(e) {
 }
 
 /**
+ * 处理粘贴事件
+ * 检查剪贴板中的文件，如果是图片则显示上传对话框
+ */
+function editorCopyEvent(e) {
+  // 获取真正要插入的文件列表
+  const files = (e.clipboardData || window.clipboardData).files;
+  // 如果有文件，并且第一个是 image 类型
+  if (files.length > 0 && files[0].type.startsWith("image/")) {
+    isShowImageUploadConfirm.value = true;
+    onShowUploadImageDialog(true);
+    setCopyImageFile(files[0]);
+    // 阻止默认粘贴行为
+    e.preventDefault();
+  }
+}
+
+/**
  * 编辑器的初始化函数
  * 在组件挂载时调用，获取文章内容并初始化编辑器
  * @returns {void}
@@ -375,6 +348,17 @@ onMounted(async () => {
   articleMeta.value.summary = res.meta.summary;
 
   updatePreview();
+
+  editorRef.value?.addEventListener("paste", (e) => editorCopyEvent(e));
+});
+
+/**
+ * 组件卸载时的清理工作
+ * 移除事件监听器
+ */
+onUnmounted(() => {
+  // 清理事件监听器
+  editorRef.value?.removeEventListener("paste", (e) => editorCopyEvent(e));
 });
 
 // 监听保存按钮文本变化，同步到按钮

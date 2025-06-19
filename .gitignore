@@ -9,6 +9,8 @@ __pycache__/
 pip-log.txt
 pip-delete-this-directory.txt
 
-
 .env
 .venv/
+
+# Do not track user avatar
+images/avatar/*

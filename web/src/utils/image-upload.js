@@ -42,6 +42,7 @@ export async function uploadAvatar(name = "") {
     return null;
   }
 }
+
 /**
  * 上传文章图像
  * @param {*} category
@@ -68,6 +69,43 @@ export async function uploadArticleImage(category, name) {
     return res.json();
   } catch (error) {
     console.error("上传文章图像失败:", error);
+    return null;
+  }
+}
+
+let copyImageFile = null;
+
+/**
+ * 设置剪贴板中的图像文件
+ * @param {*} file
+ */
+export function setCopyImageFile(file) {
+  copyImageFile = file;
+}
+
+/**
+ * 从剪贴板上传图像
+ * @param {*} category
+ * @param {*} name
+ * @returns
+ */
+export async function uploadArticleImageFromCopy(category, name) {
+  const uploadUrl = "/api/v1/image/upload/article";
+  try {
+    const formData = new FormData();
+    formData.append("file", copyImageFile);
+    formData.append("category", category);
+    formData.append("name", name);
+    const res = await fetch(uploadUrl, { method: "POST", body: formData });
+    if (!res.ok) {
+      console.error("上传文章图像失败:", res.statusText);
+      copyImageFile = null;
+      return null;
+    }
+    return res.json();
+  } catch (error) {
+    console.error("上传文章图像失败:", error);
+    copyImageFile = null;
     return null;
   }
 }

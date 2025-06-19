@@ -6,26 +6,15 @@
   box-sizing: border-box;
 }
 
+/* 保留固定右侧滚动条位置  */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
-  font-family:
-    "Segoe UI",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Roboto",
-    "Oxygen",
-    "Ubuntu",
-    "Cantarell",
-    "Fira Sans",
-    "Droid Sans",
-    "Helvetica Neue",
-    sans-serif;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: #171717;
   background-color: #fff;
-}
-
-/* 解决滚动条造成页面纵向突然变化的情况 */
-html {
-  scrollbar-gutter: stable both-edges;
 }

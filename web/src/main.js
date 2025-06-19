@@ -1,8 +1,10 @@
-import { createApp } from "vue";
+import "./assets/index.css";
+
 import App from "./App.vue";
 import router from "./routers";
 import store from "./store";
-import "./assets/index.css";
+
+import { createApp } from "vue";
 import { refresh } from "./utils/apis.js";
 
 // 异步初始化动作

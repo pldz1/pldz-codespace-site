@@ -34,7 +34,7 @@ def mount_codespace_app(main_app: FastAPI):
 
             # 这里通过默认参数把 templates 绑定进来, 避免闭包
             @app.get("/", response_class=HTMLResponse)
-            async def index(request: Request, templates=templates):
+            async def _(request: Request, templates=templates):
                 return templates.TemplateResponse("index.html", {"request": request})
 
             main_app.mount(f"/io/{item['url']}/", app, name=item['title'])

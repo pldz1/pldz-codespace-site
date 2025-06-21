@@ -1,7 +1,9 @@
 import os
 import uvicorn
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -63,16 +65,20 @@ def run_main():
     运行服务时候挂载静态资源, 注意这个内容现在都被加入到一个进程来运行
     '''
     statics_path = ProjectConfig.get_statics_path()
-    if not os.path.exists(statics_path):
-        errorMsg = f"Failed to start the server with static files: no static resources found {statics_path}"
-        raise FileNotFoundError(errorMsg)
+
+    # 挂载静态资源目录
+    @app.get("/{full_path:path}")
+    async def _(full_path: str):
+        # 构造静态文件的真实路径
+        file_path = os.path.join(statics_path, full_path)
+        # 若静态文件存在，则直接返回
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        # 否则返回 index.html，由前端路由接管
+        index_path = os.path.join(statics_path, "index.html")
+        return FileResponse(index_path)
 
     # 挂载静态资源
-    from fastapi.staticfiles import StaticFiles
-    app.mount("/",
-              StaticFiles(
-                  directory=ProjectConfig.get_statics_path(), html=True),
-              name="static")
 
     host = os.environ.get('HOST', "127.0.0.1")
     port = int(os.environ.get('PORT', 10058))

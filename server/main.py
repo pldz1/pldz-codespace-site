@@ -16,5 +16,5 @@ if __name__ == '__main__':
     AuthorizedHandler.init_admin()
 
     # 启动 fastapi 应用
-    from routes import run_dev
-    run_dev()
+    from routes import run_main
+    run_main()

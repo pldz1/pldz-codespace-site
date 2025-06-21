@@ -12,9 +12,9 @@
       <nav>
         <ul class="nav-menu">
           <li :class="['nav-item', routeName == '首页' ? 'active' : '']"><a href="/"> 首页 </a></li>
-          <!-- <li :class="['nav-item', routeName == 'Code Space' ? 'active' : '']"><a href="/codespace"> Code Space </a></li> -->
-          <li class="nav-item">
-            <a href="https://aigc.pldz1.com/auth" target="_blank"> open-webui demo <span class="badge">new</span> </a>
+          <!-- 其他的导航内容 -->
+          <li v-for="nav in navs" :key="nav.title" class="nav-item">
+            <a :href="nav.url" target="_blank" rel="noopener noreferrer"> {{ nav.title }} <span v-if="nav.new" class="badge">new</span> </a>
           </li>
         </ul>
       </nav>
@@ -37,7 +37,8 @@
 import LoginCard from "./LoginCard.vue";
 
 import { useStore } from "vuex";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { getNavigation } from "../utils/apis.js";
 
 const props = defineProps({
   routeName: {
@@ -59,6 +60,7 @@ const store = useStore();
 // 取用户头像
 const avatar = computed(() => store.state.authState.avatar);
 const username = computed(() => store.state.authState.username);
+const navs = ref([]);
 
 // 显示登录表单的状态
 const showLoginForm = ref(false);
@@ -92,6 +94,14 @@ function onCloseLoginForm() {
   app.style.cssText = "";
   showLoginForm.value = false;
 }
+
+/**
+ * 初始化时候获取导航数据
+ */
+onMounted(async () => {
+  const res = await getNavigation();
+  navs.value = res || [];
+});
 </script>
 
 <style scoped>

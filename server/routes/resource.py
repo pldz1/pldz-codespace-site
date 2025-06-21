@@ -1,11 +1,13 @@
 import os
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
 
 from core import ProjectConfig, Logger
+from scripts.filesystem import NavInfoHandler
 
 RESOURCE_ROUTE = APIRouter(prefix="/api/v1/resource", tags=["Authorization"])
+# 实例化 Codespace 处理器
+NAV_INFO_HANDLE = NavInfoHandler()
 
 
 def get_html_template(html_content: str) -> str:
@@ -92,3 +94,13 @@ async def get_user_agreement():
     html_response = get_html_template(html_content)
 
     return HTMLResponse(content=html_response, status_code=200)
+
+
+@RESOURCE_ROUTE.get('/navs')
+async def api_get_navs():
+    """
+    获取导航信息
+    :return: 导航信息列表
+    """
+    data = NAV_INFO_HANDLE.get_navigation_items()
+    return {'data': data}

@@ -84,5 +84,13 @@ class ProjectConfig:
         """
         获取Codespace配置的json文件
         """
-        templates_path = cls.get_templates_path()
-        return os.path.join(templates_path, 'codespace.json')
+        resource_path = cls.get_resource_path()
+        return os.path.join(resource_path, 'codespace.json')
+
+    @classmethod
+    def get_navigation_path(cls) -> str:
+        """
+        获取导航配置的json文件
+        """
+        resource_path = cls.get_resource_path()
+        return os.path.join(resource_path, 'navigation.json')

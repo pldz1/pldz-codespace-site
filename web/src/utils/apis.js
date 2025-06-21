@@ -175,3 +175,11 @@ export async function checkImageExit(category, name) {
 export async function getAllCodeSpaceItem() {
   return apiGet("/api/v1/codespace/all");
 }
+
+/**
+ * 获取导航信息
+ * @returns {Promise<Array>} - 返回导航信息列表
+ */
+export async function getNavigation() {
+  return apiGet("/api/v1/resource/navs");
+}

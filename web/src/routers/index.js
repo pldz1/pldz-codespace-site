@@ -3,6 +3,7 @@ import HomePage from "../views/HomePage.vue";
 import ArticlePage from "../views/ArticlePage.vue";
 import EditorPage from "../views/EditorPage.vue";
 import NotFound from "../views/NotFound.vue";
+import AdminPage from "../views/AdminPage.vue";
 
 const router = createRouter({
   // 使用 HTML5 的 History 模式
@@ -10,7 +11,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      component: HomePage,
+      component: AdminPage,
     },
     {
       // 动态路由，用 :id 捕获文章 ID

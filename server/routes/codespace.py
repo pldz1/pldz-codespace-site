@@ -7,20 +7,20 @@ from fastapi.responses import HTMLResponse
 
 
 from core import ProjectConfig, Logger
-from scripts.codespace.load_codespace import CodeSpaceHandler
+from scripts.filesystem import CodeSpaceHandler
 
 TEMPLATE_PATH = ProjectConfig.get_templates_path()
 CODE_SPACE_ROUTER = APIRouter(prefix="/api/v1/codespace", tags=["codespace"])
 
 # 实例化 Codespace 处理器
-codespace_handler = CodeSpaceHandler()
+CODE_SPACE_HANDLE = CodeSpaceHandler()
 
 
 def mount_codespace_app(main_app: FastAPI):
     """
     加载 Codespace 应用
     """
-    items = codespace_handler.get_codespace_items()
+    items = CODE_SPACE_HANDLE.get_codespace_items()
 
     for item in items:
         try:
@@ -47,7 +47,7 @@ def unmount_codespace_app(main_app: FastAPI):
     """
     卸载 Codespace 应用
     """
-    items = codespace_handler.get_codespace_items()
+    items = CODE_SPACE_HANDLE.get_codespace_items()
     try:
         for item in items:
             prefix = f"/io/{item['folder']}"
@@ -72,5 +72,5 @@ async def get_all_codespace_items():
     """
     获取所有 Codespace 项目
     """
-    items = codespace_handler.get_codespace_items()
+    items = CODE_SPACE_HANDLE.get_codespace_items()
     return {"data": items}

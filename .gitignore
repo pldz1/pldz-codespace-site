@@ -3,8 +3,6 @@ __pycache__/
 *.pyc
 *.py[cod]
 *$py.class
-.dbpath/
-.cache/
 
 # Installer logs
 pip-log.txt
@@ -14,4 +12,5 @@ pip-delete-this-directory.txt
 .venv/
 
 # Do not track user avatar
-images/avatar/*
+.dbpath/
+data/images/avatar/*

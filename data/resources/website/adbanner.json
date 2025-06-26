@@ -4,8 +4,8 @@
   "data": [
     {
       "title": "Markdown流渲染体验",
-      "folder": "markdown-sse",
-      "url": "markdown-sse",
+      "folder": "sse-markdown",
+      "url": "sse-markdown",
       "thumbnail": "/_pics/CodeSpace_Blog/sse_md_codespace.png",
       "previewgif": "/_codespace/sse_markdown/sse_markdown_preview.gif",
       "sourcelink": "https://github.com/pldz1/Demos/tree/main/sse_markdown",

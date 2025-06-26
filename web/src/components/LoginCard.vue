@@ -62,7 +62,7 @@ import { useRouter } from "vue-router";
 
 import { ref, computed } from "vue";
 import { login, register, logout, updateAvatar } from "../utils/apis.js";
-import { uploadAvatar } from "../utils/image-upload.js";
+import { uploadAvatar } from "../utils/file-upload.js";
 
 const emit = defineEmits(["close-login-form"]);
 

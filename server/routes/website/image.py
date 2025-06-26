@@ -180,7 +180,7 @@ async def api_upload_avatar(
         Logger.error(f"保存头像失败: {e}")
         raise HTTPException(status_code=500, detail="内部服务器错误，头像保存失败")
 
-    url = f"/api/v1/image/avatar/{saved_name}"
+    url = f"/api/v1/website/image/avatar/{saved_name}"
     return {"data": {"flag": True, "url": url}}
 
 
@@ -211,7 +211,7 @@ async def api_upload_article_image(
         Logger.error(f"保存文章图片失败: {e}")
         raise HTTPException(status_code=500, detail="内部服务器错误，图片保存失败")
 
-    url = f"/api/v1/image/{category}/{saved_name}"
+    url = f"/api/v1/website/image/{category}/{saved_name}"
     return {"data": {"flag": True, "url": url}}
 
 

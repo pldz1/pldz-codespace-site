@@ -2,10 +2,11 @@
  * 通用 API 请求函数，自动处理请求、响应与错误
  * @param {string} path - 请求路径，例如 '/api/v1/website/articles/all'
  * @param {Object} [options] - Fetch 配置项
+ * @param {boolean} [isBlob=false] - 是否处理为 Blob 对象
  * @returns {Promise<any>} - 返回后端返回的数据部分
  * @throws {Error} - 网络错误或 JSON 解析错误
  */
-async function apiRequest(path, options = {}) {
+async function apiRequest(path, options = {}, isBlob = false) {
   const response = await fetch(path, options);
   if (!response.ok) {
     console.error(`网络响应失败 (${response.status} ${response.statusText})`);
@@ -14,6 +15,11 @@ async function apiRequest(path, options = {}) {
 
   let payload;
   try {
+    if (isBlob) {
+      // 如果需要处理为 Blob 对象，直接返回 Blob
+      payload = await response.blob();
+      return payload;
+    }
     payload = await response.json();
   } catch (err) {
     console.error(`JSON 解析失败: ${err.message}`);
@@ -37,12 +43,16 @@ export const apiGet = (path) => apiRequest(path);
  * @param {Object} body - 请求体对象
  * @returns {Promise<any>}
  */
-export const apiPost = (path, body) =>
-  apiRequest(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+export const apiPost = (path, body, isBlob = false) =>
+  apiRequest(
+    path,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+    isBlob
+  );
 
 /**
  * 获取所有文章
@@ -233,11 +243,28 @@ export async function getAllAdBannerItem() {
 }
 
 /**
+ * 设置广告位
+ * @param {*} ads - 广告位数组
+ * @returns {Promise<Object>} - 返回设置结果
+ */
+export async function setAllAdBannerItems(ads) {
+  return apiPost("/api/v1/website/adbanner/set", { ads });
+}
+
+/**
  * 获取导航信息
  * @returns {Promise<Array>} - 返回导航信息列表
  */
 export async function getNavigation() {
   return apiGet("/api/v1/website/navs/all");
+}
+
+/**
+ * 设置导航信息
+ * @param {Array} navs - 导航信息数组，每个元素包含 { name, url, new }
+ */
+export async function setNavigation(navs) {
+  return apiPost("/api/v1/website/navs/set", { navs });
 }
 
 /**
@@ -268,4 +295,30 @@ export async function renameImage(category, oldName, newName) {
  */
 export async function deleteImage(category, name) {
   return apiPost(`/api/v1/website/image/delete`, { category, name });
+}
+
+/**
+ * 获取所有缓存数据
+ * @returns {Promise<Array>} - 返回所有缓存数据
+ */
+export async function getAllCache() {
+  return apiGet(`/api/v1/resource/cache/all`);
+}
+
+/**
+ * 下载缓存文件
+ * @param {*} filename
+ * @returns
+ */
+export async function downloadCacheFile(filename) {
+  return apiPost(`/api/v1/resource/cache/download`, { filename }, true);
+}
+
+/**
+ * 删除缓存文件
+ * @param {*} filename
+ * @returns
+ */
+export async function deleteCacheFile(filename) {
+  return apiPost(`/api/v1/resource/cache/delete`, { filename });
 }

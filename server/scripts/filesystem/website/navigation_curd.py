@@ -52,3 +52,19 @@ class NavInfoHandler:
                 Logger.error(f"Navigation 配置项缺少必要字段: {e}")
                 continue
         return items
+
+    def set_navigation_items(self, items: typing.List[NavItem]) -> None:
+        """
+        设置 Navigation 配置中的所有项目
+        :param items: 导航项列表
+        """
+        self.codespace_config['data'] = items
+        config_file = ProjectConfig.get_navigation_path()
+        try:
+            with open(config_file, 'w', encoding='utf-8') as file:
+                json.dump(self.codespace_config, file, ensure_ascii=False, indent=4)
+            Logger.info(f"Navigation 配置已更新: {config_file}")
+            return True
+        except Exception as e:
+            Logger.error(f"保存 Navigation 配置时发生错误: {e}")
+            return False

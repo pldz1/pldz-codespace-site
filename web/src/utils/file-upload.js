@@ -1,9 +1,25 @@
 /**
- * 弹出文件选择对话框，返回选中的 File 对象
+ * 弹出文件选择对话框，返回选中的 Image 对象
+ * @returns {Promise<File>}
+ */
+function selectImage() {
+  const fileInput = document.getElementById("global-image-upload-input");
+  return new Promise((resolve) => {
+    // 清除上次的选择
+    fileInput.value = "";
+    fileInput.onchange = () => {
+      resolve(fileInput.files[0] || null);
+    };
+    fileInput.click();
+  });
+}
+
+/**
+ * 选择文件
  * @returns {Promise<File>}
  */
 function selectFile() {
-  const fileInput = document.getElementById("global-image-upload-input");
+  const fileInput = document.getElementById("global-file-upload-input");
   return new Promise((resolve) => {
     // 清除上次的选择
     fileInput.value = "";
@@ -23,7 +39,7 @@ function selectFile() {
 export async function uploadAvatar(name = "") {
   const uploadUrl = "/api/v1/website/image/upload/avatar";
   try {
-    const file = await selectFile();
+    const file = await selectImage();
     if (!file) {
       console.warn("未选择文件");
       return null;
@@ -52,7 +68,7 @@ export async function uploadAvatar(name = "") {
 export async function uploadArticleImage(category, name) {
   const uploadUrl = "/api/v1/website/image/upload/article";
   try {
-    const file = await selectFile();
+    const file = await selectImage();
     if (!file) {
       console.warn("未选择文件");
       return null;
@@ -106,6 +122,30 @@ export async function uploadArticleImageFromCopy(category, name) {
   } catch (error) {
     console.error("上传文章图像失败:", error);
     copyImageFile = null;
+    return null;
+  }
+}
+
+/**
+ * 上传文件
+ * @param {string} type - 文件类型
+ * @param {string} name - 文件名称
+ * @returns {Promise<Response>}
+ */
+export async function uploadCacheFile() {
+  const uploadUrl = "/api/v1/resource/cache/upload";
+  try {
+    const file = await selectImage();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(uploadUrl, { method: "POST", body: formData });
+    if (!res.ok) {
+      console.error("上传缓存文件失败:", res.statusText);
+      return null;
+    }
+    return res.json();
+  } catch (error) {
+    console.error("上传缓存文件失败:", error);
     return null;
   }
 }

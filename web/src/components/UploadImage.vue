@@ -38,7 +38,7 @@
 <script setup>
 import { ref } from "vue";
 import { checkImageExit } from "../utils/apis.js";
-import { uploadArticleImage, uploadArticleImageFromCopy } from "../utils/image-upload.js";
+import { uploadArticleImage, uploadArticleImageFromCopy } from "../utils/file-upload.js";
 
 const emit = defineEmits(["close-upload-image-dialog", "upload-image-success"]);
 const props = defineProps({

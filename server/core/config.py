@@ -50,34 +50,28 @@ class ProjectConfig:
         return cls.get_abs_path('server/statics')
 
     @classmethod
-    def get_templates_path(cls) -> str:
-        '''
-        获得模板文件的绝对路径
-        '''
-        return cls.get_abs_path('server/templates')
-
-    @classmethod
     def get_resource_path(cls) -> str:
         '''
         获得资源文件的绝对路径
         '''
-        return cls.get_abs_path('server/resources')
+        RESOURCES_PATH = os.environ.get('RESOURCES_PATH', "data/resources")
+        return cls.get_abs_path(RESOURCES_PATH)
 
     @classmethod
-    def get_images_path(self) -> str:
+    def get_images_path(cls) -> str:
         '''
         获得存储图像的绝对路径
         '''
-        IMAGE_PATH = os.environ.get('IMAGES_PATH', "images")
-        return self.get_abs_path(IMAGE_PATH)
+        IMAGE_PATH = os.environ.get('IMAGES_PATH', "data/images")
+        return cls.get_abs_path(IMAGE_PATH)
 
     @classmethod
-    def get_articles_path(self) -> str:
+    def get_articles_path(cls) -> str:
         '''
         获得存储文章的绝对路径
         '''
-        ARTICLES_PATH = os.environ.get('ARTICLES_PATH', "articles")
-        return self.get_abs_path(ARTICLES_PATH)
+        ARTICLES_PATH = os.environ.get('ARTICLES_PATH', "data/articles")
+        return cls.get_abs_path(ARTICLES_PATH)
 
     @classmethod
     def get_adbanner_config_path(cls) -> dict:
@@ -108,5 +102,13 @@ class ProjectConfig:
         """
         获取缓存目录的路径
         """
-        cache_path = os.environ.get('CACHE_PATH', './.cache')
+        cache_path = os.environ.get('CACHE_PATH', 'data/cache')
         return cls.get_abs_path(cache_path)
+
+    @classmethod
+    def get_templates_path(cls) -> str:
+        '''
+        获得模板文件的绝对路径
+        '''
+        TEMPLATES_PATH = os.environ.get('TEMPLATES_PATH', "data/templates")
+        return cls.get_abs_path(TEMPLATES_PATH)

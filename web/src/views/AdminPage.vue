@@ -31,13 +31,13 @@
           <span class="sidebar-icon">📷</span>
           图片管理
         </div>
-        <div class="sidebar-item" @click="onActiveCard('缓存管理')" :style="{ background: backgroundColorList[4] }">
-          <span class="sidebar-icon">💾</span>
-          缓存管理
+        <div class="sidebar-item" @click="onActiveCard('网站导航管理')" :style="{ background: backgroundColorList[4] }">
+          <span class="sidebar-icon">🌐</span>
+          网站导航管理
         </div>
-        <div class="sidebar-item" @click="onActiveCard('CodeSpace管理')" :style="{ background: backgroundColorList[5] }">
-          <span class="sidebar-icon">🎈</span>
-          CodeSpace管理
+        <div class="sidebar-item" @click="onActiveCard('缓存资源管理')" :style="{ background: backgroundColorList[5] }">
+          <span class="sidebar-icon">💾</span>
+          缓存资源管理
         </div>
         <div class="sidebar-item" @click="onActiveCard('Git插件')" :style="{ background: backgroundColorList[6] }">
           <span class="sidebar-icon">🔁</span>
@@ -57,8 +57,8 @@
         <div class="content-body">
           <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
           <div class="content-item">
-            <span>文章标题</span>
-            <input type="text" placeholder="请输入标题" v-model="newArticleMgt.title" />
+            <span>文件名称</span>
+            <input type="text" placeholder="请输入文件名称" v-model="newArticleMgt.title" />
           </div>
           <div class="content-item">
             <span>文章专栏</span>
@@ -71,8 +71,9 @@
               </select>
             </div>
           </div>
+          <!-- 新增文章的button -->
           <div class="content-item">
-            <button class="btn btn-primary" @click="onNewArticle">发布文章</button>
+            <button class="btn btn-primary" @click="onNewArticle">新增文章</button>
           </div>
         </div>
       </div>
@@ -180,25 +181,92 @@
         </div>
       </div>
 
-      <!-- 缓存管理 -->
-      <div class="content-container" v-else-if="activeCard === '缓存管理'">
+      <!-- 网站导航管理 -->
+      <div class="content-container" v-else-if="activeCard === '网站导航管理'">
         <div class="content-header">
-          <h1>缓存管理</h1>
+          <h1>网站导航管理</h1>
         </div>
         <div class="content-body">
-          <p>这里可以清理缓存。</p>
-          <!-- 这里可以添加缓存管理的功能 -->
+          <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+
+          <div class="content-item">
+            <span>网站导航</span>
+            <button class="btn btn-primary" @click="onAddNavItem">新增导航项</button>
+          </div>
+          <div class="content-item" style="border-top: 1px solid #e4e6ea; margin-top: 8px"></div>
+
+          <!-- 网站导航列表 -->
+          <div class="row-list">
+            <div class="row-item" v-for="(nav, index) in webNavAdMgt.navs" :key="index">
+              <!-- 序号 -->
+              <div class="row-serial">{{ index + 1 }}</div>
+
+              <div class="row-content">
+                <input type="text" v-model="nav.title" placeholder="请输入导航标题" @change="onSetNavs" />
+                <input type="url" v-model="nav.url" placeholder="https://example.com" @change="onSetNavs" />
+                <div class="item-actions">
+                  <label title="new"> <input type="checkbox" v-model="nav.new" @change="onSetNavs" /> new标签 </label>
+                  <button @click="onDeleteNavItem(index)">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="content-item">
+            <span>横幅广告</span>
+            <button class="btn btn-primary" @click="onAddAdItem">新增横幅广告</button>
+            <div class="content-item" style="border-top: 1px solid #e4e6ea; margin-top: 8px"></div>
+          </div>
+          <!-- 广告的列表 -->
+          <div class="row-list">
+            <div class="row-item" v-for="(ad, index) in webNavAdMgt.ads" :key="index">
+              <!-- 序号 -->
+              <div class="row-serial">{{ index + 1 }}</div>
+
+              <div class="row-content">
+                <input type="text" v-model="ad.title" placeholder="请输入广告标题" @change="onSetAds" />
+                <input type="url" v-model="ad.url" placeholder="https://example.com" @change="onSetAds" />
+                <input type="text" v-model="ad.folder" placeholder="请输入广告文件夹" @change="onSetAds" />
+                <input type="text" v-model="ad.thumbnail" placeholder="请输入广告缩略图" @change="onSetAds" />
+                <input type="text" v-model="ad.previewgif" placeholder="请输入广告预览图" @change="onSetAds" />
+                <input type="text" v-model="ad.sourcelink" placeholder="请输入广告源链接" @change="onSetAds" />
+                <input type="text" v-model="ad.date" placeholder="请输入广告日期" @change="onSetAds" />
+                <input type="text" v-model="ad.description" placeholder="请输入广告描述" @change="onSetAds" />
+                <div class="item-actions" style="justify-content: right">
+                  <button @click="onDeleteAdItem(index)">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- CodeSpace 管理 -->
-      <div class="content-container" v-else-if="activeCard === 'CodeSpace管理'">
+      <!-- 缓存资源管理 -->
+      <div class="content-container" v-else-if="activeCard === '缓存资源管理'">
         <div class="content-header">
-          <h1>CodeSpace 管理</h1>
+          <h1>缓存资源管理</h1>
         </div>
         <div class="content-body">
-          <p>这里可以管理 CodeSpace。</p>
-          <!-- 这里可以添加 CodeSpace 管理的功能 -->
+          <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+          <div class="content-item">
+            <span>上传缓存资源</span>
+            <button class="btn btn-primary" @click="onUploadCacheFile">上传</button>
+            <div class="content-item" style="border-top: 1px solid #e4e6ea; margin-top: 8px"></div>
+          </div>
+          <!-- 广告的列表 -->
+          <div class="row-list">
+            <div class="row-item" v-for="(cache, index) in cacheMgt" :key="index" style="flex: 1; flex-direction: row">
+              <!-- 序号 -->
+              <div class="row-serial">{{ index + 1 }}</div>
+              <!-- 缓存文件名字 -->
+              <div class="row-content" style="flex-direction: row">
+                <input type="text" :value="cache" readonly />
+                <div class="item-actions" style="justify-content: right">
+                  <button @click="onDownloadCacheFile(cache)" style="padding: 8px; width: 54px; background-color: #1890ff">下载</button>
+                  <button @click="onDeleteCacheFile(cache)" style="padding: 8px; width: 54px; margin-left: 8px">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -257,7 +325,15 @@ import {
   allImageInCategory,
   deleteImage,
   renameImage,
+  getNavigation,
+  getAllAdBannerItem,
+  setNavigation,
+  setAllAdBannerItems,
+  getAllCache,
+  deleteCacheFile,
+  downloadCacheFile,
 } from "../utils/apis.js";
+import { uploadCacheFile } from "../utils/file-upload.js";
 import { syncAllArticles, syncGitPull, syncGitRepo } from "../utils/fetch-sse.js";
 
 const store = useStore();
@@ -335,6 +411,12 @@ const newArticleMgt = ref({ title: "", category: "" });
  * @param title {string} 文章标题
  */
 async function onNewArticle() {
+  // 检查文章标题是否符合规范
+  if (/[^\w-]/.test(newArticleMgt.value.title)) {
+    errorMessage.value = "文章标题不能包含空格、加减等其他符号";
+    return;
+  }
+
   // 检查标题和分类是否填写
   if (!newArticleMgt.value.title || !newArticleMgt.value.category) {
     errorMessage.value = "请填写文章标题和选择专栏";
@@ -615,6 +697,172 @@ async function onGitSync() {
 }
 
 /**
+ * ========================= 网站导航管理 =========================
+ */
+
+const webNavAdMgt = ref({ navs: [], ads: [] });
+
+/**
+ * 获取网站导航数据和广告横幅数据
+ */
+async function setNavAdCategory() {
+  // 获取网站导航数据
+  const navs = await getNavigation();
+  if (navs) {
+    webNavAdMgt.value.navs = navs;
+  } else {
+    errorMessage.value = "获取网站导航失败，请稍后再试";
+  }
+
+  const ads = await getAllAdBannerItem();
+  if (ads) {
+    webNavAdMgt.value.ads = ads;
+  } else {
+    errorMessage.value = "获取广告横幅失败，请稍后再试";
+  }
+}
+
+/**
+ * 设置网站导航数据
+ * 将当前的导航数据保存到服务器
+ */
+async function onSetNavs() {
+  const res = await setNavigation(webNavAdMgt.value.navs);
+  if (!res) {
+    errorMessage.value = "设置网站导航失败，请稍后再试";
+    return;
+  }
+}
+
+/**
+ * 新增网站导航项
+ * 在导航列表中添加一个新的空白项
+ */
+async function onAddNavItem() {
+  webNavAdMgt.value.navs.push({ title: "", url: "", new: false });
+  await onSetNavs();
+}
+
+/**
+ * 删除网站导航项
+ * @param index {number} 导航项索引
+ */
+async function onDeleteNavItem(index) {
+  webNavAdMgt.value.navs.splice(index, 1);
+  await onSetNavs();
+}
+
+/**
+ * 设置网站导航数据
+ * 将当前的导航数据保存到服务器
+ */
+async function onSetAds() {
+  const res = await setAllAdBannerItems(webNavAdMgt.value.ads);
+  if (!res) {
+    errorMessage.value = "设置广告失败，请稍后再试";
+    return;
+  }
+}
+
+/**
+ * 新增网站导航项
+ * 在导航列表中添加一个新的空白项
+ */
+async function onAddAdItem() {
+  webNavAdMgt.value.ads.push({
+    title: "",
+    url: "",
+    folder: "",
+    thumbnail: "",
+    previewgif: "",
+    sourcelink: "",
+    date: "",
+    description: "",
+  });
+  await onSetAds();
+}
+
+/**
+ * 删除广告项
+ * @param index {number} 广告项索引
+ */
+async function onDeleteAdItem(index) {
+  webNavAdMgt.value.ads.splice(index, 1);
+  await onSetAds();
+}
+
+/**
+ * ========================= 缓存资源管理 =========================
+ */
+
+// 用于存储缓存资源管理的数据
+const cacheMgt = ref([]);
+
+/**
+ * 删除缓存文件
+ * @param filename {string} 缓存文件名
+ * @returns {Promise<void>}
+ */
+async function onDeleteCacheFile(filename) {
+  // 删除缓存文件
+  const res = await deleteCacheFile(filename);
+  if (res) {
+    // 成功删除后，重新获取所有缓存数据
+    await onSelectCacheManagement();
+  } else {
+    errorMessage.value = "删除缓存文件失败，请稍后再试";
+  }
+}
+
+/**
+ * 下载缓存文件
+ * @param filename {string} 缓存文件名
+ */
+async function onDownloadCacheFile(filename) {
+  // 下载缓存文件
+  const res = await downloadCacheFile(filename);
+  if (res) {
+    // 创建一个 Blob 对象并下载
+    const blob = new Blob([res], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } else {
+    errorMessage.value = "下载缓存文件失败，请稍后再试";
+  }
+}
+
+/**
+ * 上传缓存文件
+ */
+async function onUploadCacheFile() {
+  const res = await uploadCacheFile();
+  if (res) {
+    // 成功上传后，重新获取所有缓存数据
+    await onSelectCacheManagement();
+  } else {
+    errorMessage.value = "上传缓存文件失败，请稍后再试";
+  }
+}
+
+/**
+ * 获取所有缓存数据
+ */
+async function onSelectCacheManagement() {
+  const res = await getAllCache();
+  if (res) {
+    cacheMgt.value = res;
+  } else {
+    errorMessage.value = "获取缓存数据失败，请稍后再试";
+  }
+}
+
+/**
  * ========================= 组件生命周期 =========================
  */
 
@@ -633,6 +881,9 @@ onMounted(async () => {
   if (!res) return;
 
   allCategories.value = res;
+
+  await setNavAdCategory();
+  await onSelectCacheManagement();
 });
 
 /**
@@ -893,6 +1144,72 @@ onUnmounted(() => {});
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
+}
+
+.row-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.row-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.row-serial {
+  font-size: 18px;
+  font-weight: bold;
+  color: #555;
+  width: 24px;
+  text-align: center;
+  margin-right: 8px;
+}
+.row-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row-content input[type="text"],
+.row-content input[type="url"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.item-actions label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+.item-actions input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+.item-actions button {
+  padding: 8px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #e74c3c;
+  color: #fff;
+  transition: background 0.2s;
+}
+.item-actions button:hover {
+  background: #c0392b;
 }
 
 .log-textarea {

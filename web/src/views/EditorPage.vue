@@ -122,7 +122,7 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { renderMdBlock } from "../utils/md-render.js";
 import { getArticle, editArticle, editMeta } from "../utils/apis.js";
-import { setCopyImageFile } from "../utils/image-upload.js";
+import { setCopyImageFile } from "../utils/file-upload.js";
 
 const props = defineProps({
   id: {

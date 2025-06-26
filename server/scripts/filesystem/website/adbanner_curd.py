@@ -66,3 +66,18 @@ class AdBannerHandler:
             except KeyError as e:
                 Logger.error(f"adbanner.json 配置项缺少必要字段: {e}")
         return items
+
+    def set_adbanner_items(self, items: typing.List[AdBannerItem]) -> None:
+        """
+        设置AdBanner配置中的所有项目
+        """
+        self.adbanner_config['data'] = items
+        config_file = ProjectConfig.get_adbanner_config_path()
+        try:
+            with open(config_file, 'w', encoding='utf-8') as file:
+                json.dump(self.adbanner_config, file, ensure_ascii=False, indent=4)
+            Logger.info(f"AdBanner配置已更新: {config_file}")
+            return True
+        except Exception as e:
+            Logger.error(f"保存AdBanner配置时发生错误: {e}")
+            return False

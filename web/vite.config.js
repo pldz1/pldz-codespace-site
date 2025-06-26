@@ -24,7 +24,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../server/statics",
+    outDir: "../data/templates/statics",
     emptyOutDir: true,
   },
 });

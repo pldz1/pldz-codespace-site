@@ -10,7 +10,17 @@ pip-delete-this-directory.txt
 
 .env
 .venv/
+.dbpath/
+.cache/
+.bin/
 
 # Do not track user avatar
-.dbpath/
 data/images/avatar/*
+data/templates/**/*.db
+
+# Python REPL 历史记录
+.python_history
+
+# Vim 配置/缓存
+.vim/
+.viminfo

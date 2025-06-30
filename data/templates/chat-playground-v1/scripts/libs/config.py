@@ -46,8 +46,8 @@ class ProjectConfig:
 
         # 用户配置项目的默认参数
         self.host: str = '127.0.0.1'                     # 项目运行的 Host address
-        self.port: int = 10088                           # 项目运行的 port 号
-        self.username = os.environ.get("ADMIN_USERNAME")                          # 项目的超级管理员名字
+        self.port: int = 10068                           # 项目运行的 port 号
+        self.username = "admin"                          # 项目的超级管理员名字
         self.password = os.environ.get("ADMIN_PASSWORD")                          # 项目的超级管理员密码
         self.chat_models = {}                            # 项目提供的对话模型
         self.image_models = {}                           # 项目提供的图像模型

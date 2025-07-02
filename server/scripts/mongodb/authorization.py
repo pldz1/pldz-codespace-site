@@ -153,7 +153,7 @@ class AuthorizedHandler:
         return user is not None
 
     @classmethod
-    def add_user(cls, username: str, password: str, nickname: str, avatar: str = "/api/v1/image/avatar/default.jpg") -> bool:
+    def add_user(cls, username: str, password: str, nickname: str, avatar: str = "/api/v1/website/image/avatar/default.jpg") -> bool:
         """
         添加新用户到数据库, 如果存在就更新, 如果不存在就创建
         Args:

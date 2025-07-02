@@ -31,6 +31,16 @@ const props = defineProps({
     type: String,
     default: ".content .article-content",
   },
+  // 滚动偏移量，与scrollToView中的偏移量保持一致
+  scrollOffset: {
+    type: Number,
+    default: 60,
+  },
+  // 激活阈值，在目标位置附近多少像素范围内认为是激活状态
+  activeThreshold: {
+    type: Number,
+    default: 30, // ±30px的容差范围
+  },
 });
 
 const currentTitle = reactive({ id: null, level: 0 });
@@ -54,12 +64,18 @@ function getTitles() {
     if (lvl === -1) return;
 
     serials[lvl]++;
+    // 重置更深层级的序号
+    for (let i = lvl + 1; i < serials.length; i++) {
+      serials[i] = 0;
+    }
+
     const node = {
       id: `${tag}-${idx}-${el.innerText.slice(0, 20)}`,
       level: lvl,
       rawName: el.innerText,
       scrollTop: el.offsetTop,
       name: `${serials.slice(0, lvl + 1).join(".")}\. ${el.innerText}`,
+      element: el, // 保存元素引用用于实时获取位置
     };
     list.push(node);
   });
@@ -72,23 +88,58 @@ function handleScroll() {
   const sh = document.documentElement.scrollHeight;
   const ch = window.innerHeight;
   const maxScroll = sh - ch;
+
+  // 更新进度条
   progress.value = maxScroll > 0 ? `${Math.floor((st / maxScroll) * 100)}%` : "0%";
 
-  // 倒序查找当前活动标题并更新
-  for (let i = titles.value.length - 1; i >= 0; i--) {
-    const t = titles.value[i];
-    if (t.scrollTop <= st) {
-      if (currentTitle.id !== t.id) {
-        currentTitle.id = t.id;
-        currentTitle.level = t.level;
+  // 查找最接近目标位置的标题（考虑scrollOffset）
+  let activeTitle = null;
+  let minDistance = Infinity;
+
+  // 目标位置：距离视口顶部 scrollOffset 像素的位置
+  const targetPosition = props.scrollOffset;
+
+  titles.value.forEach((title) => {
+    // 实时获取元素位置
+    const elementTop = title.element.getBoundingClientRect().top;
+    // 计算元素距离目标位置的距离
+    const distanceFromTarget = Math.abs(elementTop - targetPosition);
+
+    // 如果标题在目标位置附近（在阈值范围内）
+    if (distanceFromTarget <= props.activeThreshold) {
+      if (distanceFromTarget < minDistance) {
+        minDistance = distanceFromTarget;
+        activeTitle = title;
       }
-      break;
     }
+  });
+
+  // 如果没有找到在阈值范围内的标题，则找最近刚刚滚过目标位置的标题
+  if (!activeTitle) {
+    for (let i = titles.value.length - 1; i >= 0; i--) {
+      const title = titles.value[i];
+      const elementTop = title.element.getBoundingClientRect().top;
+
+      // 判断是否已经滚过目标位置
+      if (elementTop <= targetPosition) {
+        activeTitle = title;
+        break;
+      }
+    }
+  }
+
+  // 更新当前激活标题
+  if (activeTitle && currentTitle.id !== activeTitle.id) {
+    currentTitle.id = activeTitle.id;
+    currentTitle.level = activeTitle.level;
+  } else if (!activeTitle) {
+    currentTitle.id = null;
+    currentTitle.level = 0;
   }
 }
 
 function scrollToView(pos) {
-  window.scrollTo({ top: pos, behavior: "smooth" });
+  window.scrollTo({ top: pos - props.scrollOffset, behavior: "smooth" });
 }
 
 onMounted(() => {

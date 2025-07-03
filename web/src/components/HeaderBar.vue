@@ -24,7 +24,7 @@
       <!-- 登录卡片 -->
       <div class="user-avatar" @click="onToggleLoginForm">
         <img v-if="avatar" :src="avatar" />
-        <div v-else>游客</div>
+        <div v-else class="visitor-avatar"></div>
       </div>
     </div>
   </header>

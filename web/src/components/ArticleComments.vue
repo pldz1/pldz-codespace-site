@@ -1,61 +1,677 @@
 <template>
-  <div class="comment-submit-container">
-    <textarea placeholder="输入评论内容..."></textarea>
-    <button>提交</button>
+  <div class="comments-container">
+    <!-- 评论提交表单 -->
+    <div class="comment-submit-container">
+      <label for="comment-input" class="sr-only">输入评论内容</label>
+      <textarea
+        id="comment-input"
+        v-model="commentText"
+        :placeholder="replyTo ? `回复 @${replyTo.username}：` : placeholder"
+        @keyup.enter.ctrl="onSubmit"
+        :disabled="isSubmitting"
+        :aria-disabled="isSubmitting"
+        ref="textareaRef"
+      ></textarea>
+      <div class="actions">
+        <div class="left-actions">
+          <span v-if="replyTo" class="reply-info">
+            回复 @{{ replyTo.username }}
+            <button @click="cancelReply" class="cancel-reply">✕</button>
+          </span>
+          <span class="char-count" :class="{ 'over-limit': charCount > maxLength }"> {{ charCount }}/{{ maxLength }} </span>
+        </div>
+        <button class="submit-btn" :disabled="!isValid || isSubmitting" @click="onSubmit">
+          {{ isSubmitting ? "提交中..." : replyTo ? "回复" : buttonText }}
+        </button>
+      </div>
+    </div>
+
+    <!-- 评论列表 -->
+    <div class="comments-list" v-if="comments.length > 0">
+      <div class="comments-header">
+        <h3>评论 ({{ comments.length }})</h3>
+        <div class="sort-options">
+          <button :class="{ active: sortBy === 'newest' }" @click="sortBy = 'newest'">最新</button>
+          <button :class="{ active: sortBy === 'oldest' }" @click="sortBy = 'oldest'">最早</button>
+        </div>
+      </div>
+
+      <div class="comment-item" v-for="comment in sortedComments" :key="comment.id">
+        <div class="comment-avatar">
+          <img :src="comment.avatar || '/default-avatar.png'" :alt="comment.username" />
+        </div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="username">{{ comment.username }}</span>
+            <span class="time">{{ formatTime(comment.createdAt) }}</span>
+          </div>
+          <div class="comment-text">{{ comment.content }}</div>
+          <div class="comment-actions">
+            <button @click="startReply(comment)" class="action-btn"><span class="icon">💬</span> 回复</button>
+            <button v-if="canDelete(comment)" @click="deleteComment(comment.id)" class="action-btn delete-btn" :disabled="deletingIds.has(comment.id)">
+              <span class="icon">🗑️</span>
+              {{ deletingIds.has(comment.id) ? "删除中..." : "删除" }}
+            </button>
+          </div>
+
+          <!-- 回复列表 -->
+          <div class="replies" v-if="comment.replies && comment.replies.length > 0">
+            <div class="reply-item" v-for="reply in comment.replies" :key="reply.id">
+              <div class="reply-avatar">
+                <img :src="reply.avatar || '/default-avatar.png'" :alt="reply.username" />
+              </div>
+              <div class="reply-content">
+                <div class="reply-header">
+                  <span class="username">{{ reply.username }}</span>
+                  <span class="time">{{ formatTime(reply.createdAt) }}</span>
+                </div>
+                <div class="reply-text">
+                  <span v-if="reply.replyToUsername" class="reply-to"> @{{ reply.replyToUsername }} </span>
+                  {{ reply.content }}
+                </div>
+                <div class="reply-actions">
+                  <button @click="startReply(comment, reply)" class="action-btn"><span class="icon">💬</span> 回复</button>
+                  <button
+                    v-if="canDelete(reply)"
+                    @click="deleteReply(comment.id, reply.id)"
+                    class="action-btn delete-btn"
+                    :disabled="deletingIds.has(reply.id)"
+                  >
+                    <span class="icon">🗑️</span>
+                    {{ deletingIds.has(reply.id) ? "删除中..." : "删除" }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-comments" v-else>
+      <div class="empty-icon">💬</div>
+      <p>还没有评论，来发表第一条评论吧！</p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, nextTick } from "vue";
+import { useStore } from "vuex";
+import Toast from "@/utils/toast.js";
+
+// Props
+const props = defineProps({
+  articleId: { type: [String, Number], required: true },
+  placeholder: { type: String, default: "输入评论内容..." },
+  buttonText: { type: String, default: "发表评论" },
+  maxLength: { type: Number, default: 500 },
+  initialComments: { type: Array, default: () => [] },
+});
+
+// Emits
+const emit = defineEmits(["comment-added", "comment-deleted", "reply-added", "reply-deleted"]);
+
+const store = useStore();
+const username = computed(() => store.state.authState.username);
+const userId = computed(() => store.state.authState.userId);
+
+// 状态
+const commentText = ref("");
+const isSubmitting = ref(false);
+const replyTo = ref(null); // { id, username, isReply: boolean }
+const comments = ref([...props.initialComments]);
+const deletingIds = ref(new Set());
+const sortBy = ref("newest");
+const textareaRef = ref(null);
+
+// 计算属性
+const charCount = computed(() => commentText.value.length);
+const isValid = computed(() => {
+  const text = commentText.value.trim();
+  return text.length > 0 && text.length <= props.maxLength && username.value;
+});
+
+const sortedComments = computed(() => {
+  const sorted = [...comments.value];
+  if (sortBy.value === "newest") {
+    return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else {
+    return sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }
+});
+
+// 模拟API调用
+const mockApi = {
+  async addComment(articleId, content) {
+    // 模拟网络延迟
+    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
+
+    // 模拟随机失败
+    if (Math.random() < 0.1) {
+      throw new Error("网络错误");
+    }
+
+    return {
+      id: Date.now() + Math.random(),
+      articleId,
+      content,
+      username: username.value,
+      userId: userId.value,
+      avatar: "/default-avatar.png",
+      createdAt: new Date().toISOString(),
+      replies: [],
+    };
+  },
+
+  async addReply(commentId, content, replyToUsername = null) {
+    await new Promise((resolve) => setTimeout(resolve, 800 + Math.random() * 800));
+
+    if (Math.random() < 0.1) {
+      throw new Error("网络错误");
+    }
+
+    return {
+      id: Date.now() + Math.random(),
+      commentId,
+      content,
+      username: username.value,
+      userId: userId.value,
+      avatar: "/default-avatar.png",
+      replyToUsername,
+      createdAt: new Date().toISOString(),
+    };
+  },
+
+  async deleteComment(commentId) {
+    await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 500));
+
+    if (Math.random() < 0.05) {
+      throw new Error("删除失败");
+    }
+
+    return { success: true };
+  },
+
+  async deleteReply(commentId, replyId) {
+    await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 500));
+
+    if (Math.random() < 0.05) {
+      throw new Error("删除失败");
+    }
+
+    return { success: true };
+  },
+};
+
+// 提交评论或回复
+async function onSubmit() {
+  if (isSubmitting.value) return;
+
+  if (!username.value) {
+    Toast.error("请先登录");
+    return;
+  }
+
+  const text = commentText.value.trim();
+  if (!text) {
+    Toast.warning("评论内容不能为空");
+    return;
+  }
+
+  if (text.length > props.maxLength) {
+    Toast.warning(`评论不能超过${props.maxLength}个字`);
+    return;
+  }
+
+  try {
+    isSubmitting.value = true;
+
+    if (replyTo.value) {
+      // 添加回复
+      const reply = await mockApi.addReply(replyTo.value.id, text, replyTo.value.isReply ? replyTo.value.username : null);
+
+      // 找到对应的评论并添加回复
+      const comment = comments.value.find((c) => c.id === replyTo.value.id);
+      if (comment) {
+        if (!comment.replies) comment.replies = [];
+        comment.replies.push(reply);
+        emit("reply-added", reply);
+      }
+
+      Toast.success("回复成功");
+    } else {
+      // 添加评论
+      const comment = await mockApi.addComment(props.articleId, text);
+      comments.value.unshift(comment);
+      emit("comment-added", comment);
+      Toast.success("评论成功");
+    }
+
+    // 清空输入
+    commentText.value = "";
+    cancelReply();
+  } catch (error) {
+    Toast.error(replyTo.value ? "回复失败，请重试" : "评论失败，请重试");
+    console.error("Submit error:", error);
+  } finally {
+    isSubmitting.value = false;
+  }
+}
+
+// 开始回复
+async function startReply(comment, reply = null) {
+  if (reply) {
+    // 回复某条回复
+    replyTo.value = {
+      id: comment.id,
+      username: reply.username,
+      isReply: true,
+    };
+  } else {
+    // 回复某条评论
+    replyTo.value = {
+      id: comment.id,
+      username: comment.username,
+      isReply: false,
+    };
+  }
+
+  // 聚焦到输入框
+  await nextTick();
+  textareaRef.value?.focus();
+}
+
+// 取消回复
+function cancelReply() {
+  replyTo.value = null;
+}
+
+// 删除评论
+async function deleteComment(commentId) {
+  if (deletingIds.value.has(commentId)) return;
+
+  try {
+    deletingIds.value.add(commentId);
+    await mockApi.deleteComment(commentId);
+
+    const index = comments.value.findIndex((c) => c.id === commentId);
+    if (index !== -1) {
+      const deletedComment = comments.value.splice(index, 1)[0];
+      emit("comment-deleted", deletedComment);
+      Toast.success("评论已删除");
+    }
+  } catch (error) {
+    Toast.error("删除失败，请重试");
+    console.error("Delete comment error:", error);
+  } finally {
+    deletingIds.value.delete(commentId);
+  }
+}
+
+// 删除回复
+async function deleteReply(commentId, replyId) {
+  if (deletingIds.value.has(replyId)) return;
+
+  try {
+    deletingIds.value.add(replyId);
+    await mockApi.deleteReply(commentId, replyId);
+
+    const comment = comments.value.find((c) => c.id === commentId);
+    if (comment && comment.replies) {
+      const index = comment.replies.findIndex((r) => r.id === replyId);
+      if (index !== -1) {
+        const deletedReply = comment.replies.splice(index, 1)[0];
+        emit("reply-deleted", deletedReply);
+        Toast.success("回复已删除");
+      }
+    }
+  } catch (error) {
+    Toast.error("删除失败，请重试");
+    console.error("Delete reply error:", error);
+  } finally {
+    deletingIds.value.delete(replyId);
+  }
+}
+
+// 检查是否可以删除
+function canDelete(item) {
+  return username.value && (item.userId === userId.value || item.username === username.value);
+}
+
+// 格式化时间
+function formatTime(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now - date;
+
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${minutes}分钟前`;
+  if (hours < 24) return `${hours}小时前`;
+  if (days < 7) return `${days}天前`;
+
+  return date.toLocaleDateString("zh-CN");
+}
+
+// 暴露方法
+defineExpose({
+  clearText: () => {
+    commentText.value = "";
+    cancelReply();
+  },
+  setText: (text) => {
+    commentText.value = text;
+  },
+  addComment: (comment) => {
+    comments.value.unshift(comment);
+  },
+  removeComment: (commentId) => {
+    const index = comments.value.findIndex((c) => c.id === commentId);
+    if (index !== -1) {
+      comments.value.splice(index, 1);
+    }
+  },
+});
 </script>
 
 <style scoped>
-.comment-submit-container {
-  margin: 16px auto;
-  padding: 16px;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.comments-container {
+  max-width: 100%;
+  margin: 0 auto;
 }
 
-.comment-submit-container textarea {
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.comment-submit-container {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+textarea {
   width: 100%;
   min-height: 120px;
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  resize: vertical;
   font-size: 14px;
   line-height: 1.5;
   transition: border-color 0.2s;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-.comment-submit-container textarea:focus {
+textarea:focus {
   outline: none;
   border-color: #48a9fe;
   box-shadow: 0 0 0 3px rgba(72, 169, 254, 0.2);
 }
 
-.comment-submit-container button {
-  align-self: flex-end;
-  padding: 10px 24px;
-  font-size: 15px;
+textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.left-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reply-info {
+  font-size: 12px;
+  color: #48a9fe;
+  background: #f0f9ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cancel-reply {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+}
+
+.cancel-reply:hover {
+  color: #666;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #888;
+  transition: color 0.2s;
+}
+
+.char-count.over-limit {
+  color: #ff4757;
+  font-weight: 500;
+}
+
+.submit-btn {
+  padding: 8px 20px;
+  font-size: 14px;
   font-weight: 500;
   color: #fff;
   background: linear-gradient(135deg, #48a9fe 0%, #6d5dfc 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition:
-    background 0.3s,
-    transform 0.1s;
+  transition: all 0.3s;
+  min-width: 80px;
 }
-.comment-submit-container button:hover {
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #6d5dfc 0%, #48a9fe 100%);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(72, 169, 254, 0.3);
 }
-.comment-submit-container button:active {
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+
+.comments-list {
+  margin-top: 24px;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.comments-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.sort-options {
+  display: flex;
+  gap: 8px;
+}
+
+.sort-options button {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sort-options button.active {
+  background: #48a9fe;
+  color: #fff;
+  border-color: #48a9fe;
+}
+
+.comment-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  background: #fff;
+  margin-bottom: 16px;
+}
+
+.comment-avatar img,
+.reply-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reply-avatar img {
+  width: 32px;
+  height: 32px;
+}
+
+.comment-content {
+  flex: 1;
+}
+
+.comment-header,
+.reply-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.username {
+  font-weight: 500;
+  color: #333;
+}
+
+.time {
+  font-size: 12px;
+  color: #888;
+}
+
+.comment-text,
+.reply-text {
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 12px;
+  word-break: break-word;
+}
+
+.reply-to {
+  color: #48a9fe;
+  font-weight: 500;
+}
+
+.comment-actions,
+.reply-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #666;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-btn:hover {
+  background: #ffebee;
+  color: #f44336;
+}
+
+.icon {
+  font-size: 12px;
+}
+
+.replies {
+  margin-top: 16px;
+  padding-left: 16px;
+  border-left: 2px solid #f0f0f0;
+}
+
+.reply-item {
+  display: flex;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.reply-item:last-child {
+  border-bottom: none;
+}
+
+.reply-content {
+  flex: 1;
+}
+
+.empty-comments {
+  text-align: center;
+  padding: 48px 16px;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-comments p {
+  margin: 0;
+  font-size: 14px;
 }
 </style>

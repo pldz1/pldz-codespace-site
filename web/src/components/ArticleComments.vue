@@ -6,7 +6,7 @@
       <textarea
         id="comment-input"
         v-model="commentText"
-        :placeholder="replyTo ? `回复 @${replyTo.username}：` : placeholder"
+        :placeholder="replyTo ? `回复 @${replyTo.username}:` : placeholder"
         @keyup.enter.ctrl="onSubmit"
         :disabled="isSubmitting"
         :aria-disabled="isSubmitting"
@@ -38,7 +38,7 @@
 
       <div class="comment-item" v-for="comment in sortedComments" :key="comment.id">
         <div class="comment-avatar">
-          <img :src="comment.avatar || '/default-avatar.png'" :alt="comment.username" />
+          <img :src="comment.avatar" />
         </div>
         <div class="comment-content">
           <div class="comment-header">
@@ -107,7 +107,28 @@ const props = defineProps({
   placeholder: { type: String, default: "输入评论内容..." },
   buttonText: { type: String, default: "发表评论" },
   maxLength: { type: Number, default: 500 },
-  initialComments: { type: Array, default: () => [] },
+  initialComments: {
+    type: Array,
+    default: () => [
+      {
+        id: "xxxx",
+        avatar: "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg",
+        username: "admin@pldz1.com",
+        content: "这是一条初始评论",
+        createdAt: "2023-10-01T12:00:00Z",
+        replies: [
+          {
+            id: "reply1",
+            avatar: "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg",
+            username: "test@pldz1.com",
+            content: "这是对初始评论的回复",
+            createdAt: "2023-10-01T12:05:00Z",
+            replyToUsername: "CJJDA",
+          },
+        ],
+      },
+    ],
+  },
 });
 
 // Emits
@@ -549,6 +570,15 @@ textarea:disabled {
   border-radius: 12px;
   background: #fff;
   margin-bottom: 16px;
+}
+
+.comment-avatar,
+.reply-avatar {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .comment-avatar img,

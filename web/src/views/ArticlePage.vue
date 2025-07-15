@@ -43,7 +43,7 @@
       </div>
       <div class="comments-content">
         <span> 评论留言 </span>
-        <ArticleComments v-if="isArticleLoaded"></ArticleComments>
+        <ArticleComments v-if="isArticleLoaded" :article-id="article.id"></ArticleComments>
       </div>
     </main>
 
@@ -160,7 +160,7 @@ watch(
     if (newWidth > 768) {
       closeMobileMenu();
     }
-  },
+  }
 );
 </script>
 
@@ -270,11 +270,20 @@ watch(
 }
 
 @media (max-width: 768px) {
+  .to-bottom,
+  .to-top {
+    width: 45px;
+    height: 45px;
+  }
+
   .to-top {
     right: 15px;
     bottom: 15px;
-    width: 45px;
-    height: 45px;
+  }
+
+  .to-bottom {
+    right: 15px;
+    bottom: 80px;
   }
 }
 

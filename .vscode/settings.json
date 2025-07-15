@@ -22,9 +22,8 @@
 
   // 针对vscode的放大镜在项目下全局搜索的配置，添加的元素是不会被搜索的路径
   "search.exclude": {
-    "build": true,
-    "resources": true,
-    "reference": true
+    "data/templates": true,
+    "data/articles": true,
   },
 
   // 消除vscode找不到第三方库的路径提示.

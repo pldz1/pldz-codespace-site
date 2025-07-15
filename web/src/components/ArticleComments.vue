@@ -43,12 +43,12 @@
         <div class="comment-content">
           <div class="comment-header">
             <span class="username">{{ comment.username }}</span>
-            <span class="time">{{ formatTime(comment.createdAt) }}</span>
+            <span class="time">{{ formatTime(comment.created) }}</span>
           </div>
           <div class="comment-text">{{ comment.content }}</div>
           <div class="comment-actions">
             <button @click="startReply(comment)" class="action-btn"><span class="icon">💬</span> 回复</button>
-            <button v-if="canDelete(comment)" @click="deleteComment(comment.id)" class="action-btn delete-btn" :disabled="deletingIds.has(comment.id)">
+            <button v-if="canDelete(comment)" @click="onDeleteComment(comment.id)" class="action-btn delete-btn" :disabled="deletingIds.has(comment.id)">
               <span class="icon">🗑️</span>
               {{ deletingIds.has(comment.id) ? "删除中..." : "删除" }}
             </button>
@@ -63,7 +63,7 @@
               <div class="reply-content">
                 <div class="reply-header">
                   <span class="username">{{ reply.username }}</span>
-                  <span class="time">{{ formatTime(reply.createdAt) }}</span>
+                  <span class="time">{{ formatTime(reply.created) }}</span>
                 </div>
                 <div class="reply-text">
                   <span v-if="reply.replyToUsername" class="reply-to"> @{{ reply.replyToUsername }} </span>
@@ -73,7 +73,7 @@
                   <button @click="startReply(comment, reply)" class="action-btn"><span class="icon">💬</span> 回复</button>
                   <button
                     v-if="canDelete(reply)"
-                    @click="deleteReply(comment.id, reply.id)"
+                    @click="onDeleteReply(comment.id, reply.id)"
                     class="action-btn delete-btn"
                     :disabled="deletingIds.has(reply.id)"
                   >
@@ -97,9 +97,11 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from "vue";
+import { ref, computed, nextTick, onMounted } from "vue";
 import { useStore } from "vuex";
 import Toast from "@/utils/toast.js";
+
+import { getAllComments, addComment, deleteComment } from "@/utils/apis.js";
 
 // Props
 const props = defineProps({
@@ -107,28 +109,6 @@ const props = defineProps({
   placeholder: { type: String, default: "输入评论内容..." },
   buttonText: { type: String, default: "发表评论" },
   maxLength: { type: Number, default: 500 },
-  initialComments: {
-    type: Array,
-    default: () => [
-      {
-        id: "xxxx",
-        avatar: "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg",
-        username: "admin@pldz1.com",
-        content: "这是一条初始评论",
-        createdAt: "2023-10-01T12:00:00Z",
-        replies: [
-          {
-            id: "reply1",
-            avatar: "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg",
-            username: "test@pldz1.com",
-            content: "这是对初始评论的回复",
-            createdAt: "2023-10-01T12:05:00Z",
-            replyToUsername: "CJJDA",
-          },
-        ],
-      },
-    ],
-  },
 });
 
 // Emits
@@ -136,13 +116,13 @@ const emit = defineEmits(["comment-added", "comment-deleted", "reply-added", "re
 
 const store = useStore();
 const username = computed(() => store.state.authState.username);
-const userId = computed(() => store.state.authState.userId);
+const avatar = computed(() => store.state.authState.avatar);
 
 // 状态
 const commentText = ref("");
 const isSubmitting = ref(false);
 const replyTo = ref(null); // { id, username, isReply: boolean }
-const comments = ref([...props.initialComments]);
+const comments = ref([]);
 const deletingIds = ref(new Set());
 const sortBy = ref("newest");
 const textareaRef = ref(null);
@@ -157,74 +137,11 @@ const isValid = computed(() => {
 const sortedComments = computed(() => {
   const sorted = [...comments.value];
   if (sortBy.value === "newest") {
-    return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return sorted.sort((a, b) => new Date(b.created) - new Date(a.created));
   } else {
-    return sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    return sorted.sort((a, b) => new Date(a.created) - new Date(b.created));
   }
 });
-
-// 模拟API调用
-const mockApi = {
-  async addComment(articleId, content) {
-    // 模拟网络延迟
-    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
-
-    // 模拟随机失败
-    if (Math.random() < 0.1) {
-      throw new Error("网络错误");
-    }
-
-    return {
-      id: Date.now() + Math.random(),
-      articleId,
-      content,
-      username: username.value,
-      userId: userId.value,
-      avatar: "/default-avatar.png",
-      createdAt: new Date().toISOString(),
-      replies: [],
-    };
-  },
-
-  async addReply(commentId, content, replyToUsername = null) {
-    await new Promise((resolve) => setTimeout(resolve, 800 + Math.random() * 800));
-
-    if (Math.random() < 0.1) {
-      throw new Error("网络错误");
-    }
-
-    return {
-      id: Date.now() + Math.random(),
-      commentId,
-      content,
-      username: username.value,
-      userId: userId.value,
-      avatar: "/default-avatar.png",
-      replyToUsername,
-      createdAt: new Date().toISOString(),
-    };
-  },
-
-  async deleteComment(commentId) {
-    await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 500));
-
-    if (Math.random() < 0.05) {
-      throw new Error("删除失败");
-    }
-
-    return { success: true };
-  },
-
-  async deleteReply(commentId, replyId) {
-    await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 500));
-
-    if (Math.random() < 0.05) {
-      throw new Error("删除失败");
-    }
-
-    return { success: true };
-  },
-};
 
 // 提交评论或回复
 async function onSubmit() {
@@ -250,8 +167,21 @@ async function onSubmit() {
     isSubmitting.value = true;
 
     if (replyTo.value) {
-      // 添加回复
-      const reply = await mockApi.addReply(replyTo.value.id, text, replyTo.value.isReply ? replyTo.value.username : null);
+      const reply = {
+        id: (Date.now() + Math.random()).toString().replace(".", ""),
+        content: text,
+        username: username.value,
+        avatar: avatar.value,
+        replies: [],
+        replyToUsername: replyTo.value.username || "",
+        created: new Date().toISOString(),
+      };
+
+      const flag = await addComment(props.articleId, reply, replyTo.value.id || "");
+      if (!flag) {
+        Toast.error("评论失败，请重试");
+        return;
+      }
 
       // 找到对应的评论并添加回复
       const comment = comments.value.find((c) => c.id === replyTo.value.id);
@@ -264,10 +194,24 @@ async function onSubmit() {
       Toast.success("回复成功");
     } else {
       // 添加评论
-      const comment = await mockApi.addComment(props.articleId, text);
-      comments.value.unshift(comment);
-      emit("comment-added", comment);
-      Toast.success("评论成功");
+      const comment = {
+        id: (Date.now() + Math.random()).toString().replace(".", ""),
+        content: text,
+        username: username.value,
+        avatar: avatar.value,
+        replies: [],
+        replyToUsername: "",
+        created: new Date().toISOString(),
+      };
+
+      const flag = await addComment(props.articleId, comment);
+      if (flag) {
+        comments.value.unshift(comment);
+        Toast.success("评论成功");
+      } else {
+        Toast.error("评论失败，请重试");
+        return;
+      }
     }
 
     // 清空输入
@@ -310,12 +254,16 @@ function cancelReply() {
 }
 
 // 删除评论
-async function deleteComment(commentId) {
+async function onDeleteComment(commentId) {
   if (deletingIds.value.has(commentId)) return;
 
   try {
     deletingIds.value.add(commentId);
-    await mockApi.deleteComment(commentId);
+    const flag = await deleteComment(props.articleId, commentId);
+    if (!flag) {
+      Toast.error("删除失败，请重试");
+      return;
+    }
 
     const index = comments.value.findIndex((c) => c.id === commentId);
     if (index !== -1) {
@@ -332,12 +280,17 @@ async function deleteComment(commentId) {
 }
 
 // 删除回复
-async function deleteReply(commentId, replyId) {
+async function onDeleteReply(commentId, replyId) {
   if (deletingIds.value.has(replyId)) return;
 
   try {
     deletingIds.value.add(replyId);
-    await mockApi.deleteReply(commentId, replyId);
+
+    const flag = await deleteComment(props.articleId, replyId);
+    if (!flag) {
+      Toast.error("删除失败，请重试");
+      return;
+    }
 
     const comment = comments.value.find((c) => c.id === commentId);
     if (comment && comment.replies) {
@@ -358,7 +311,7 @@ async function deleteReply(commentId, replyId) {
 
 // 检查是否可以删除
 function canDelete(item) {
-  return username.value && (item.userId === userId.value || item.username === username.value);
+  return username.value && item.username === username.value;
 }
 
 // 格式化时间
@@ -379,24 +332,15 @@ function formatTime(dateString) {
   return date.toLocaleDateString("zh-CN");
 }
 
-// 暴露方法
-defineExpose({
-  clearText: () => {
-    commentText.value = "";
-    cancelReply();
-  },
-  setText: (text) => {
-    commentText.value = text;
-  },
-  addComment: (comment) => {
-    comments.value.unshift(comment);
-  },
-  removeComment: (commentId) => {
-    const index = comments.value.findIndex((c) => c.id === commentId);
-    if (index !== -1) {
-      comments.value.splice(index, 1);
-    }
-  },
+/**
+ * 组件挂载时获取初始评论
+ */
+onMounted(async () => {
+  // 获取初始评论
+  const data = await getAllComments(props.articleId);
+  if (Array.isArray(data)) {
+    comments.value = data;
+  }
 });
 </script>
 

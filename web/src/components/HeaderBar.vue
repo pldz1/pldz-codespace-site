@@ -20,12 +20,12 @@
       </nav>
     </div>
     <div class="header-right">
-      <input type="text" class="search-box" placeholder="探索文章" />
+      <input type="text" class="search-box" placeholder="探索文章" style="display: none" />
       <!-- 登录卡片 -->
-      <div class="user-avatar" @click="onToggleLoginForm">
+      <div v-if="avatar" class="user-avatar" @click="onToggleLoginForm">
         <img v-if="avatar" :src="avatar" />
-        <div v-else class="visitor-avatar"></div>
       </div>
+      <button v-else class="login-register-btn" @click="onToggleLoginForm">登录 | 注册</button>
     </div>
   </header>
 
@@ -123,5 +123,18 @@ onMounted(async () => {
   vertical-align: middle;
   background: url("../assets/svgs/logo-32.svg") no-repeat center;
   background-size: contain;
+}
+
+.login-register-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid #51a6ff;
+  border-radius: 3px;
+  background-color: #ffffff;
+  color: #51a6ff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
 }
 </style>

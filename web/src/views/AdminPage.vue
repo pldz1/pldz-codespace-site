@@ -18,7 +18,13 @@
     <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
       <div class="sidebar-card" ref="sidebarContentRef">
         <div class="sidebar-card-title">⚙ 菜单</div>
-        <div class="sidebar-item" @click="onActiveCard('新增文章')" :style="{ background: backgroundColorList[0] }">
+
+        <div class="sidebar-item" @click="onActiveCard('用户管理')" :style="{ background: backgroundColorList[0] }">
+          <span class="sidebar-icon">🫨 </span>
+          用户管理
+        </div>
+
+        <div class="sidebar-item" @click="onActiveCard('新增文章')" :style="{ background: backgroundColorList[1] }">
           <span class="sidebar-icon">➕ </span>
           新增文章
         </div>
@@ -363,7 +369,7 @@ const mainSidebarContainerRef = ref(null);
 const sidebarContentRef = ref(null);
 
 // 用于存储当前选中的分类
-const activeCard = ref("新增文章");
+const activeCard = ref("用户管理");
 
 /**
  * 设置当前活动分类并获取相应的文章
@@ -929,7 +935,7 @@ onUnmounted(() => {});
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 24px 32px;
+  padding: 16px 32px;
   color: #71777c;
   cursor: pointer;
   gap: 10px;

@@ -352,3 +352,30 @@ export async function addComment(article_id, content, parent_id = "") {
 export async function deleteComment(article_id, comment_id) {
   return apiPost(`/api/v1/website/comment/delete`, { article_id, comment_id });
 }
+
+/**
+ * 获取白板内容
+ * @param {*} key
+ * @returns
+ */
+export async function getWhiteBoardByKey(key) {
+  return apiPost("/api/v1/website/whiteboard/key", { key });
+}
+
+/**
+ * 获取当前用户的白板内容
+ * @returns
+ */
+export async function getWhiteBoardByUser() {
+  return apiPost("/api/v1/website/whiteboard/authorized");
+}
+
+/**
+ * 更新白板内容
+ * @param {*} key
+ * @param {*} content
+ * @returns
+ */
+export async function updateWhiteBoardContent(key, content) {
+  return apiPost("/api/v1/website/whiteboard/update", { key, content });
+}

@@ -12,6 +12,7 @@
       <nav>
         <ul class="nav-menu">
           <li :class="['nav-item', routeName == '首页' ? 'active' : '']"><a href="/"> 首页 </a></li>
+          <li :class="['nav-item', routeName == '白板' ? 'active' : '']"><a href="/whiteboard"> 白板 </a></li>
           <!-- 其他的导航内容 -->
           <li v-for="nav in navs" :key="nav.title" class="nav-item">
             <a :href="nav.url" target="_blank" rel="noopener noreferrer"> {{ nav.title }} <span v-if="nav.new" class="badge">new</span> </a>

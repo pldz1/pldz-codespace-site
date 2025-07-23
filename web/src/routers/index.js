@@ -4,6 +4,7 @@ import ArticlePage from "../views/ArticlePage.vue";
 import EditorPage from "../views/EditorPage.vue";
 import NotFound from "../views/NotFound.vue";
 import AdminPage from "../views/AdminPage.vue";
+import WhiteBoard from "../views/WhiteBoard.vue";
 
 const router = createRouter({
   // 使用 HTML5 的 History 模式
@@ -16,6 +17,10 @@ const router = createRouter({
     {
       path: "/admin",
       component: AdminPage,
+    },
+    {
+      path: "/whiteboard",
+      component: WhiteBoard,
     },
     {
       // 动态路由，用 :id 捕获文章 ID

@@ -1,7 +1,8 @@
 
 import typing
 import datetime
-import hashlib
+import random
+import string
 
 
 INVALID_TIME = 60*10  # 10分钟的秒数
@@ -28,17 +29,17 @@ class WhiteBoardHandler:
         pass
 
     @classmethod
-    def hash_username(cls, username: str) -> str:
+    def random4(cls, username: str, length: int = 4) -> str:
         """
-        哈希用户名
+        生成指定长度的随机字符串
         :param username: 用户名
-        :return: 哈希后的用户名
-        """
-        if not username:
-            return ""
-        h = hashlib.new('sha256')
-        h.update(username.encode('utf-8'))
-        return h.hexdigest()
+        :param length: 字符串长度
+        :return: 随机字符串"""
+        # 可选字符：大写、小写、数字
+        alphabet = string.ascii_letters + string.digits
+        # 随机选 length 个字符并拼接
+        subfix = ''.join(random.choices(alphabet, k=length))
+        return f"{username}-{subfix}"
 
     @classmethod
     def get_item_by_username(cls, username) -> typing.Optional[WhiteBoardItem]:
@@ -56,19 +57,21 @@ class WhiteBoardHandler:
                         (datetime.datetime.now() - datetime.datetime.fromisoformat(item['created'])).total_seconds() > INVALID_TIME):
                     return {
                         'created': datetime.datetime.now().isoformat(),
-                        'key': cls.hash_username(username),
+                        'key': cls.random4(username),
                         'content': "",
                         'username': username,
                     }
                 # 返回白板内容
                 return item
         # 如果没有找到或用户名为空，返回空内容但是新的item
-        return {
+        new_item = {
             'created': datetime.datetime.now().isoformat(),
-            'key': cls.hash_username(username),
+            'key': cls.random4(username),
             'content': "",
             'username': username,
         }
+        cls.white_board_list.append(new_item)
+        return new_item
 
     @classmethod
     def get_item_by_key(cls, key: str) -> typing.Optional[WhiteBoardItem]:
@@ -102,7 +105,7 @@ class WhiteBoardHandler:
         :param key: 白板项的键
         :param content: 白板内容
         """
-        if not key or not content:
+        if not key:
             return ""
         # 检查是否已存在该键的白板项
         for item in cls.white_board_list:

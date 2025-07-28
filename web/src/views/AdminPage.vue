@@ -419,9 +419,9 @@ const newArticleMgt = ref({ title: "", category: "" });
  */
 async function onNewArticle() {
   // 检查文章标题是否符合规范
-  const regex = /^(?!-)[\w\u3400-\u4DBF\u4E00-\u9FFF-]+$/u;
-  if (regex.test(newArticleMgt.value.title)) {
-    errorMessage.value = "文章标题不能包含空格、加减等其他符号";
+  const regex = /^(?!-)[\p{Script=Han}\p{L}\p{N}_-]+$/u;
+  if (!regex.test(newArticleMgt.value.title)) {
+    errorMessage.value = "文章标题只能包含汉字、字母、数字、下划线和中划线，且不能以中划线开头";
     return;
   }
 

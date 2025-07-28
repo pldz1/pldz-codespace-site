@@ -176,13 +176,13 @@ function onCloseUploadImageDialog() {
  * 上传图片成功后处理
  * @param {Object} data - 包含图片URL和名称的对象
  * @param {string} data.url - 图片的URL
- * @param {string} data.imageName - 图片的名称
+ * @param {string} data.name - 图片的名称
  * @returns {Promise<void>}
  */
 async function onUploadImageSuccess(data) {
-  const { url, imageName } = data;
+  const { url, name } = data;
   if (isEditContent.value) {
-    insertText(`![${imageName}](${url})`, "");
+    insertText(`![${name}](${url})`, "");
     await editArticle(articleID.value, editorText.value);
   } else {
     articleMeta.value.thumbnail = url;
@@ -208,6 +208,9 @@ async function closeMetaSetting() {
  */
 function closeOpenPreview() {
   isShowPreviw.value = !isShowPreviw.value;
+  if (isShowPreviw.value) {
+    updatePreview();
+  }
 }
 
 /**

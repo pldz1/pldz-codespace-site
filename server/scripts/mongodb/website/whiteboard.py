@@ -2,10 +2,9 @@
 import typing
 import datetime
 import random
-import string
 
 
-INVALID_TIME = 60*10  # 10分钟的秒数
+INVALID_TIME = 60*60*24  # 一天
 
 
 class WhiteBoardItem(typing.TypedDict):
@@ -29,17 +28,16 @@ class WhiteBoardHandler:
         pass
 
     @classmethod
-    def random4(cls, username: str, length: int = 4) -> str:
+    def random_key(cls, username: str, length: int = 4) -> str:
         """
         生成指定长度的随机字符串
         :param username: 用户名
         :param length: 字符串长度
         :return: 随机字符串"""
         # 可选字符：大写、小写、数字
-        alphabet = string.ascii_letters + string.digits
-        # 随机选 length 个字符并拼接
-        subfix = ''.join(random.choices(alphabet, k=length))
-        return f"{username}-{subfix}"
+        name = username.split('@')[0]
+        rnum = random.randint(100, 999)
+        return f"{name}-{rnum}"
 
     @classmethod
     def get_item_by_username(cls, username) -> typing.Optional[WhiteBoardItem]:
@@ -52,21 +50,32 @@ class WhiteBoardHandler:
             return None
         for item in cls.white_board_list:
             if item['username'] == username:
-                # 如果创建时间超过10分钟返回空字符串
+                # 如果创建时间超过 INVALID_TIME 返回空字符串
                 if (item['created'] and
                         (datetime.datetime.now() - datetime.datetime.fromisoformat(item['created'])).total_seconds() > INVALID_TIME):
-                    return {
+
+                    # 如果new_key与现有的key重复，重新生成
+                    new_key = cls.random_key(username)
+                    while any(existing_item['key'] == new_key for existing_item in cls.white_board_list):
+                        new_key = cls.random_key(username)
+
+                    # 返回新的白板项
+                    cls.white_board_list.remove(item)
+                    new_item = {
                         'created': datetime.datetime.now().isoformat(),
-                        'key': cls.random4(username),
+                        'key': new_key,
                         'content': "",
                         'username': username,
                     }
+                    cls.white_board_list.append(new_item)
+                    # 返回新的白板项
+                    return new_item
                 # 返回白板内容
                 return item
         # 如果没有找到或用户名为空，返回空内容但是新的item
         new_item = {
             'created': datetime.datetime.now().isoformat(),
-            'key': cls.random4(username),
+            'key': cls.random_key(username),
             'content': "",
             'username': username,
         }
@@ -84,7 +93,7 @@ class WhiteBoardHandler:
             return None
         for item in cls.white_board_list:
             if item['key'] == key:
-                # 如果创建时间超过10分钟返回空字符串
+                # 如果创建时间超过 INVALID_TIME 分钟返回空字符串
                 if (item['created'] and
                         (datetime.datetime.now() - datetime.datetime.fromisoformat(item['created'])).total_seconds() > INVALID_TIME):
                     return {

@@ -19,9 +19,11 @@ pip-delete-this-directory.txt
 # Do not track user avatar
 data/images/avatar/*
 data/templates/**/*.db
+data/cache/**
 
 # Python REPL 历史记录
 .python_history
+.bash_history
 
 # Vim 配置/缓存
 .vim/

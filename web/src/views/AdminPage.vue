@@ -381,6 +381,7 @@ function onActiveCard(category) {
 
   // 设置当前活动分类
   activeCard.value = category;
+  errorMessage.value = "";
 }
 
 /**
@@ -418,7 +419,8 @@ const newArticleMgt = ref({ title: "", category: "" });
  */
 async function onNewArticle() {
   // 检查文章标题是否符合规范
-  if (/[^\w-]/.test(newArticleMgt.value.title)) {
+  const regex = /^(?!-)[\w\u3400-\u4DBF\u4E00-\u9FFF-]+$/u;
+  if (regex.test(newArticleMgt.value.title)) {
     errorMessage.value = "文章标题不能包含空格、加减等其他符号";
     return;
   }

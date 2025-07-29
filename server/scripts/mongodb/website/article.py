@@ -338,6 +338,7 @@ class ArticleHandler:
                     'author': username,
                     'category': category,
                     'serialNo': serial_no,
+                    'status': 'publish',
                     'tags': [],
                     'date': today,
                     'thumbnail': "",

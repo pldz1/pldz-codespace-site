@@ -54,7 +54,6 @@
 
     <!-- 中间内容区 -->
     <main class="content">
-      <!-- 中间内容 -->
       <!-- 新增文章 -->
       <div class="content-container" v-if="activeCard === '新增文章'">
         <div class="content-header">
@@ -90,6 +89,11 @@
         </div>
         <div class="content-body">
           <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+          <div class="content-item">
+            <span>新建专栏</span>
+            <input type="text" placeholder="请输入专栏名称" v-model="categoryMgt.newCategoryName" />
+            <button class="btn btn-primary" @click="onNewCategory">新增专栏</button>
+          </div>
           <div class="content-item">
             <span>选择专栏</span>
             <!-- 下拉菜单选择专栏 -->
@@ -284,15 +288,15 @@
         <div class="content-body">
           <!-- 这里可以添加 Git 插件的功能 -->
           <div class="content-item">
+            <span>Git Pull</span>
+            <button class="btn btn-danger" style="padding: 10px 20px" @click="onGitPull" :disabled="isSyncing">PULL</button>
+          </div>
+          <div class="content-item">
             <span>同步全部文章</span>
             <button class="btn btn-danger" style="padding: 10px 20px" @click="onSyncAll" :disabled="isSyncing">同步</button>
           </div>
           <div class="content-item">
-            <span>Git Pull</span>
-            <button class="btn btn-danger" style="padding: 10px 20px" @click="onGitPull" :disabled="isSyncing">同步</button>
-          </div>
-          <div class="content-item">
-            <span>Github 同步</span>
+            <span>Github Push</span>
             <input type="text" placeholder="请输入 Git commit" v-model="gitCommit" />
             <button class="btn btn-danger" style="padding: 10px 20px; margin-left: 16px" @click="onGitSync" :disabled="isSyncing">同步</button>
           </div>
@@ -455,7 +459,7 @@ async function onNewArticle() {
  */
 
 // 用于存储当前选中的分类下的文章
-const categoryMgt = ref({ category: "", articles: [] });
+const categoryMgt = ref({ newCategoryName: "", category: "", articles: [] });
 
 /**
  * 选择分类时获取该分类下的所有文章
@@ -985,6 +989,8 @@ onUnmounted(() => {});
   align-items: center;
   margin-bottom: 20px;
   flex-direction: row;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 .content-item span {
   width: 100px;

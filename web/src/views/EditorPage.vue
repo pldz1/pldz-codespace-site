@@ -117,7 +117,7 @@
 import HeaderBar from "../components/HeaderBar.vue";
 import UploadImage from "../components/UploadImage.vue";
 
-import { ref, watch, nextTick, onMounted, onUnmounted } from "vue";
+import { ref, watch, nextTick, onActivated, onDeactivated } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { renderMdBlock } from "../utils/md-render.js";
@@ -250,7 +250,7 @@ function updatePreview() {
   }, 1000);
 }
 
-// 处理编辑器输入：更新预览并模拟自动保存
+// 处理编辑器输入：更新预览并自动保存
 function onEditorInput() {
   updatePreview();
 
@@ -347,7 +347,7 @@ async function onForceUpdate() {
  * 在组件挂载时调用，获取文章内容并初始化编辑器
  * @returns {void}
  */
-onMounted(async () => {
+onActivated(async () => {
   // 检查是否为管理员
   const isadmin = store.state.authState.isadmin;
   if (!isadmin) {
@@ -384,7 +384,7 @@ onMounted(async () => {
  * 组件卸载时的清理工作
  * 移除事件监听器
  */
-onUnmounted(() => {
+onDeactivated(() => {
   // 清理事件监听器
   editorRef.value?.removeEventListener("paste", (e) => editorCopyEvent(e));
 });

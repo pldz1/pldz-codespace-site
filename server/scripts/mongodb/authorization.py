@@ -17,8 +17,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin@pldz1.com")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "123")
 
-ACCESS_EXPIRE = timedelta(minutes=int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)))
+ACCESS_EXPIRE = timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)))
 REFRESH_EXPIRE = timedelta(days=int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7)))
 
 # 密码

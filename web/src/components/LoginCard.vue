@@ -63,6 +63,7 @@ import { useRouter } from "vue-router";
 import { ref, computed } from "vue";
 import { login, register, logout, updateAvatar } from "../utils/apis.js";
 import { uploadAvatar } from "../utils/file-upload.js";
+import Toast from "../utils/toast.js";
 
 const emit = defineEmits(["close-login-form"]);
 
@@ -135,8 +136,10 @@ async function onLoginOrRegister() {
       nickname: res.nickname || "",
     });
     onCloseLoginForm();
+    Toast.success("登录成功!");
   } else {
     error.value = res.log || "操作失败，请稍后再试";
+    Toast.error(`登录失败: ${error.value}`);
   }
 }
 
@@ -152,6 +155,7 @@ async function onLogout() {
     isadmin: false,
   });
   onCloseLoginForm();
+  Toast.success("退出成功!");
 }
 
 /**

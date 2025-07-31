@@ -4,11 +4,13 @@ from fastapi import APIRouter, Request, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import time
+import datetime
 import random
 
 from scripts.mongodb import AuthorizedHandler, SECRET_KEY, ALGORITHM
 
 AUTH_ROUTER = APIRouter(prefix="/authorization", tags=["authorization"])
+ACCESS_EXPIRE = datetime.timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)))
 
 
 @AUTH_ROUTER.get("/privacy")
@@ -56,8 +58,8 @@ async def login(data: LoginData):
     resp = JSONResponse({'data': {"flag": True, **user, 'log': '登录成功'}})
 
     # 设置Cookie，httponly和samesite属性
-    resp.set_cookie('access_token', access, httponly=True, samesite='lax')
-    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax')
+    resp.set_cookie('access_token', access, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
+    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
     return resp
 
 
@@ -86,8 +88,8 @@ async def register(data: RegisterData):
     user = AuthorizedHandler.get_user_by_username(data.username)
     resp = JSONResponse({'data': {'flag': True, **user, 'log': '注册成功'}})
     # 设置Cookie，httponly和samesite属性
-    resp.set_cookie('access_token', access, httponly=True, samesite='lax')
-    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax')
+    resp.set_cookie('access_token', access, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
+    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
     time.sleep(random.uniform(0.1, 0.3))
     return resp
 
@@ -128,7 +130,7 @@ async def refresh(request: Request):
     user = AuthorizedHandler.get_current_user(request)
     resp = JSONResponse(
         {'data': {'flag': True, **user, 'log': '刷新成功'}})
-    resp.set_cookie('access_token', new_access, httponly=True, samesite='lax')
+    resp.set_cookie('access_token', new_access, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
     return resp
 
 

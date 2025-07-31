@@ -40,6 +40,7 @@ import LoginCard from "./LoginCard.vue";
 import { useStore } from "vuex";
 import { ref, computed, onMounted } from "vue";
 import { getNavigation } from "../utils/apis.js";
+import Toast from "../utils/toast.js";
 
 const props = defineProps({
   routeName: {
@@ -83,6 +84,8 @@ function onToggleLoginForm() {
   if (!!username.value) {
     return;
   }
+
+  Toast.info("登录后可以注册aigc账号, 评论文章, 缓存白板内容");
   const app = document.getElementById("app");
   app.style.opacity = 0.04;
 }

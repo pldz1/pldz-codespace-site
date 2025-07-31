@@ -54,6 +54,16 @@
 
     <!-- 中间内容区 -->
     <main class="content">
+      <!-- 用户管理 -->
+      <div class="content-container" v-if="activeCard === '用户管理'">
+        <div class="content-header">
+          <h1>用户管理</h1>
+        </div>
+        <div class="content-body">
+          <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+        </div>
+      </div>
+
       <!-- 新增文章 -->
       <div class="content-container" v-if="activeCard === '新增文章'">
         <div class="content-header">
@@ -82,6 +92,7 @@
           </div>
         </div>
       </div>
+
       <!-- 专栏管理 -->
       <div class="content-container" v-else-if="activeCard === '专栏管理'">
         <div class="content-header">

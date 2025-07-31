@@ -86,3 +86,54 @@ docker run -it --name code-server \
 ---
 
 ## 2. 配置
+
+### 2.1 配置使用GitHub Copilot
+
+> 参考内容
+>
+> [How to install Github Copilot on code-server](https://github.com/coder/code-server/discussions/5063)
+> 
+> [VsixHub - Best Extensions for VS Code](https://www.vsixhub.com)
+>
+
+1. 下载GitHub Copilot 的 vsix 文件: [https://marketplace.visualstudio.com/_apis/public/gallery/publishers/GitHub/vsextensions/copilot/1.348.1698/vspackage
+](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/GitHub/vsextensions/copilot/1.348.1698/vspackage)
+
+![code-server-github-copliot-version](/api/v1/website/image/others/code-server-github-copliot-version.png)
+
+2. 拖拽这个内容到 code-server 里
+
+![code-server-github-copilot-installed](/api/v1/website/image/others/code-server-github-copilot-installed.png)
+
+能看见日志:
+
+```bash
+[13:19:04] Installing extension: github.copilot {
+  installGivenVersion: true,
+  isApplicationScoped: false,
+  profileLocation: yr {
+    scheme: 'file',
+    authority: '',
+    path: '/home/pldz/.local/share/code-server/extensions/extensions.json',
+    query: '',
+    fragment: '',
+    _formatted: 'file:///home/pldz/.local/share/code-server/extensions/extensions.json',
+    _fsPath: '/home/pldz/.local/share/code-server/extensions/extensions.json'
+  },
+  productVersion: { version: '1.102.2', date: '2025-07-24T20:11:42.777Z' }
+}
+[13:19:07] Extracted extension to file:///home/pldz/.local/share/code-server/extensions/github.copilot-1.348.1698: github.copilot
+[13:19:07] Renamed to /home/pldz/.local/share/code-server/extensions/github.copilot-1.348.1698
+[13:19:07] Extension installed successfully: github.copilot file:///home/pldz/.local/share/code-server/extensions/extensions.json
+```
+
+3. 激活 Github Copilot: 点击 code-server 右下角的 Accounts, 选择 `Sign in to xxxxx`
+登录来使用 `Github Copilot`.
+
+![code-server-login-github-copilot](/api/v1/website/image/others/code-server-login-github-copilot.png)
+
+![code-server-using-github-copilot](/api/v1/website/image/others/code-server-using-github-copilot.png)
+
+注意 如果你使用的是 Token 登录的 记得给 token 分配 Github Copilot 的权限
+
+![code-server-ghp-github-copilot-tips](/api/v1/website/image/others/code-server-ghp-github-copilot-tips.png)

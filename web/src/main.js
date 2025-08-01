@@ -1,5 +1,5 @@
 import "./assets/index.css";
-
+import "./utils/md-editor.js";
 import App from "./App.vue";
 import router from "./routers";
 import store from "./store";

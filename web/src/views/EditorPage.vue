@@ -120,7 +120,7 @@ import UploadImage from "../components/UploadImage.vue";
 import { ref, watch, nextTick, onActivated, onDeactivated } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { renderMdBlock } from "../utils/md-render.js";
+// import { renderMdBlock } from "../utils/md-render.js";
 import { getArticle, editArticle, editMeta } from "../utils/apis.js";
 import { setCopyImageFile } from "../utils/file-upload.js";
 
@@ -246,7 +246,7 @@ function updatePreview() {
   renderTimer = setTimeout(() => {
     const previewEl = previewRef.value;
     if (!previewEl) return;
-    renderMdBlock("article-content", previewEl, editorText.value);
+    // renderMdBlock("article-content", previewEl, editorText.value);
   }, 1000);
 }
 
@@ -398,6 +398,5 @@ watch(saveBtnText, (val) => {
 </script>
 
 <style scoped>
-@import url("../assets/views/article-content.css");
 @import url("../assets/views/editor-content.css");
 </style>

@@ -36,7 +36,9 @@
         </div>
       </div>
 
-      <div class="article-content" ref="mdDivRef"></div>
+      <div class="article-content">
+        <MdPreview v-model="article.content" />
+      </div>
       <div class="next-previous-article">
         <span>其他文章</span>
         <PrevNextArticle v-if="isArticleLoaded" :id="article.id" :category="article.meta.category"></PrevNextArticle>
@@ -72,9 +74,11 @@ import ArticleRelated from "../components/ArticleRelated.vue";
 
 import { ref, onActivated, nextTick, watch, computed } from "vue";
 import { useRouter } from "vue-router";
-import { buildMdBlock } from "../utils/md-render.js";
+// import { buildMdBlock } from "../utils/md-render.js";
 import { getArticle } from "../utils/apis.js";
 import { useStore } from "vuex";
+
+import { MdPreview } from "md-editor-v3";
 
 const props = defineProps({
   id: {
@@ -145,7 +149,7 @@ onActivated(async () => {
 
   isArticleLoaded.value = false;
   await nextTick(() => {
-    buildMdBlock(mdDivRef.value, article.value.content);
+    // buildMdBlock(mdDivRef.value, article.value.content);
   }).then(() => {
     isArticleLoaded.value = true;
   });

@@ -40,7 +40,7 @@ import { ref } from "vue";
 import { checkImageExit } from "../utils/apis.js";
 import { uploadArticleImage, uploadArticleImageFromCopy } from "../utils/file-upload.js";
 
-const emit = defineEmits(["close-upload-image-dialog", "upload-image-success"]);
+const emit = defineEmits(["on-close", "on-upload"]);
 const props = defineProps({
   category: {
     type: String,
@@ -58,13 +58,6 @@ const imageName = ref("");
 const imagePreviewUrl = ref("");
 const imageUploadError = ref("图像名称不能为空！");
 let checkNameTimer = null;
-
-/**
- * 关闭上传图像对话框
- */
-function onClose() {
-  emit("close-upload-image-dialog");
-}
 
 /**
  * 校验上传的图像名字
@@ -110,7 +103,7 @@ function afterUploadImage(res) {
   imageUploadError.value = "";
 
   // 触发上传成功事件
-  emit("upload-image-success", { url: res.data.url, name: imageName.value });
+  emit("on-upload", { url: res.data.url, name: imageName.value });
 }
 
 /**
@@ -136,6 +129,17 @@ async function onUploadImageFromCopy() {
   // 检查返回结果
   afterUploadImage(res);
 }
+
+/**
+ * 关闭上传图像对话框
+ */
+function onClose() {
+  emit("on-close");
+  imageName.value = "";
+  imagePreviewUrl.value = "";
+  imageUploadError.value = "图像名称不能为空！";
+  clearTimeout(checkNameTimer);
+}
 </script>
 
 <style scoped>
@@ -143,7 +147,7 @@ async function onUploadImageFromCopy() {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 999;
+  z-index: 100009;
   height: 100%;
   width: 100%;
   display: flex;

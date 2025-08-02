@@ -1,128 +1,61 @@
 <template>
-  <div class="meta-setting-overlay" @click="closeMetaSetting" v-show="isShowMetaSetting"></div>
-  <div class="meta-setting-sidebar" v-show="isShowMetaSetting">
-    <div class="meta-setting-sidebar-header">
-      <div>
-        <a href="/"><div class="app-logo"></div></a>
-        <span>爬楼的猪 CodeSpace</span>
-      </div>
-      <button class="close-btn" @click="closeMetaSetting">×</button>
-    </div>
-    <!-- 侧边栏内容 -->
-    <div class="meta-setting-sidebar-container">
-      <div class="meta-setting-item">
-        <span>专栏</span>
-        <input class="meta-setting-input" v-model="articleMeta.category" placeholder="请输入专栏" />
-      </div>
-      <div class="meta-setting-item">
-        <span>日期</span>
-        <input class="meta-setting-input" v-model="articleMeta.date" type="date" />
-      </div>
-      <div class="meta-setting-item">
-        <span>排序</span>
-        <input class="meta-setting-input" type="number" v-model="articleMeta.serialNo" placeholder="数字排序" />
-      </div>
-      <div class="meta-setting-item">
-        <span>标签</span>
-        <input class="meta-setting-input" v-model="articleTags" placeholder="逗号分隔" @change="onTagsChange" />
-      </div>
-      <div class="meta-setting-item">
-        <span>总结</span>
-        <textarea class="meta-setting-textarea" v-model="articleMeta.summary" placeholder="一句话总结" type="textarea" rows="4"></textarea>
-      </div>
-      <div class="meta-setting-item">
-        <span>封面</span>
-        <div class="thumbnail-container" @click="onShowUploadImageDialog(false)">
-          <img class="thumbnail-image" :src="articleMeta.thumbnail" />
-          <div class="overlay-button">+</div>
-        </div>
-      </div>
-      <div class="meta-setting-item">
-        <span>图像源</span>
-        <input class="meta-setting-input" v-model="articleMeta.thumbnail" placeholder="有效的图片路径" />
-      </div>
-    </div>
-  </div>
-
   <!-- 头部导航, 但是不显示移动菜单 -->
   <HeaderBar :show-mobile-menu="false" />
 
-  <!-- 编辑器标题和操作按钮 -->
-  <div class="edit-header">
-    <div class="edit-title"><input placeholder="输入标题" v-model="articleMeta.title" @change="saveMeta" /></div>
-    <div class="edit-header-actions">
-      <button class="btn btn-primary" @click="onJumpArticle">查看文章</button>
-      <button class="btn btn-primary" @click="closeMetaSetting">设置元数据</button>
-      <button class="btn btn-primary" ref="saveBtn" @click="onForceUpdate">已保存</button>
-    </div>
-  </div>
-
-  <!-- 工具栏 -->
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <button class="toolbar-btn image" @click="onShowUploadImageDialog(true)" title="图片"></button>
-      <div class="separator"></div>
-      <button class="toolbar-btn bold" @click="insertText('**', '**')" title="粗体"></button>
-      <button class="toolbar-btn italic" @click="insertText('*', '*')" title="斜体"></button>
-      <button class="toolbar-btn quote" @click="insertText('> ', '')" title="引用"></button>
-      <button class="toolbar-btn link" @click="insertText('[]()', '')" title="链接"></button>
-      <div class="separator"></div>
-      <button class="toolbar-btn code" @click="insertText('`', '`')" title="代码"></button>
-      <button class="toolbar-btn unorder-list" @click="insertText('- ', '')" title="无序列表"></button>
-      <button class="toolbar-btn order-list" @click="insertText('1. ', '')" title="有序列表"></button>
-      <button class="toolbar-btn strikethrough" @click="insertText('~~', '~~')" title="删除线"></button>
-      <button class="toolbar-btn task" @click="insertText('- [ ] ', '')" title="任务列表"></button>
-      <button class="toolbar-btn table" @click="insertText('| 表头1 | 表头2 |\n|-------|-------|\n| 内容1 | 内容2 |', '')" title="表格"></button>
-      <button class="toolbar-btn divide" @click="insertText('---\n', '')" title="分割线"></button>
-    </div>
-    <div class="toolbar-right">
-      <button class="toolbar-btn preview-switch" @click="closeOpenPreview" title="打开/关闭预览"></button>
-      <div class="separator"></div>
-    </div>
-  </div>
-
   <!-- 主界面 -->
-  <div class="main-container">
-    <!-- 编辑器区域 -->
-    <div class="editor-panel">
-      <div class="panel-header">编辑界面</div>
-      <textarea
-        ref="editorRef"
-        v-model="editorText"
-        class="editor"
-        placeholder="在这里输入Markdown内容..."
-        @input="onEditorInput"
-        @keydown.tab.prevent="insertTab"
-      ></textarea>
-    </div>
+  <MdEditor
+    class="md-editor-v3-container"
+    ref="editorRef"
+    :pageFullscreen="true"
+    :noUploadImg="true"
+    :toolbars="toolbars"
+    :footers="footers"
+    :toolbarsExclude="['image', 'previewOnly', 'htmlPreview', 'pageFullscreen', 'fullscreen', 'github']"
+    @on-save="onSaveArticleContent"
+    @on-change="onChange"
+    @on-error="onError"
+    v-model="editorText"
+  >
+    <template #defToolbars>
+      <NormalToolbar title="上传图像" @onClick="onShowUploadImageDialog">
+        <Image class="md-editor-icon" />
+      </NormalToolbar>
+      <ArticleMeta :meta="articleMeta" @on-update="onSaveMeta" />
+      <NormalToolbar title="查看文章" @onClick="onGotoArticle">
+        <BookOpen class="md-editor-icon" />
+      </NormalToolbar>
+    </template>
 
-    <!-- 预览区域 -->
-    <div class="preview-panel" v-show="isShowPreviw">
-      <div class="panel-header">预览界面</div>
-      <div ref="previewRef" class="article-content"></div>
-    </div>
-  </div>
+    <template #defFooters>
+      <NormalFooterToolbar>上次更新: {{ updateTime }}</NormalFooterToolbar>
+    </template>
+  </MdEditor>
 
-  <!-- 上传图像的位置 -->
   <UploadImage
-    v-if="isShowImageUpload"
+    v-if="showUploadImageDialog"
     :category="articleMeta.category"
-    :show-confirm-button="isShowImageUploadConfirm"
-    @upload-image-success="onUploadImageSuccess"
-    @close-upload-image-dialog="onCloseUploadImageDialog"
-  ></UploadImage>
+    :show-confirm-button="showImageUploadConfirm"
+    @on-close="onCloseUploadImageDialog"
+    @on-upload="onUploadImage"
+  />
 </template>
 
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
 import UploadImage from "../components/UploadImage.vue";
+import ArticleMeta from "../components/ArticleMeta.vue";
 
-import { ref, watch, nextTick, onActivated, onDeactivated } from "vue";
+import { BookOpen, Image } from "lucide-vue-next";
+import { MdEditor, NormalToolbar, NormalFooterToolbar } from "md-editor-v3";
+
+import { ref, onActivated, onDeactivated } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-// import { renderMdBlock } from "../utils/md-render.js";
+
+import { toolbars, footers } from "../utils/md-editor.js";
 import { getArticle, editArticle, editMeta } from "../utils/apis.js";
 import { setCopyImageFile } from "../utils/file-upload.js";
+import Toast from "../utils/toast.js";
 
 const props = defineProps({
   id: {
@@ -135,194 +68,84 @@ const props = defineProps({
 const router = useRouter();
 const store = useStore();
 
-// 控制元数据设置和预览的显示状态
-const isShowMetaSetting = ref(false);
-const isShowPreviw = ref(true);
-const isShowImageUpload = ref(false);
-const isShowImageUploadConfirm = ref(false);
-
-// 编辑器和预览的引用
+// 编辑器引用
 const editorRef = ref(null);
-const previewRef = ref(null);
+const codemirror = ref(null);
+const updateTime = ref("");
 
 // 编辑器内容和文章元数据
 const editorText = ref("");
 const articleID = ref("");
 const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "" });
-const articleTags = ref("");
-const isEditContent = ref(true);
 
 /**
- * 显示上传图片对话框
+ * 更新保存时间
+ * 格式化日期为 YYYY/MM/DD HH:mm:ss
  */
-function onShowUploadImageDialog(isContent = true) {
-  isShowImageUpload.value = true;
-  isEditContent.value = isContent;
+function updateSaveTime(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
 
-  const app = document.getElementById("app");
-  app.style.opacity = 0.41;
-}
-
-/**
- * 关闭上传图片对话框
- */
-function onCloseUploadImageDialog() {
-  const app = document.getElementById("app");
-  app.style.cssText = "";
-  isShowImageUpload.value = false;
-}
-
-/**
- * 上传图片成功后处理
- * @param {Object} data - 包含图片URL和名称的对象
- * @param {string} data.url - 图片的URL
- * @param {string} data.name - 图片的名称
- * @returns {Promise<void>}
- */
-async function onUploadImageSuccess(data) {
-  const { url, name } = data;
-  if (isEditContent.value) {
-    insertText(`![${name}](${url})`, "");
-    await editArticle(articleID.value, editorText.value);
-  } else {
-    articleMeta.value.thumbnail = url;
-    await saveMeta();
-  }
-
-  onCloseUploadImageDialog();
-  onEditorInput();
-}
-
-/**
- * 打开/关闭元数据设置
- */
-async function closeMetaSetting() {
-  isShowMetaSetting.value = !isShowMetaSetting.value;
-  if (!isShowMetaSetting.value) {
-    await saveMeta();
-  }
-}
-
-/**
- * 打开/关闭预览
- */
-function closeOpenPreview() {
-  isShowPreviw.value = !isShowPreviw.value;
-  if (isShowPreviw.value) {
-    updatePreview();
-  }
-}
-
-/**
- * 处理标签变化
- */
-function onTagsChange() {
-  articleMeta.value.tags = JSON.parse(articleTags.value) || "";
+  updateTime.value = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
  * 保存文章元数据
  */
-async function saveMeta() {
+async function onSaveMeta(data) {
+  _updateArticleMeta(data);
   await editMeta(articleID.value, articleMeta.value);
 }
 
-const saveBtnText = ref("已保存");
-const saveBtn = ref(null);
-let saveTimeout = null;
-let renderTimer = null;
+/**
+ * 保存文章内容
+ * @param showToast 是否显示保存成功的提示
+ */
+async function onSaveArticleContent(showToast = true) {
+  await editArticle(articleID.value, editorText.value);
+  updateSaveTime();
 
-// 更新预览内容
-function updatePreview() {
-  // 输入为空或预览隐藏，直接跳过
-  if (editorText.value.trim() === "" || !isShowPreviw.value) {
-    return;
+  if (showToast) {
+    Toast.success("文章已保存！");
   }
-
-  // 清除上次尚未执行的渲染
-  clearTimeout(renderTimer);
-
-  // 延迟 1s 后渲染（如果 1s 内无新输入）
-  renderTimer = setTimeout(() => {
-    const previewEl = previewRef.value;
-    if (!previewEl) return;
-    // renderMdBlock("article-content", previewEl, editorText.value);
-  }, 1000);
-}
-
-// 处理编辑器输入：更新预览并自动保存
-function onEditorInput() {
-  updatePreview();
-
-  // 自动保存按钮逻辑
-  clearTimeout(saveTimeout);
-  saveBtnText.value = "已保存";
-  saveTimeout = setTimeout(async () => {
-    saveBtnText.value = "保存中...";
-    await editArticle(articleID.value, editorText.value);
-    setTimeout(() => {
-      saveBtnText.value = "已保存";
-    }, 1000);
-  }, 1000);
-}
-
-// 插入文本（前后缀）
-function insertText(before = "", after = "") {
-  const el = editorRef.value;
-  if (!el) return;
-
-  const start = el.selectionStart;
-  const end = el.selectionEnd;
-  const selected = editorText.value.substring(start, end);
-  const newContent = before + selected + after;
-
-  editorText.value = editorText.value.substring(0, start) + newContent + editorText.value.substring(end);
-
-  nextTick(async () => {
-    // 更新光标位置
-    const pos = start + before.length + selected.length;
-    el.focus();
-    el.setSelectionRange(pos, pos);
-    await editArticle(articleID.value, editorText.value);
-  });
-}
-
-// 处理 Tab 键
-function insertTab(e) {
-  const el = editorRef.value;
-  if (!el) return;
-
-  const start = el.selectionStart;
-  const end = el.selectionEnd;
-  editorText.value = editorText.value.substring(0, start) + "    " + editorText.value.substring(end);
-
-  nextTick(() => {
-    el.selectionStart = el.selectionEnd = start + 4;
-  });
 }
 
 /**
- * 处理粘贴事件
- * 检查剪贴板中的文件，如果是图片则显示上传对话框
+ * 编辑器错误处理函数
+ * @param error 处理编辑器错误
  */
-function editorCopyEvent(e) {
-  // 获取真正要插入的文件列表
-  const files = (e.clipboardData || window.clipboardData).files;
-  // 如果有文件，并且第一个是 image 类型
-  if (files.length > 0 && files[0].type.startsWith("image/")) {
-    isShowImageUploadConfirm.value = true;
-    onShowUploadImageDialog(true);
-    setCopyImageFile(files[0]);
-    // 阻止默认粘贴行为
-    e.preventDefault();
+async function onError(error) {
+  Toast.error(`Markdown 编辑器存在错误: ${String(error)}`);
+}
+
+// 定时器
+let renderTimer = null;
+
+/**
+ * 编辑器内容发生变化, 自动保存.
+ */
+async function onChange() {
+  // 如果有定时器，清除它
+  if (renderTimer) {
+    clearTimeout(renderTimer);
   }
+
+  // 设置一个新的定时器
+  renderTimer = setTimeout(async () => {
+    await onSaveArticleContent(false);
+  }, 1000);
 }
 
 /**
  * 跳转到文章详情页
  * 使用路由跳转到指定文章的详情页面
  */
-async function onJumpArticle() {
+async function onGotoArticle() {
   // 跳转到文章详情页
   await onForceUpdate();
   router.push({ path: `/article/${articleID.value}` });
@@ -334,12 +157,84 @@ async function onJumpArticle() {
  * @returns {Promise<void>}
  */
 async function onForceUpdate() {
-  saveBtnText.value = "保存中...";
   await editMeta(articleID.value, articleMeta.value);
   await editArticle(articleID.value, editorText.value);
-  setTimeout(() => {
-    saveBtnText.value = "已保存";
-  }, 1000);
+  updateSaveTime();
+}
+
+/**
+ * 更新文章元数据
+ * @param data 更新文章元数据
+ */
+function _updateArticleMeta(data = {}) {
+  Object.entries(data).forEach(([k, v]) => {
+    if (v !== undefined && k in articleMeta.value) {
+      articleMeta.value[k] = v;
+    }
+  });
+}
+/**
+ * ========================= UploadImage 相关 =========================
+ */
+const showImageUploadConfirm = ref(false);
+const showUploadImageDialog = ref(false);
+
+/**
+ * 显示上传图像对话框
+ * 设置对话框的状态和样式
+ */
+function onShowUploadImageDialog() {
+  showUploadImageDialog.value = true;
+  showImageUploadConfirm.value = false;
+  const app = document.getElementById("app");
+  if (app) app.style.opacity = "0.04";
+}
+
+/**
+ * 关闭上传图像对话框
+ */
+function onCloseUploadImageDialog() {
+  showUploadImageDialog.value = false;
+  showImageUploadConfirm.value = false;
+  const app = document.getElementById("app");
+  if (app) app.style.cssText = "";
+}
+
+/**
+ * 上传图像
+ * @param data 上传的图像数据
+ *
+ */
+function onUploadImage(data) {
+  if (editorRef.value) {
+    editorRef.value?.insert(() => {
+      return {
+        targetValue: `![${data?.name}](${data?.url})`,
+        select: true,
+        deviationStart: 0,
+        deviationEnd: 0,
+      };
+    });
+  }
+  showImageUploadConfirm.value = false;
+  showUploadImageDialog.value = false;
+}
+
+/**
+ * 处理粘贴事件
+ * 检查剪贴板中的文件，如果是图片则显示上传对话框
+ */
+function _handleCodemirrorCopy(e) {
+  // 获取真正要插入的文件列表
+  const files = (e.clipboardData || window.clipboardData).files;
+  // 如果有文件，并且第一个是 image 类型
+  if (files.length > 0 && files[0].type.startsWith("image/")) {
+    showUploadImageDialog.value = true;
+    showImageUploadConfirm.value = true;
+    setCopyImageFile(files[0]);
+    // 阻止默认粘贴行为
+    e.preventDefault();
+  }
 }
 
 /**
@@ -365,19 +260,14 @@ onActivated(async () => {
   // 初始化内容和预览
   articleID.value = res.id;
   editorText.value = res.content;
+  _updateArticleMeta(res.meta);
 
-  articleMeta.value.title = res.meta.title;
-  articleMeta.value.thumbnail = res.meta.thumbnail;
-  articleMeta.value.category = res.meta.category;
-  articleTags.value = JSON.stringify(res.meta.tags);
-  articleMeta.value.tags = res.meta.tags || [];
-  articleMeta.value.date = res.meta.date;
-  articleMeta.value.serialNo = res.meta.serialNo;
-  articleMeta.value.summary = res.meta.summary;
+  codemirror.value = editorRef.value?.getEditorView()?.contentDOM;
+  if (codemirror.value instanceof HTMLElement) {
+    codemirror.value.addEventListener("paste", (e) => _handleCodemirrorCopy(e));
+  }
 
-  updatePreview();
-
-  editorRef.value?.addEventListener("paste", (e) => editorCopyEvent(e));
+  updateSaveTime();
 });
 
 /**
@@ -386,17 +276,20 @@ onActivated(async () => {
  */
 onDeactivated(() => {
   // 清理事件监听器
-  editorRef.value?.removeEventListener("paste", (e) => editorCopyEvent(e));
-});
-
-// 监听保存按钮文本变化，同步到按钮
-watch(saveBtnText, (val) => {
-  if (saveBtn.value) {
-    saveBtn.value.textContent = val;
+  if (codemirror.value instanceof HTMLElement) {
+    codemirror.value.removeEventListener("paste", (e) => _handleCodemirrorCopy(e));
+    codemirror.value = null;
   }
 });
 </script>
 
 <style scoped>
-@import url("../assets/views/editor-content.css");
+.md-editor-v3-container {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100vh - 60px);
+}
 </style>

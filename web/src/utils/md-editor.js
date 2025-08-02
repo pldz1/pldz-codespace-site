@@ -1,11 +1,43 @@
-import { config } from "md-editor-v3";
-import { lineNumbers } from "@codemirror/view";
+export const toolbars = [
+  "bold",
+  "underline",
+  "italic",
+  "-",
+  "title",
+  "strikeThrough",
+  "sub",
+  "sup",
+  "quote",
+  "unorderedList",
+  "orderedList",
+  "task",
+  "-",
+  "codeRow",
+  "code",
+  "link",
+  "-",
+  "image",
+  "table",
+  "mermaid",
+  "katex",
+  "-",
+  "revoke",
+  "next",
+  "save",
+  "=",
+  0,
+  "-",
+  1,
+  "-",
+  2,
+  "-",
+  "pageFullscreen",
+  "fullscreen",
+  "preview",
+  "previewOnly",
+  "htmlPreview",
+  "catalog",
+  "github",
+];
 
-import "md-editor-v3/lib/preview.css";
-
-// 配置编辑界面显示行号和字数
-config({
-  codeMirrorExtensions(_theme, extensions) {
-    return [...extensions, lineNumbers()];
-  },
-});
+export const footers = ["markdownTotal", "=", 0, "scrollSwitch"];

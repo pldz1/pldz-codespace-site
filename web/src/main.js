@@ -1,5 +1,4 @@
 import "./assets/index.css";
-import "./utils/md-editor.js";
 import App from "./App.vue";
 import router from "./routers";
 import store from "./store";
@@ -7,8 +6,21 @@ import store from "./store";
 import { createApp } from "vue";
 import { refresh } from "./utils/apis.js";
 
+import { config } from "md-editor-v3";
+import { lineNumbers } from "@codemirror/view";
+
+// 引入编辑器的全部样式
+import "md-editor-v3/lib/style.css";
+
 // 异步初始化动作
 const initializeApp = async () => {
+  // 配置编辑界面显示行号和字数
+  config({
+    codeMirrorExtensions(_theme, extensions) {
+      return [...extensions, lineNumbers()];
+    },
+  });
+
   // 刷新cookie
   const res = await refresh();
   await store.dispatch("authState/update", {

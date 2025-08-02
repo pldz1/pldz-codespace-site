@@ -1,7 +1,7 @@
 <template>
-  <header class="header">
+  <header :class="['header', { 'header--hidden': !isHeaderVisible }]">
     <div class="header-left">
-      <button v-if="props.showMobileMenu" class="mobile-menu-btn" @click="toggleMobileMenu()">☰</button>
+      <button v-if="showMobileMenu" class="mobile-menu-btn" @click="toggleMobileMenu()"></button>
       <a class="header-logo-link" href="/">
         <!-- 使用 scoped 样式的 app-logo -->
         <div class="app-logo"></div>
@@ -11,11 +11,17 @@
       <!-- 导航 -->
       <nav>
         <ul class="nav-menu">
-          <li :class="['nav-item', routeName == '首页' ? 'active' : '']"><a href="/"> 首页 </a></li>
-          <li :class="['nav-item', routeName == '白板' ? 'active' : '']"><a href="/whiteboard"> 白板 </a></li>
-          <!-- 其他的导航内容 -->
+          <li :class="['nav-item', routeName === '首页' ? 'active' : '']">
+            <a href="/"> 首页 </a>
+          </li>
+          <li :class="['nav-item', routeName === '白板' ? 'active' : '']">
+            <a href="/whiteboard"> 白板 </a>
+          </li>
           <li v-for="nav in navs" :key="nav.title" class="nav-item">
-            <a :href="nav.url" target="_blank" rel="noopener noreferrer"> {{ nav.title }} <span v-if="nav.new" class="badge">new</span> </a>
+            <a :href="nav.url" target="_blank" rel="noopener noreferrer">
+              {{ nav.title }}
+              <span v-if="nav.new" class="badge">new</span>
+            </a>
           </li>
         </ul>
       </nav>
@@ -24,22 +30,23 @@
       <input type="text" class="search-box" placeholder="探索文章" style="display: none" />
       <!-- 登录卡片 -->
       <div v-if="avatar" class="user-avatar" @click="onToggleLoginForm">
-        <img v-if="avatar" :src="avatar" />
+        <img :src="avatar" alt="avatar" />
       </div>
       <button v-else class="login-register-btn" @click="onToggleLoginForm">登录 | 注册</button>
     </div>
   </header>
 
   <!-- 登录表单 -->
-  <LoginCard v-if="showLoginForm" @close-login-form="onCloseLoginForm"></LoginCard>
+  <LoginCard v-if="showLoginForm" @close-login-form="onCloseLoginForm" />
 </template>
 
 <script setup>
-import LoginCard from "./LoginCard.vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import { useStore } from "vuex";
-import { ref, computed, onMounted } from "vue";
 import { getNavigation } from "../utils/apis.js";
+
+import LoginCard from "./LoginCard.vue";
 import Toast from "../utils/toast.js";
 
 const props = defineProps({
@@ -63,9 +70,56 @@ const store = useStore();
 const avatar = computed(() => store.state.authState.avatar);
 const username = computed(() => store.state.authState.username);
 const navs = ref([]);
-
-// 显示登录表单的状态
 const showLoginForm = ref(false);
+
+// header 显示/隐藏控制
+const isHeaderVisible = ref(true);
+let lastScrollY = 0;
+let ticking = false;
+const deltaToShow = 50; // 向上滚动多少再出现
+const deltaToHide = 5; // 向下滚动多少才隐藏
+let accumulatedUp = 0;
+let accumulatedDown = 0;
+
+function handleScroll() {
+  const currentY = window.scrollY;
+  const diff = currentY - lastScrollY;
+
+  if (Math.abs(diff) < 1) {
+    lastScrollY = currentY;
+    return;
+  }
+
+  if (diff > 0) {
+    // 向下
+    accumulatedDown += diff;
+    accumulatedUp = 0;
+    if (accumulatedDown > deltaToHide && isHeaderVisible.value) {
+      isHeaderVisible.value = false;
+      accumulatedDown = 0;
+    }
+  } else {
+    // 向上
+    accumulatedUp += -diff;
+    accumulatedDown = 0;
+    if (accumulatedUp > deltaToShow && !isHeaderVisible.value) {
+      isHeaderVisible.value = true;
+      accumulatedUp = 0;
+    }
+  }
+
+  lastScrollY = currentY;
+}
+
+function onScrollThrottled() {
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      handleScroll();
+      ticking = false;
+    });
+    ticking = true;
+  }
+}
 
 /**
  * 切换移动端菜单
@@ -79,15 +133,11 @@ function toggleMobileMenu() {
  */
 function onToggleLoginForm() {
   showLoginForm.value = true;
-
-  // 如果已经登录，则不需要加入遮罩
-  if (!!username.value) {
-    return;
-  }
+  if (!!username.value) return;
 
   Toast.info("登录后可以注册aigc账号, 评论文章, 缓存白板内容");
   const app = document.getElementById("app");
-  app.style.opacity = 0.04;
+  if (app) app.style.opacity = "0.04";
 }
 
 /**
@@ -95,7 +145,7 @@ function onToggleLoginForm() {
  */
 function onCloseLoginForm() {
   const app = document.getElementById("app");
-  app.style.cssText = "";
+  if (app) app.style.cssText = "";
   showLoginForm.value = false;
 }
 
@@ -103,13 +153,52 @@ function onCloseLoginForm() {
  * 初始化时候获取导航数据
  */
 onMounted(async () => {
+  lastScrollY = window.scrollY;
+  window.addEventListener("scroll", onScrollThrottled, { passive: true });
   const res = await getNavigation();
   navs.value = res || [];
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onScrollThrottled);
 });
 </script>
 
 <style scoped>
 @import url("../assets/components/header-bar.css");
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  z-index: 50;
+  background: white;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 60px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 10001;
+}
+
+.header--hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .header-logo-link {
   display: flex;
@@ -136,7 +225,7 @@ onMounted(async () => {
   border-radius: 3px;
   background-color: #ffffff;
   color: #51a6ff;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1;
   cursor: pointer;
   text-decoration: none;

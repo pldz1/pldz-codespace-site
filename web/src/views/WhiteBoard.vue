@@ -106,7 +106,7 @@ const handleClick = async () => {
 .main-container {
   display: flex;
   justify-content: center;
-  padding: 32px 16px;
+  padding: 68px 16px 16px 16px;
   background-color: #f9fafb;
   min-height: calc(100vh - 64px);
 }

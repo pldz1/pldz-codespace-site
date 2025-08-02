@@ -8,26 +8,6 @@
   color: #71777c;
 }
 
-/* 顶部导航栏 */
-.header {
-  background: white;
-  border-bottom: 1px solid #e4e6ea;
-  padding: 0 20px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 .header-logo {
   display: flex;
   align-items: center;
@@ -156,7 +136,11 @@
   }
 
   .mobile-menu-btn {
-    display: block;
+    display: inline-block;
+    background: url("../svgs/menu-32.svg") no-repeat center;
+    margin-right: 8px;
+    width: 32px;
+    height: 32px;
   }
 
   .search-box {

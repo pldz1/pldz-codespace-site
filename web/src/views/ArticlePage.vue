@@ -17,7 +17,7 @@
     <!-- 左侧边栏 -->
     <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
       <div class="sidebar-item sidebar-article-chapter" ref="articleChapterRef">
-        <ArticleChapter v-if="isArticleLoaded"></ArticleChapter>
+        <ArticleChapter v-if="isArticleLoaded" :editor-id="state.id" :theme="state.theme"></ArticleChapter>
       </div>
 
       <div class="sidebar-item sidebar-article-related">
@@ -37,7 +37,7 @@
       </div>
 
       <div class="article-content">
-        <MdPreview v-model="article.content" />
+        <MdPreview :id="state.id" :theme="state.theme" :codeFoldable="false" v-model="article.content" @onRemount="onRemount" />
       </div>
       <div class="next-previous-article">
         <span>其他文章</span>
@@ -72,9 +72,8 @@ import PrevNextArticle from "../components/PrevNextArticle.vue";
 import ArticleComments from "../components/ArticleComments.vue";
 import ArticleRelated from "../components/ArticleRelated.vue";
 
-import { ref, onActivated, nextTick, watch, computed } from "vue";
+import { ref, onActivated, watch, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-// import { buildMdBlock } from "../utils/md-render.js";
 import { getArticle } from "../utils/apis.js";
 import { useStore } from "vuex";
 
@@ -89,6 +88,13 @@ const props = defineProps({
 });
 
 const router = useRouter();
+
+const state = reactive({
+  theme: "light",
+  id: "my-editor",
+});
+
+const scrollElement = document.documentElement;
 
 const isMobileMenuOpen = ref(false);
 const mainSidebarContainerRef = ref(null);
@@ -148,12 +154,11 @@ onActivated(async () => {
   article.value = res;
 
   isArticleLoaded.value = false;
-  await nextTick(() => {
-    // buildMdBlock(mdDivRef.value, article.value.content);
-  }).then(() => {
-    isArticleLoaded.value = true;
-  });
 });
+
+const onRemount = () => {
+  isArticleLoaded.value = true;
+};
 
 /**
  * 监听窗口大小变化，自动关闭移动端菜单

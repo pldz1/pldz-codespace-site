@@ -5,7 +5,7 @@
   display: flex;
   gap: 20px;
   padding: 60px 8px 8px 8px;
-  min-height: calc(100vh - 86px);
+  min-height: calc(100vh - 24px);
 }
 
 /* 左侧边栏 */

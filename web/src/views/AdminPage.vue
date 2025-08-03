@@ -61,6 +61,25 @@
         </div>
         <div class="content-body">
           <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+          <!-- 网站导航列表 -->
+          <div class="row-list">
+            <div class="row-item" v-for="(user, index) in userMgt.users" :key="index">
+              <!-- 序号 -->
+              <div class="row-serial">{{ index + 1 }}</div>
+
+              <div class="row-content">
+                <div><span>id: </span><input type="text" v-model="user.id" :disabled="true" /></div>
+                <div><span>用户名: </span><input type="text" v-model="user.username" :disabled="true" /></div>
+                <div><span>明文密码: </span><input type="text" v-model="user.raw_password" :disabled="true" /></div>
+                <div><span>是否管理员: </span><input type="text" v-model="user.isadmin" :disabled="true" /></div>
+                <div><span>昵称: </span><input type="text" v-model="user.nickname" :disabled="true" /></div>
+                <div><span>头像: </span><img :src="user.avatar" /></div>
+                <div class="item-actions" style="justify-content: right">
+                  <button @click="onDeleteUserByUsername(user.username)">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -175,8 +194,8 @@
               v-if="imageMgt.upload"
               :category="imageMgt.category"
               :show-confirm-button="false"
-              @upload-image-success="onUploadImageSuccess"
-              @close-upload-image-dialog="onCloseUploadImageDialog"
+              @on-upload="onUploadImageSuccess"
+              @on-close="onCloseUploadImageDialog"
             ></UploadImage>
           </div>
 
@@ -353,6 +372,8 @@ import {
   getAllCache,
   deleteCacheFile,
   downloadCacheFile,
+  getAllUsers,
+  deleteUserByUsername,
 } from "../utils/apis.js";
 import { uploadCacheFile } from "../utils/file-upload.js";
 import { syncAllArticles, syncGitPull, syncGitRepo } from "../utils/fetch-sse.js";
@@ -886,6 +907,28 @@ async function onSelectCacheManagement() {
 }
 
 /**
+ * ========================= 用户管理 =========================
+ */
+
+const userMgt = ref({ users: [] });
+
+/**
+ * 触发删除用户操作
+ * @param username
+ */
+async function onDeleteUserByUsername(username) {
+  // 删除用户
+  const res = await deleteUserByUsername(username);
+  if (res) {
+    // 成功删除后，重新获取所有用户数据
+    const users = await getAllUsers();
+    userMgt.value.users = users.data;
+  } else {
+    errorMessage.value = "删除用户失败，请稍后再试";
+  }
+}
+
+/**
  * ========================= 组件生命周期 =========================
  */
 
@@ -900,10 +943,14 @@ onMounted(async () => {
     return;
   }
   // 获得全部的博客文章
-  const res = await getAllCategories();
+  let res = await getAllCategories();
   if (!res) return;
 
   allCategories.value = res;
+
+  res = await getAllUsers();
+  userMgt.value.users = res.data;
+  console.error("用户管理数据", userMgt.value.users);
 
   await setNavAdCategory();
   await onSelectCacheManagement();

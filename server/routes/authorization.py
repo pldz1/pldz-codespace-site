@@ -151,3 +151,75 @@ async def api_update_avatar(data: AvatarData, user: dict = Depends(AuthorizedHan
     AuthorizedHandler.update_user_avatar(username, data.avatar)
 
     return JSONResponse({'data': {'flag': True, 'log': '头像更新成功'}})
+
+
+@AUTH_ROUTER.get('/usermanagement/all')
+async def api_get_all_user(user: dict = Depends(AuthorizedHandler.get_current_user)):
+    """
+    获取所有用户信息
+    """
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="未授权访问，请先登录!"
+        )
+
+    username = user.get('username')
+    isadmin = AuthorizedHandler.check_admin(username)
+    if not isadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="您没有权限访问此资源!"
+        )
+
+    users = AuthorizedHandler.get_all_users()
+    return JSONResponse({'data': {'flag': True, 'data': users, 'log': '获取所有用户信息成功.'}})
+
+
+class DeleteUserRequest(BaseModel):
+    username: str
+
+
+@AUTH_ROUTER.post('/usermanagement/delete')
+async def api_get_all_user(data: DeleteUserRequest, user: dict = Depends(AuthorizedHandler.get_current_user)):
+    """
+    获取所有用户信息
+    """
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="未授权访问，请先登录!"
+        )
+
+    username = user.get('username')
+    isadmin = AuthorizedHandler.check_admin(username)
+    if not isadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="您没有权限访问此资源!"
+        )
+
+    if not data.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="用户名不能为空!"
+        )
+    if data.username == username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="不能删除当前登录用户!"
+        )
+    if not AuthorizedHandler.get_user_by_username(data.username):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在!"
+        )
+    # 删除用户
+    res = AuthorizedHandler.delete_user(data.username)
+    if not res:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="删除用户失败，请稍后再试!"
+        )
+    # 返回成功响应
+    return JSONResponse({'data': {'flag': True, 'log': '用户删除成功'}})

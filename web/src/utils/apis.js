@@ -379,3 +379,24 @@ export async function getWhiteBoardByUser() {
 export async function updateWhiteBoardContent(key, content) {
   return apiPost("/api/v1/website/whiteboard/update", { key, content });
 }
+
+/**
+ * ========================= 用户相关 API =========================
+ */
+
+/**
+ * 获得全部的用户信息
+ * @returns {Promise<Object>} - 返回所有用户信息
+ */
+export async function getAllUsers() {
+  return apiGet("/api/v1/authorization/usermanagement/all");
+}
+
+/**
+ * 删除用户
+ * @param {string} username - 被删除的用户名
+ * @returns {Promise<Object>} - 返回删除结果
+ */
+export async function deleteUserByUsername(username) {
+  return apiPost("/api/v1/authorization/usermanagement/delete", { username });
+}

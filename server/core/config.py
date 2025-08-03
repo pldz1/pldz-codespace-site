@@ -30,7 +30,7 @@ class ProjectConfig:
             sys.exit(1)
 
         # 加载环境变量
-        dotenv.load_dotenv(env_file_path, override=True)
+        dotenv.load_dotenv(env_file_path, override=False)
 
     @classmethod
     def get_abs_path(cls, folder: str = None, fileName: str = None) -> str:

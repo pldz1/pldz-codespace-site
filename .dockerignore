@@ -1,14 +1,73 @@
-# Byte-compiled / optimized / DLL files
+# ========================
+# 通用/源代码无关
+# ========================
+.git
+.gitignore
+.DS_Store
+*.swp
+*~ 
+.vscode/
+.idea/
+thumbs.db
+
+# ========================
+# 前端（Node/Vite）相关
+# ========================
+web/node_modules
+web/dist
+web/.env
+web/.cache
+web/.vite
+
+web/.pnp/
+web/.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# ========================
+# 后端（Python）相关
+# ========================
 __pycache__/
-*.pyc
 *.py[cod]
 *$py.class
-.dbpath/
-
-# Installer logs
+*.pyo
+*.pyd
+*.pyc
+*.pytest_cache/
+*.mypy_cache/
+.env
+.venv/
+venv/
+ENV/
+env/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# ========================
+# 日志 / 临时文件
+# ========================
+*.log
+*.sqlite3
+*.db
+tmp/
+temp/
 
-.env
-.venv/
+# ========================
+# 构建输出缓存
+# ========================
+build/
+dist/
+coverage/
+*.egg-info/
+
+# ========================
+# 本地配置
+# ========================
+*.pem
+*.key
+*.crt
+.env.local
+.env.*.local

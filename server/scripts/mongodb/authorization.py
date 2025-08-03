@@ -6,6 +6,7 @@ from pymongo.errors import PyMongoError
 from datetime import datetime, timedelta
 from fastapi import Request, HTTPException
 from passlib.context import CryptContext
+from typing import TypedDict
 
 from core import Logger
 from scripts.mongodb import get_user_mongo_collection
@@ -24,6 +25,30 @@ REFRESH_EXPIRE = timedelta(days=int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7)))
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+class UserItem(TypedDict):
+    """
+    用户信息的字典类型
+    username: 用户名
+    password: 哈希后的密码
+    raw_password: 明文密码
+    nickname: 昵称
+    avatar: 头像URL
+    role: 角色
+    isadmin: 是否为管理员
+    token: JWT令牌
+    blacklisted: 是否在黑名单中
+    """
+    username: str
+    password: str
+    raw_password: str
+    nickname: str
+    avatar: str
+    isadmin: bool
+    role: str
+    token: str
+    blacklisted: bool
+
+
 class AuthorizedHandler:
 
     def __init__(self) -> None:
@@ -34,7 +59,7 @@ class AuthorizedHandler:
         """ 
         初始化管理员账号
         """
-        cls.add_user(ADMIN_USERNAME, cls.hash_password(ADMIN_PASSWORD), "爬楼的猪", "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg")
+        cls.add_user(ADMIN_USERNAME, ADMIN_PASSWORD, "爬楼的猪", "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg")
         Logger.info(f"✔ 初始化管理员账号: {ADMIN_USERNAME}")
 
     @classmethod
@@ -113,6 +138,11 @@ class AuthorizedHandler:
 
     @classmethod
     def create_refresh_token(cls, user):
+        """
+        创建刷新令牌
+        :param user: 用户名
+        :return: JWT刷新令牌字符串
+        """
         tok = cls.create_token(user, REFRESH_EXPIRE, 'refresh')
         cls.update_user_token(user, tok)
         return tok
@@ -167,14 +197,17 @@ class AuthorizedHandler:
         isadmin = cls.check_admin(username)
         try:
             # 使用 upsert 更新或插入用户
-            result = coll.update_one(
-                {'username': username},
-                {
-                    '$set': {'password': password, 'nickname': nickname, 'avatar': avatar, 'isadmin': isadmin, 'blacklisted': False},
-                    '$setOnInsert': {'id': str(uuid.uuid4())}
-                },
-                upsert=True
-            )
+            hash_password = cls.hash_password(ADMIN_PASSWORD)
+            result = coll.update_one({'username': username},
+                                     {'$set': {'password': hash_password,
+                                               'raw_password': password,
+                                               'nickname': nickname,
+                                               'avatar': avatar,
+                                               'isadmin': isadmin,
+                                               'blacklisted': False
+                                               },
+                                      '$setOnInsert': {'id': str(uuid.uuid4())}
+                                      }, upsert=True)
             return result.upserted_id is not None or result.modified_count > 0
         except PyMongoError as e:
             Logger.error(f"✖ MongoDB 错误: {e}")
@@ -269,6 +302,41 @@ class AuthorizedHandler:
                 {'$set': {'avatar': avatar}}
             )
             return result.modified_count > 0
+        except PyMongoError as e:
+            Logger.error(f"✖ MongoDB 错误: {e}")
+            return False
+
+    @classmethod
+    def get_all_users(cls) -> list:
+        """
+        获取所有用户信息
+        Returns:
+            list: 用户信息列表
+        """
+        coll = get_user_mongo_collection()
+        users = coll.find({})
+        user_list = []
+        for user in users:
+            user.pop('_id', None)
+            user.pop('password', None)
+            user.pop('token', None)
+            user.pop('blacklisted', None)
+            user_list.append(user)
+        return user_list
+
+    @classmethod
+    def delete_user(cls, username: str) -> bool:
+        """
+        删除用户
+        Args:
+            username (str): 用户名
+        Returns:
+            bool: 删除成功返回 True, 失败返回 False
+        """
+        coll = get_user_mongo_collection()
+        try:
+            result = coll.delete_one({'username': username})
+            return result.deleted_count > 0
         except PyMongoError as e:
             Logger.error(f"✖ MongoDB 错误: {e}")
             return False

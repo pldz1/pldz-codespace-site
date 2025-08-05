@@ -11,6 +11,7 @@ services:
   backend:
     build:
       context: .
+      dockerfile: Dockerfile
       target: backend
     container_name: pldz-backend
     depends_on:
@@ -33,17 +34,17 @@ services:
       retries: 3
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.25-alpine
     container_name: pldz-nginx
     depends_on:
       - backend
-    # 宿主通过 localhost:10058 访问 backend
+    # 宿主通过 localhost:8000 访问 backend
     ports:
-      - "10058:80"
+      - "8000:80"
     # nginx 的配置
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/prod.d:/etc/nginx/conf.d:ro
       - ./data/templates/statics:/usr/share/nginx/html:ro
     restart: unless-stopped
 

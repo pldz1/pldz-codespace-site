@@ -4,8 +4,9 @@ import router from "./routers";
 import store from "./store";
 
 import { createApp } from "vue";
-import { refresh } from "./utils/apis.js";
+import { refresh } from "./utils/apis";
 
+// 配置 md-editor-v3 编辑器
 import { config } from "md-editor-v3";
 import { lineNumbers } from "@codemirror/view";
 

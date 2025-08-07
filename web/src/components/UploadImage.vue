@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { checkImageExit } from "../utils/apis.js";
+import { checkImageExit } from "../utils/apis";
 import { uploadArticleImage, uploadArticleImageFromCopy } from "../utils/file-upload.js";
 
 const emit = defineEmits(["on-close", "on-upload"]);

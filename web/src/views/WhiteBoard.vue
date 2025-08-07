@@ -33,7 +33,7 @@
 import HeaderBar from "../components/HeaderBar.vue";
 import { ref } from "vue";
 import Toast from "../utils/toast.js";
-import { getWhiteBoardByKey, getWhiteBoardByUser, updateWhiteBoardContent } from "../utils/apis.js";
+import { getWhiteBoardByKey, getWhiteBoardByUser, updateWhiteBoardContent } from "../utils/apis";
 
 // 引用移动端和主侧边栏容器
 const isMobileMenuOpen = ref(false);

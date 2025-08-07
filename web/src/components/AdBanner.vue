@@ -17,7 +17,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getAllAdBannerItem } from "../utils/apis.js";
+import { getAllAdBannerItem } from "../utils/apis";
 
 /**
  * 单个配置项

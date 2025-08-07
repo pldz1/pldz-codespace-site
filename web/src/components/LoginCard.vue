@@ -61,7 +61,7 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
 import { ref, computed } from "vue";
-import { login, register, logout, updateAvatar } from "../utils/apis.js";
+import { login, register, logout, updateAvatar } from "../utils/apis";
 import { uploadAvatar } from "../utils/file-upload.js";
 import Toast from "../utils/toast.js";
 

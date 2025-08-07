@@ -20,7 +20,7 @@
       <NormalToolbar title="上传图像" @onClick="onShowUploadImageDialog">
         <Image class="md-editor-icon" />
       </NormalToolbar>
-      <ArticleMeta :meta="articleMeta" @on-update="onSaveMeta" />
+      <MetaDialog :meta="articleMeta" @on-update="onSaveMeta" />
       <NormalToolbar title="查看文章" @onClick="onGotoArticle">
         <BookOpen class="md-editor-icon" />
       </NormalToolbar>
@@ -43,7 +43,7 @@
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
 import UploadImage from "../components/UploadImage.vue";
-import ArticleMeta from "../components/ArticleMeta.vue";
+import MetaDialog from "../components/edit-page/MetaDialog.vue";
 
 import { BookOpen, Image } from "lucide-vue-next";
 import { MdEditor, NormalToolbar, NormalFooterToolbar } from "md-editor-v3";
@@ -53,7 +53,7 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
 import { toolbars, footers } from "../utils/md-editor.js";
-import { getArticle, editArticle, editMeta } from "../utils/apis.js";
+import { getArticle, editArticle, editMeta } from "../utils/apis";
 import { setCopyImageFile } from "../utils/file-upload.js";
 import Toast from "../utils/toast.js";
 

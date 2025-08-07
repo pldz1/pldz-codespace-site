@@ -101,7 +101,7 @@ import { ref, computed, nextTick, onMounted } from "vue";
 import { useStore } from "vuex";
 import Toast from "@/utils/toast.js";
 
-import { getAllComments, addComment, deleteComment } from "@/utils/apis.js";
+import { getAllComments, addComment, deleteComment } from "../../utils/apis";
 
 // Props
 const props = defineProps({

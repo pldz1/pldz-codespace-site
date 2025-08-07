@@ -60,7 +60,7 @@
 import { reactive, ref } from "vue";
 import { FolderPen } from "lucide-vue-next";
 import { ModalToolbar } from "md-editor-v3";
-import UploadImage from "./UploadImage.vue";
+import UploadImage from "../UploadImage.vue";
 
 const emit = defineEmits(["on-update"]);
 

@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getArticlesByCategory, getArticlesByTag } from "../utils/apis.js";
+import { getArticlesByCategory, getArticlesByTag } from "../../utils/apis";
 
 const props = defineProps({
   article: {

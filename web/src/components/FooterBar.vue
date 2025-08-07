@@ -12,7 +12,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getPrivacyPolicy } from "../utils/apis.js";
+import { getPrivacyPolicy } from "../utils/apis";
 
 const privacyData = ref({ icp: "", copyright: "", ps: "" });
 

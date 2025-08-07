@@ -2,8 +2,6 @@ import os
 import sys
 import uuid
 import time
-import datetime
-import frontmatter
 from pymongo.errors import PyMongoError
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler

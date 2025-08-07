@@ -77,6 +77,7 @@ class AdBannerHandler:
             with open(config_file, 'w', encoding='utf-8') as file:
                 json.dump(self.adbanner_config, file, ensure_ascii=False, indent=4)
             Logger.info(f"AdBanner配置已更新: {config_file}")
+            self.get_adbanner_items()
             return True
         except Exception as e:
             Logger.error(f"保存AdBanner配置时发生错误: {e}")

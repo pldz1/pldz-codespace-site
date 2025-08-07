@@ -33,7 +33,7 @@
         </div>
       </div>
       <div class="sidebar-card">
-        <ArticleTags @toggle-tag-filter="onActiveTag" :active-tag="activeTag"></ArticleTags>
+        <TagsCloud @toggle-tag-filter="onActiveTag" :active-tag="activeTag"></TagsCloud>
       </div>
     </aside>
 
@@ -87,11 +87,12 @@
 import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
 import AdBanner from "../components/AdBanner.vue";
-import ArticleTags from "../components/ArticleTags.vue";
+
+import TagsCloud from "../components/home-page/TagsCloud.vue";
 
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { sortByDate, sortByViews, sortBySerialNo } from "../utils/sort.js";
-import { getAllArticles, getAllCategories, getArticlesByCategory, getArticlesByTag } from "../utils/apis.js";
+import { getAllArticles, getAllCategories, getArticlesByCategory, getArticlesByTag } from "../utils/apis";
 
 // 用于存储所有文章
 const allArticles = ref([]);
@@ -244,7 +245,7 @@ watch(
     if (newWidth > 768) {
       onCloseMobileMenu();
     }
-  },
+  }
 );
 
 /**

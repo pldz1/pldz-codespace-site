@@ -44,7 +44,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import { useStore } from "vuex";
-import { getNavigation } from "../utils/apis.js";
+import { getNavigation } from "../utils/apis";
 
 import LoginCard from "./LoginCard.vue";
 import Toast from "../utils/toast.js";

@@ -17,11 +17,11 @@
     <!-- 左侧边栏 -->
     <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
       <div class="sidebar-item sidebar-article-chapter" ref="articleChapterRef">
-        <ArticleChapter v-if="isArticleLoaded" :editor-id="state.id" :theme="state.theme"></ArticleChapter>
+        <ChapterBlock v-if="isArticleLoaded" :editor-id="state.id" :theme="state.theme"></ChapterBlock>
       </div>
 
       <div class="sidebar-item sidebar-article-related">
-        <ArticleRelated v-if="isArticleLoaded" :article="article"></ArticleRelated>
+        <RelatedRecom v-if="isArticleLoaded" :article="article"></RelatedRecom>
       </div>
     </aside>
     <!-- 中间内容区 -->
@@ -41,11 +41,11 @@
       </div>
       <div class="next-previous-article">
         <span>其他文章</span>
-        <PrevNextArticle v-if="isArticleLoaded" :id="article.id" :category="article.meta.category"></PrevNextArticle>
+        <PrevNext v-if="isArticleLoaded" :id="article.id" :category="article.meta.category"></PrevNext>
       </div>
       <div class="comments-content">
         <span> 评论留言 </span>
-        <ArticleComments v-if="isArticleLoaded" :article-id="article.id"></ArticleComments>
+        <CommentForm v-if="isArticleLoaded" :article-id="article.id"></CommentForm>
       </div>
     </main>
 
@@ -66,15 +66,16 @@
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
-import ArticleChapter from "../components/ArticleChapter.vue";
 import AdBanner from "../components/AdBanner.vue";
-import PrevNextArticle from "../components/PrevNextArticle.vue";
-import ArticleComments from "../components/ArticleComments.vue";
-import ArticleRelated from "../components/ArticleRelated.vue";
+
+import ChapterBlock from "../components/article-page/ChapterBlock.vue";
+import PrevNext from "../components/article-page/PrevNext.vue";
+import CommentForm from "../components/article-page/CommentForm.vue";
+import RelatedRecom from "../components/article-page/RelatedRecom.vue";
 
 import { ref, onActivated, watch, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { getArticle } from "../utils/apis.js";
+import { getArticle } from "../utils/apis";
 import { useStore } from "vuex";
 
 import { MdPreview } from "md-editor-v3";

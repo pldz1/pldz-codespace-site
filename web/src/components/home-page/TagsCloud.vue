@@ -11,8 +11,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getTagCounts } from "../utils/apis";
-import { randomColorWordCloud } from "../utils/word-cloud.js";
+import { getTagCounts } from "../../utils/apis";
+import { randomColorWordCloud } from "../../utils/word-cloud.js";
 
 const emit = defineEmits(["toggle-tag-filter"]);
 

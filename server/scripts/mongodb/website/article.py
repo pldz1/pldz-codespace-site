@@ -85,4 +85,4 @@ class ArticleHandler:
 
     @classmethod
     async def sync_all_article(cls) -> AsyncGenerator[str, Any]:
-        return write_article_to_file()
+        yield await write_all_article()

@@ -1,4 +1,4 @@
-import { apiPost, hostPrefix } from "./request.js";
+import { apiGet, apiPost, hostPrefix } from "./request.js";
 
 /**
  * 获取所有缓存数据

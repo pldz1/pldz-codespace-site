@@ -117,9 +117,9 @@ async function onSelectCacheManagement() {
 /**
  * 初始化时获取所有缓存数据
  */
-onMounted(() => {
+onMounted(async () => {
   // 初始化时获取所有缓存数据
-  onSelectCacheManagement();
+  await onSelectCacheManagement();
 });
 </script>
 

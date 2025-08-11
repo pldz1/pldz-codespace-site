@@ -22,6 +22,7 @@ def build_all_article_format(art: T_ArticleData) -> T_ArticleInfo:
         tags=meta.get('tags', []),
         views=art.get('views', 0),
         date=meta.get('date', ''),
+        path=art.get('path', ''),
     )
 
 

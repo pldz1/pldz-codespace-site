@@ -80,3 +80,22 @@ async def edit_article_serialno(article_data: T_Article_SerialNoEdit_Request, us
     check_user_permission(user)
     res = ArticleHandler.edit_article_serial_no(article_data.id, article_data.serialNo)
     return T_Articl_Edit_Response(data=res)
+
+
+# =========================================================================
+class T_Article_TitleEdit_Request(BaseModel):
+    id: str
+    title: str
+
+
+async def edit_article_title(article_data: T_Article_TitleEdit_Request, user: dict):
+    """
+    编辑文章标题
+    Args:
+        article_data (T_Article_TitleEdit_Request): 文章标题编辑数据
+    Returns:
+        dict: 编辑后的文章标题数据
+    """
+    check_user_permission(user)
+    res = ArticleHandler.edit_article_title(article_data.id, article_data.title)
+    return T_Articl_Edit_Response(data=res)

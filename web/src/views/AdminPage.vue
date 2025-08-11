@@ -59,7 +59,7 @@
       <!-- 新增文章 -->
       <ArticleMgt v-if="activeCard === '新增文章'" :all-categories="allCategories"></ArticleMgt>
       <!-- 专栏管理 -->
-      <CategoryMgt v-if="activeCard === '专栏管理'" :all-categories="allCategories"> </CategoryMgt>
+      <CategoryMgt v-if="activeCard === '专栏管理'" :all-categories="allCategories" @on-update-categories="onOnUpdateCategories"> </CategoryMgt>
       <!-- 图片管理 -->
       <ImageMgt v-if="activeCard === '图片管理'" :all-categories="allCategories"></ImageMgt>
       <!-- 网站导航管理 -->
@@ -148,6 +148,19 @@ function onCloseMobileMenu() {
 
   if (mainSidebarContainerRef.value && sidebarContentRef.value) {
     mainSidebarContainerRef.value.appendChild(sidebarContentRef.value);
+  }
+}
+
+/**
+ * 更新所有分类数据
+ */
+async function onOnUpdateCategories() {
+  const res = await getAllCategories();
+  if (res) {
+    allCategories.value = res;
+    Toast.success("分类数据更新成功");
+  } else {
+    Toast.error("分类数据更新失败，请稍后再试");
   }
 }
 

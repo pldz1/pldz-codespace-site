@@ -92,3 +92,29 @@ def set_article_serial_no(article_id: str, serial_no: int) -> bool:
     except PyMongoError as e:
         Logger.error(f"✖ MongoDB 错误: {e}")
         return False
+
+
+def set_article_title(article_id: str, title: str) -> bool:
+    """
+    根据文章的ID编辑文章标题
+    Args:
+        article_id (str): 文章ID
+        title (str): 文章标题
+    Returns:
+        bool: 编辑后的文章数据
+    """
+    coll = get_article_mongo_collection()
+    try:
+        # 更新文章标题
+        result = coll.update_one(
+            {'id': article_id},
+            {'$set': {'meta.title': title}}
+        )
+        if result.modified_count > 0:
+            return True
+        else:
+            Logger.warning(f"没有找到或未修改文章 ID: {article_id}")
+            return False
+    except PyMongoError as e:
+        Logger.error(f"✖ MongoDB 错误: {e}")
+        return False

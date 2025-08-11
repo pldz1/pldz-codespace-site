@@ -53,6 +53,20 @@ class MarkdownEventHandler(FileSystemEventHandler):
             Logger.info(f"检测到修改: {event.src_path}")
             sync_file(event.src_path, self.coll)
 
+    def on_moved(self, event):
+        if not event.is_directory and event.src_path.lower().endswith('.md'):
+            Logger.info(f"检测到重命名: {event.src_path} -> {event.dest_path}")
+            # 同步新文件
+            sync_file(event.dest_path, self.coll)
+            # 删除旧文件记录
+            rel = os.path.relpath(event.src_path, ARTICLES_DIR)
+            pid = uuid.uuid5(uuid.NAMESPACE_URL, rel).hex[:16]
+            try:
+                self.coll.delete_one({'id': pid})
+                Logger.info(f"✖ 删除旧记录: {rel}")
+            except PyMongoError as e:
+                Logger.info(f"❗ 删除失败 {rel}: {e}")
+
     def on_deleted(self, event):
         # 可选：同步删除操作
         if not event.is_directory and event.src_path.lower().endswith('.md'):

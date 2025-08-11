@@ -96,3 +96,44 @@ async def sync_all_articles(user: dict):
     """
     check_user_permission(user)
     return StreamingResponse(ArticleHandler.sync_all_article(), media_type="text/event-stream")
+
+# =========================================================================
+
+
+class T_Set_Article_Filename_Request(BaseModel):
+    id: str
+    filename: str
+
+
+async def set_article_filename(req: T_Set_Article_Filename_Request, user: dict):
+    """
+    设置文章文件名
+    Args:
+        req (T_Set_Article_Filename_Request): 包含文章ID和新文件名的请求对象
+        user (dict): 当前用户信息
+    Returns:
+        bool: 设置操作的结果
+    """
+    check_user_permission(user)
+    res = ArticleHandler.set_article_filename(req.id, req.filename)
+    return T_Article_File_Response(data=res)
+
+
+# =========================================================================
+
+class T_Add_Category_Request(BaseModel):
+    name: str
+
+
+async def add_category(req: T_Add_Category_Request, user: dict):
+    """
+    添加新文章分类
+    Args:
+        req (T_Add_Category_Request): 包含分类名称的请求对象
+        user (dict): 当前用户信息
+    Returns:
+        dict: 新分类的详细信息
+    """
+    check_user_permission(user)
+    res = ArticleHandler.add_category(req.name)
+    return T_Article_File_Response(data=res)

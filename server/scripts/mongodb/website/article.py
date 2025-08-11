@@ -4,8 +4,8 @@ from typedef import T_ArticleData, T_TagCount
 from .articles.category import find_all_categories, find_articles_by_category, find_latest_serial_no, create_article_by_title_and_category, find_article_in_category
 from .articles.article import find_all_articles, find_article_by_id, delete_article_by_id, get_article_text_by_id
 from .articles.tag import find_all_tag_and_counts, find_articles_by_tag
-from .articles.edit import set_article_content_by_id, set_article_meta_by_id, set_article_serial_no
-from .articles.file import write_article_to_file, write_all_article
+from .articles.edit import set_article_content_by_id, set_article_meta_by_id, set_article_serial_no, set_article_title
+from .articles.file import write_article_to_file, write_all_article, rename_article_file, create_category
 
 
 class ArticleHandler:
@@ -64,6 +64,10 @@ class ArticleHandler:
         return set_article_serial_no(article_id, serial_no)
 
     @classmethod
+    def edit_article_title(cls, article_id: str, title: str) -> bool:
+        return set_article_title(article_id, title)
+
+    @classmethod
     def is_article_exists(cls, category: str, title: str) -> bool:
         return find_article_in_category(category, title)
 
@@ -78,6 +82,14 @@ class ArticleHandler:
     @classmethod
     def get_article_text(cls, article_id: str) -> Union[str, bool]:
         return get_article_text_by_id(article_id)
+
+    @classmethod
+    def set_article_filename(cls, article_id: str, filename: str) -> bool:
+        return rename_article_file(article_id, filename)
+
+    @classmethod
+    def add_category(cls, category: str) -> bool:
+        return create_category(category)
 
     @classmethod
     def sync_article_file(cls, article_id: str) -> bool:

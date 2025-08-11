@@ -58,8 +58,8 @@ async def login(data: LoginData):
     resp = JSONResponse({'data': {"flag": True, **user, 'log': '登录成功'}})
 
     # 设置Cookie，httponly和samesite属性
-    resp.set_cookie('access_token', access, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
-    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
+    resp.set_cookie('access_token', access, httponly=True, samesite='lax', max_age=int(ACCESS_EXPIRE.total_seconds()))
+    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax', max_age=int(ACCESS_EXPIRE.total_seconds()))
     return resp
 
 
@@ -88,8 +88,8 @@ async def register(data: RegisterData):
     user = AuthorizedHandler.get_user_by_username(data.username)
     resp = JSONResponse({'data': {'flag': True, **user, 'log': '注册成功'}})
     # 设置Cookie，httponly和samesite属性
-    resp.set_cookie('access_token', access, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
-    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
+    resp.set_cookie('access_token', access, httponly=True, samesite='lax', max_age=int(ACCESS_EXPIRE.total_seconds()))
+    resp.set_cookie('refresh_token', refresh, httponly=True, samesite='lax', max_age=int(ACCESS_EXPIRE.total_seconds()))
     time.sleep(random.uniform(0.1, 0.3))
     return resp
 
@@ -130,7 +130,7 @@ async def refresh(request: Request):
     user = AuthorizedHandler.get_current_user(request)
     resp = JSONResponse(
         {'data': {'flag': True, **user, 'log': '刷新成功'}})
-    resp.set_cookie('access_token', new_access, httponly=True, samesite='lax', max_age=ACCESS_EXPIRE.seconds)
+    resp.set_cookie('access_token', new_access, httponly=True, samesite='lax', max_age=int(ACCESS_EXPIRE.total_seconds()))
     return resp
 
 

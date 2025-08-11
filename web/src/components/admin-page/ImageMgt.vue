@@ -25,7 +25,7 @@
         <button class="btn btn-danger" style="padding: 10px 20px" @click="onShowUploadImageDialog">选择照片</button>
         <!-- 上传图像的位置 -->
         <UploadImage
-          v-model="imageMgt.upload"
+          v-if="imageMgt.upload"
           :category="imageMgt.category"
           :show-confirm-button="false"
           @on-upload="onUploadImageSuccess"

@@ -23,3 +23,4 @@ class T_ArticleInfo(TypedDict):
     tags: List[str]
     views: int
     date: str
+    path: str

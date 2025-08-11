@@ -40,6 +40,25 @@ export async function editSerialNo(id, serialNo) {
 }
 
 /**
+ * 编辑文章标题
+ * @param {*} id
+ * @param {*} title
+ * @returns
+ */
+export async function editTitle(id, title) {
+  return apiPost(`${webSitePrefix}/article/edit/title`, { id, title });
+}
+
+/**
+ * 添加文章分类
+ * @param {*} category
+ * @returns
+ */
+export async function addCategory(category) {
+  return apiPost(`${webSitePrefix}/article/file/addcategory`, { name: category });
+}
+
+/**
  * 检查文章是否存在
  * @param {*} category
  * @param {*} title
@@ -64,6 +83,16 @@ export async function deleteArticle(id) {
  */
 export async function syncArticleToFile(id) {
   return apiPost(`${webSitePrefix}/article/file/sync`, { id });
+}
+
+/**
+ * 重命名文章文件
+ * @param {*} id
+ * @param {*} filename
+ * @returns
+ */
+export async function renameArticleFile(id, filename) {
+  return apiPost(`${webSitePrefix}/article/file/rename`, { id, filename });
 }
 
 /**

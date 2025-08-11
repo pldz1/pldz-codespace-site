@@ -138,9 +138,15 @@ def find_article_in_category(category: str, title: str) -> bool:
     """
     coll = get_article_mongo_collection()
     try:
-        # 检查文章是否存在
-        existing_article: Optional[T_ArticleData] = coll.find_one({'meta.title': title, 'meta.category': category})
-        return existing_article is not None
+        # 检查文章是否存在, 找出 category 下的所有文章
+        all_docs: List[T_ArticleData] = coll.find({'meta.category': category})
+        all_paths: List[str] = [doc['path'] for doc in all_docs]
+        all_filename = [os.path.basename(path) for path in all_paths]
+
+        if title + '.md' in all_filename:
+            return True
+        else:
+            return False
     except PyMongoError as e:
         Logger.error(f"✖ MongoDB 错误: {e}")
         return False

@@ -32,6 +32,9 @@
 import { ref } from "vue";
 import { editIsExist, addArticle } from "../../utils/apis";
 import Toast from "../../utils/toast.js";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps({
   allCategories: {

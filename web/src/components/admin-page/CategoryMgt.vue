@@ -86,6 +86,13 @@ const errorMessage = ref("");
 const categoryMgt = ref({ newCategoryName: "", category: "", articles: [] });
 
 /**
+ * 对文章进行排序
+ */
+function sortBySerialNo() {
+  return categoryMgt.value.articles.sort((a, b) => a.serialNo - b.serialNo);
+}
+
+/**
  * 选择分类时获取该分类下的所有文章
  */
 async function onSelectArticleCategory() {
@@ -104,6 +111,7 @@ async function onSelectArticleCategory() {
       }
       categoryMgt.value.articles.push(article);
     });
+    sortBySerialNo();
     Toast.success("文章数据加载成功");
   } else {
     errorMessage.value = "获取文章失败，请稍后再试";
@@ -192,6 +200,10 @@ async function onEditFileName(articleId, filename) {
     errorMessage.value = "文件名更新失败，请稍后再试";
     Toast.error("文件名更新失败，请稍后再试");
   } else {
+    const index = categoryMgt.value.articles.findIndex((article) => article.id === articleId);
+    if (index !== -1) {
+      categoryMgt.value.articles[index].id = res;
+    }
     Toast.success("文件名更新成功");
   }
 }
@@ -209,6 +221,9 @@ async function onEditSerialNo(article) {
     errorMessage.value = "序号更新失败，请稍后再试";
     Toast.error("序号更新失败，请稍后再试");
   }
+  sortBySerialNo();
+  Toast.success("序号更新成功");
+  errorMessage.value = "";
 }
 
 /**
@@ -222,6 +237,7 @@ async function onDeleteArticle(articleId) {
   if (res) {
     // 成功删除后，重新获取当前分类下的文章
     await onSelectArticleCategory();
+    Toast.success("文章删除成功");
   } else {
     errorMessage.value = "删除文章失败，请稍后再试";
     Toast.error("删除文章失败，请稍后再试");
@@ -239,6 +255,8 @@ async function onSyncArticleDiff(articleId) {
   if (!res) {
     errorMessage.value = "保存文章到源文件失败，请稍后再试";
     Toast.error("保存文章到源文件失败，请稍后再试");
+  } else {
+    Toast.success("文章保存成功");
   }
 }
 
@@ -260,6 +278,7 @@ async function onDownLoadMDFile(id, title) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    Toast.success("下载文章成功");
   } else {
     errorMessage.value = "下载文章失败，请稍后再试";
     Toast.error("下载文章失败，请稍后再试");

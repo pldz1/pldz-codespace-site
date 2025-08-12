@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, Any, Dict, List, Optional, Union
+from typing import AsyncGenerator, Any, Dict, List, Optional
 from typedef import T_ArticleData, T_TagCount
 
 from .articles.category import find_all_categories, find_articles_by_category, find_latest_serial_no, find_article_in_category
@@ -72,7 +72,7 @@ class ArticleHandler:
         return find_article_in_category(category, title)
 
     @classmethod
-    def add_article_by_title_and_category(cls, category: str, title: str, username: str) -> Dict[str, Union[bool, str]]:
+    def add_article_by_title_and_category(cls, category: str, title: str, username: str) -> str:
         return create_article_file(category, title, username)
 
     @classmethod
@@ -80,11 +80,11 @@ class ArticleHandler:
         return delete_article_by_id(article_id)
 
     @classmethod
-    def get_article_text(cls, article_id: str) -> Union[str, bool]:
+    def get_article_text(cls, article_id: str) -> str:
         return get_article_text_by_id(article_id)
 
     @classmethod
-    def set_article_filename(cls, article_id: str, filename: str) -> bool:
+    def set_article_filename(cls, article_id: str, filename: str) -> str:
         return rename_article_file(article_id, filename)
 
     @classmethod

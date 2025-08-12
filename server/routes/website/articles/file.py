@@ -11,8 +11,8 @@ class T_Add_Article_Request(BaseModel):
     category: str = ""
 
 
-class T_New_Article_Response(BaseModel):
-    data: dict
+class T_Article_File_Str_Response(BaseModel):
+    data: str
 
 
 async def add_article(req: T_Add_Article_Request, user: dict):
@@ -26,7 +26,7 @@ async def add_article(req: T_Add_Article_Request, user: dict):
     check_user_permission(user)
     username = user.get('username')
     res = ArticleHandler.add_article_by_title_and_category(req.category, req.title, username)
-    return T_New_Article_Response(data=res)
+    return T_Article_File_Str_Response(data=res)
 
 
 # =========================================================================
@@ -81,7 +81,7 @@ async def get_article_text(req: T_Article_File_Request, user: dict):
     """
     check_user_permission(user)
     res = ArticleHandler.get_article_text(req.id)
-    return {"data": res}
+    return T_Article_File_Str_Response(data=res)
 
 # =========================================================================
 
@@ -116,7 +116,7 @@ async def set_article_filename(req: T_Set_Article_Filename_Request, user: dict):
     """
     check_user_permission(user)
     res = ArticleHandler.set_article_filename(req.id, req.filename)
-    return T_Article_File_Response(data=res)
+    return T_Article_File_Str_Response(data=res)
 
 
 # =========================================================================

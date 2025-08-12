@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from pymongo import DESCENDING
 from pymongo.errors import PyMongoError
 from core import Logger
@@ -66,13 +66,13 @@ def delete_article_by_id(article_id: str) -> bool:
         return False
 
 
-def get_article_text_by_id(article_id: str) -> Union[str, bool]:
+def get_article_text_by_id(article_id: str) -> str:
     """
     根据文章ID获取文章数据
     Args:
         article_id (str): 文章ID
     Returns:
-        Union[str, bool]: 文章数据，如果未找到则返回False
+        str: 文章数据，如果未找到则返回错误的文本
     """
     coll = get_article_mongo_collection()
     try:
@@ -82,7 +82,7 @@ def get_article_text_by_id(article_id: str) -> Union[str, bool]:
         article: Optional[T_ArticleData] = coll.find_one({'id': article_id})
         if not article:
             Logger.warning(f"没有找到文章 ID: {article_id}")
-            return False
+            return "没有找到文章"
 
         meta: T_ArticleMeta = article['meta']
         content: str = article['content']

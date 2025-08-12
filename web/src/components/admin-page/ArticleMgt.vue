@@ -80,10 +80,10 @@ async function onNewArticle() {
   errorMessage.value = "";
 
   const res = await addArticle(newArticleMgt.value.category, newArticleMgt.value.title);
-  if (res?.id) {
+  if (typeof res === "string" && res !== "") {
     newArticleMgt.value.title = "";
     newArticleMgt.value.category = "";
-    router.push({ path: `/edit/${res.id}` });
+    router.push({ path: `/edit/${res}` });
   } else {
     errorMessage.value = "新增文章失败，请稍后再试";
     Toast.error("新增文章失败，请稍后再试");

@@ -16,14 +16,27 @@ IMAGES_DIR = ProjectConfig.get_images_path()
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin@pldz1.com")
 
 
-def rename_article_file(article_id: str, filename: str) -> bool:
+def get_article_id_by_path(path: str) -> Optional[str]:
+    """
+    根据文章路径获取文章ID
+    Args:
+        path (str): 文章路径
+    Returns:
+        Optional[str]: 如果找到文章则返回文章ID，否则返回None
+    """
+    rel: str = os.path.relpath(path, ARTICLES_DIR)
+    pid: str = uuid.uuid5(uuid.NAMESPACE_URL, rel).hex[:16]
+    return pid
+
+
+def rename_article_file(article_id: str, filename: str) -> str:
     """
     重命名文章文件
     Args:
         article_id (str): 文章ID
         filename (str): 新的文件名（不包含扩展名）
     Returns:
-        bool: 如果重命名成功则返回True，否则返回False
+        str: 如果重命名成功则返回新的文章ID，否则返回空字符串
     """
     coll = get_article_mongo_collection()
     try:
@@ -31,7 +44,7 @@ def rename_article_file(article_id: str, filename: str) -> bool:
         doc = coll.find_one({'id': article_id}, {'_id': 0, 'path': 1})
         if not doc:
             Logger.warning(f"没有找到文章 ID: {article_id}")
-            return False
+            return ""
 
         path = doc['path']
         base_path = os.path.dirname(path)
@@ -42,10 +55,11 @@ def rename_article_file(article_id: str, filename: str) -> bool:
         new_path = os.path.join(ARTICLES_DIR, base_path, filename + ext)
         os.rename(old_path, new_path)
         Logger.info(f"文件重命名成功")
-        return True
+        pid = get_article_id_by_path(new_path)
+        return pid
     except Exception as e:
         Logger.error(f"重命名文件失败: {e}")
-        return False
+        return ""
 
 
 def create_category(category_name: str) -> bool:
@@ -107,8 +121,6 @@ def create_article_file(category: str, filename: str, username: str) -> str:
     """
     try:
         new_file_path: str = os.path.join(ARTICLES_DIR, category, f"{filename}.md")
-        rel: str = os.path.relpath(new_file_path, ARTICLES_DIR)
-        pid: str = uuid.uuid5(uuid.NAMESPACE_URL, rel).hex[:16]
         datestr = datetime.now().strftime('%Y-%m-%d')
         md = f"""
         ---
@@ -129,10 +141,11 @@ def create_article_file(category: str, filename: str, username: str) -> str:
         with open(new_file_path, 'w', encoding='utf-8') as f:
             f.write(md)
         Logger.info(f"文件创建成功: {new_file_path}")
-        return {"flag": True, "id": pid}
+        pid: str = get_article_id_by_path(new_file_path)
+        return pid
     except Exception as e:
         Logger.error(f"创建文件失败: {e}")
-        return {"flag": False, "id": ""}
+        return ""
 
 
 def write_article_to_file(article_id: str) -> bool:

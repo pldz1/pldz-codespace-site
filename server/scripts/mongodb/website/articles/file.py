@@ -4,6 +4,7 @@ import os
 import textwrap
 from datetime import datetime
 from typing import Any, AsyncGenerator, List, Optional
+import uuid
 from pymongo.errors import PyMongoError
 from core import Logger, ProjectConfig
 from scripts.mongodb.connection import get_article_mongo_collection
@@ -12,6 +13,7 @@ from typedef.mongodb.article import T_ArticleData, T_ArticleMeta
 # 定义文章和图像目录路径
 ARTICLES_DIR = ProjectConfig.get_articles_path()
 IMAGES_DIR = ProjectConfig.get_images_path()
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin@pldz1.com")
 
 
 def rename_article_file(article_id: str, filename: str) -> bool:
@@ -69,12 +71,12 @@ def create_category(category_name: str) -> bool:
         datestr = datetime.now().strftime('%Y-%m-%d')
         md = f"""
         ---
-        author: admin@pldz1.com
+        author: {ADMIN_USERNAME}
         category: {category_name}
         date: '{datestr}'
         serialNo: 0
         status: publish
-        summary: {datestr}的随笔
+        summary: {category_name}的随笔
         tags: []
         thumbnail:
         title: ABOUT
@@ -91,6 +93,46 @@ def create_category(category_name: str) -> bool:
     except Exception as e:
         Logger.error(f"创建分类目录失败: {e}")
         return False
+
+
+def create_article_file(category: str, filename: str, username: str) -> str:
+    """
+    创建新的文章文件
+    Args:
+        category (str): 分类名称
+        filename (str): 文件名（不包含扩展名）
+        username (str): 创建者用户名
+    Returns:
+        str: 如果创建成功则返回文章ID，否则返回空字符串
+    """
+    try:
+        new_file_path: str = os.path.join(ARTICLES_DIR, category, f"{filename}.md")
+        rel: str = os.path.relpath(new_file_path, ARTICLES_DIR)
+        pid: str = uuid.uuid5(uuid.NAMESPACE_URL, rel).hex[:16]
+        datestr = datetime.now().strftime('%Y-%m-%d')
+        md = f"""
+        ---
+        author: {username}
+        category: {category}
+        date: '{datestr}'
+        serialNo: 99999
+        status: publish
+        summary:
+        tags: []
+        thumbnail:
+        title:
+        ---
+
+        # Hello world !
+        """
+        md = textwrap.dedent(md).lstrip("\n")
+        with open(new_file_path, 'w', encoding='utf-8') as f:
+            f.write(md)
+        Logger.info(f"文件创建成功: {new_file_path}")
+        return {"flag": True, "id": pid}
+    except Exception as e:
+        Logger.error(f"创建文件失败: {e}")
+        return {"flag": False, "id": ""}
 
 
 def write_article_to_file(article_id: str) -> bool:

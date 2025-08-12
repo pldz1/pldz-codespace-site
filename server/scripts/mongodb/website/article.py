@@ -1,11 +1,11 @@
 from typing import AsyncGenerator, Any, Dict, List, Optional, Union
 from typedef import T_ArticleData, T_TagCount
 
-from .articles.category import find_all_categories, find_articles_by_category, find_latest_serial_no, create_article_by_title_and_category, find_article_in_category
+from .articles.category import find_all_categories, find_articles_by_category, find_latest_serial_no, find_article_in_category
 from .articles.article import find_all_articles, find_article_by_id, delete_article_by_id, get_article_text_by_id
 from .articles.tag import find_all_tag_and_counts, find_articles_by_tag
 from .articles.edit import set_article_content_by_id, set_article_meta_by_id, set_article_serial_no, set_article_title
-from .articles.file import write_article_to_file, write_all_article, rename_article_file, create_category
+from .articles.file import write_article_to_file, write_all_article, rename_article_file, create_category, create_article_file
 
 
 class ArticleHandler:
@@ -73,7 +73,7 @@ class ArticleHandler:
 
     @classmethod
     def add_article_by_title_and_category(cls, category: str, title: str, username: str) -> Dict[str, Union[bool, str]]:
-        return create_article_by_title_and_category(category, title, username)
+        return create_article_file(category, title, username)
 
     @classmethod
     def delete_article(cls, article_id: str) -> bool:

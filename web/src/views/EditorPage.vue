@@ -6,6 +6,7 @@
   <MdEditor
     class="md-editor-v3-container"
     ref="editorRef"
+    :codeFoldable="false"
     :pageFullscreen="true"
     :noUploadImg="true"
     :toolbars="toolbars"

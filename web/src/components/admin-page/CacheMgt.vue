@@ -35,6 +35,7 @@ import { getAllCache, deleteCacheFile, downloadCacheFile } from "../../utils/api
 import { uploadCacheFile } from "../../utils/file-upload.js";
 import Toast from "../../utils/toast.js";
 
+const errorMessage = ref("");
 // 用于存储缓存资源管理的数据
 const cacheMgt = ref([]);
 

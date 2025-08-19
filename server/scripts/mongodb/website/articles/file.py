@@ -126,16 +126,16 @@ def create_article_file(category: str, filename: str, username: str) -> str:
         ---
         author: {username}
         category: {category}
-        date: '{datestr}'
+        date: {datestr}
         serialNo: 99999
         status: publish
         summary:
         tags: []
         thumbnail:
-        title:
+        title: {filename}
         ---
 
-        # Hello world !
+        # {filename} !
         """
         md = textwrap.dedent(md).lstrip("\n")
         with open(new_file_path, 'w', encoding='utf-8') as f:

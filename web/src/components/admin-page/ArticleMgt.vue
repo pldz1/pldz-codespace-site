@@ -5,10 +5,7 @@
     </div>
     <div class="content-body">
       <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
-      <div class="content-item">
-        <span>文件名称</span>
-        <input type="text" placeholder="请输入文件名称" v-model="newArticleMgt.title" />
-      </div>
+      <!-- 文章分类选择 -->
       <div class="content-item">
         <span>文章专栏</span>
         <div class="select-wrapper">
@@ -20,8 +17,13 @@
           </select>
         </div>
       </div>
+      <!-- 文章标题输入 -->
+      <div class="content-item" v-show="newArticleMgt.category">
+        <span>文件名称</span>
+        <input type="text" placeholder="请输入文件名称" v-model="newArticleMgt.title" />
+      </div>
       <!-- 新增文章的button -->
-      <div class="content-item">
+      <div class="content-item" v-show="newArticleMgt.category && newArticleMgt.title">
         <button class="btn btn-primary" @click="onNewArticle">新增文章</button>
       </div>
     </div>

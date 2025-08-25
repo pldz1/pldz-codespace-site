@@ -97,4 +97,5 @@ class ArticleHandler:
 
     @classmethod
     async def sync_all_article(cls) -> AsyncGenerator[str, Any]:
-        yield await write_all_article()
+        async for msg in write_all_article():
+            yield msg

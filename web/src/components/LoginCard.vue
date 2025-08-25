@@ -52,6 +52,9 @@
           </div>
         </form>
       </div>
+      <div class="auth-container flex-center loading" v-if="showLoginCss">
+        <div class="my-loader"></div>
+      </div>
     </div>
   </teleport>
 </template>
@@ -88,6 +91,9 @@ const error = ref("");
 // 显示是注册界面的状态
 const showRegister = ref(false);
 
+// 显示登陆css
+const showLoginCss = ref(false);
+
 /**
  * 检查用户名是否符合要求
  * @returns {boolean} 是否符合要求
@@ -115,8 +121,10 @@ function onSwitchRegister() {
  * 登录或注册操作
  */
 async function onLoginOrRegister() {
+  showLoginCss.value = true;
   const isValid = onCheckName();
   if (!isValid) {
+    showLoginCss.value = false;
     return;
   }
 
@@ -141,6 +149,7 @@ async function onLoginOrRegister() {
     error.value = res.log || "操作失败，请稍后再试";
     Toast.error(`登录失败: ${error.value}`);
   }
+  showLoginCss.value = false;
 }
 
 /**
@@ -226,7 +235,20 @@ async function onUploadAvatar(event) {
   padding: 24px;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(124, 122, 122, 0.4);
+  z-index: 900;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading {
+  position: absolute;
+  height: 360px;
+  z-index: 1000;
 }
 
 .auth-header {

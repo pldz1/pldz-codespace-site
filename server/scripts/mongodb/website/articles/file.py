@@ -177,8 +177,7 @@ def write_article_to_file(article_id: str) -> bool:
         return False
 
 
-@classmethod
-async def write_all_article(cls) -> AsyncGenerator[str, Any]:
+async def write_all_article() -> AsyncGenerator[str, Any]:
     """
     保存所有文章的元数据和内容
     Returns:

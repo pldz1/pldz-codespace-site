@@ -21,7 +21,9 @@
       <NormalToolbar title="上传图像" @onClick="onShowUploadImageDialog">
         <Image class="md-editor-icon" />
       </NormalToolbar>
-      <MetaDialog :meta="articleMeta" @on-update="onSaveMeta" />
+      <NormalToolbar title="设置元数据" @onClick="onShowMetaDialog">
+        <Settings2 class="md-editor-icon" />
+      </NormalToolbar>
       <NormalToolbar title="查看文章" @onClick="onGotoArticle">
         <BookOpen class="md-editor-icon" />
       </NormalToolbar>
@@ -31,6 +33,8 @@
       <NormalFooterToolbar>上次更新: {{ updateTime }}</NormalFooterToolbar>
     </template>
   </MdEditor>
+
+  <MetaDialog v-if="showMetaDialog" :meta="articleMeta" @on-update="onCloseMetaDialog" />
 
   <UploadImage
     v-if="showUploadImageDialog"
@@ -46,7 +50,7 @@ import HeaderBar from "../components/HeaderBar.vue";
 import UploadImage from "../components/UploadImage.vue";
 import MetaDialog from "../components/edit-page/MetaDialog.vue";
 
-import { BookOpen, Image } from "lucide-vue-next";
+import { BookOpen, Image, Settings2 } from "lucide-vue-next";
 import { MdEditor, NormalToolbar, NormalFooterToolbar } from "md-editor-v3";
 
 import { ref, onActivated, onDeactivated } from "vue";
@@ -93,14 +97,6 @@ function updateSaveTime(date = new Date()) {
   const seconds = pad(date.getSeconds());
 
   updateTime.value = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
-}
-
-/**
- * 保存文章元数据
- */
-async function onSaveMeta(data) {
-  _updateArticleMeta(data);
-  await editMeta(articleID.value, articleMeta.value);
 }
 
 /**
@@ -236,6 +232,38 @@ function _handleCodemirrorCopy(e) {
     // 阻止默认粘贴行为
     e.preventDefault();
   }
+}
+
+/**
+ * ========================= Meta数据设置相关 =========================
+ */
+
+// 显示元数据对话框
+const showMetaDialog = ref(false);
+
+/**
+ * 显示元数据对话框
+ */
+function onShowMetaDialog() {
+  showMetaDialog.value = true;
+}
+
+/**
+ * 保存文章元数据
+ */
+async function onSaveMeta(data) {
+  _updateArticleMeta(data);
+  await editMeta(articleID.value, articleMeta.value);
+}
+
+/**
+ * 关闭元数据对话框
+ */
+async function onCloseMetaDialog() {
+  Toast.info("正在保存元数据...");
+  showMetaDialog.value = false;
+  await onSaveMeta();
+  Toast.success("元数据已保存！");
 }
 
 /**

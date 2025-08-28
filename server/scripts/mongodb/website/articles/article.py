@@ -1,9 +1,14 @@
+import os
 from typing import Any, Dict, List, Optional
 from pymongo import DESCENDING
 from pymongo.errors import PyMongoError
-from core import Logger
+from core import Logger, ProjectConfig
 from scripts.mongodb.connection import get_article_mongo_collection
 from typedef.mongodb.article import T_ArticleData, T_ArticleMeta
+
+
+# 定义文章目录路径
+ARTICLES_DIR = ProjectConfig.get_articles_path()
 
 
 def find_all_articles() -> List[T_ArticleData]:
@@ -58,9 +63,26 @@ def delete_article_by_id(article_id: str) -> bool:
     """
     coll = get_article_mongo_collection()
     try:
-        # 删除文章
+        # 获得文章的path属性
+        article: Optional[T_ArticleData] = coll.find_one({'id': article_id})
+        if not article:
+            Logger.warning(f"没有找到文章 ID: {article_id}")
+            return False
+        # 1. 删除文章的mongodb记录
         result = coll.delete_one({'id': article_id})
-        return result.deleted_count > 0
+        if result.deleted_count == 0:
+            Logger.warning(f"没有删除任何文章 ID: {article_id}")
+            return False
+
+        # 2. 删除文章的缓存文件
+        path = article.get('path', '')
+        full_path = os.path.join(ARTICLES_DIR, path)
+        if os.path.exists(full_path):
+            os.remove(full_path)
+            Logger.info(f"✔ 已删除文章缓存文件: {full_path}")
+        else:
+            Logger.warning(f"没有找到文章缓存文件: {full_path}")
+        return True
     except PyMongoError as e:
         Logger.error(f"✖ MongoDB 错误: {e}")
         return False

@@ -97,9 +97,9 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted } from "vue";
+import { ref, computed, nextTick, watch } from "vue";
 import { useStore } from "vuex";
-import Toast from "@/utils/toast.js";
+import Toast from "../../utils/toast.js";
 
 import { getAllComments, addComment, deleteComment } from "../../utils/apis";
 
@@ -335,13 +335,19 @@ function formatTime(dateString) {
 /**
  * 组件挂载时获取初始评论
  */
-onMounted(async () => {
-  // 获取初始评论
-  const data = await getAllComments(props.articleId);
-  if (Array.isArray(data)) {
-    comments.value = data;
+watch(
+  () => props.articleId,
+  async () => {
+    if (!props.articleId) {
+      return;
+    }
+    // 获取初始评论
+    const data = await getAllComments(props.articleId);
+    if (Array.isArray(data)) {
+      comments.value = data;
+    }
   }
-});
+);
 </script>
 
 <style scoped>

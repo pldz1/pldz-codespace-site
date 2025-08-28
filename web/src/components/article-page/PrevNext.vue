@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { getArticlesByCategory } from "../../utils/apis";
 
 // 定义 props 接收文章信息
@@ -38,7 +38,7 @@ const next = ref(null);
  * 获取上一篇和下一篇文章
  * @param {Object} article 当前文章对象
  */
-onMounted(async () => {
+watch([() => props.id, () => props.category], async () => {
   if (props.category === "" || props.id === "") {
     console.warn("没有分类或ID, 无法获取文章.");
     return;

@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { getArticlesByCategory, getArticlesByTag } from "../../utils/apis";
 
 const props = defineProps({
@@ -42,30 +42,34 @@ function updateRelatedArticles(article) {
   }
 }
 
-onMounted(async () => {
-  const { article } = props;
-  const category = article.meta.category;
-  const tags = article.meta.tags;
+watch(
+  () => props.article,
+  async () => {
+    const { article } = props;
+    const category = article.meta.category;
+    const tags = article.meta.tags;
 
-  // 获取相关文章
-  if (!category && !tags) {
-    return;
-  }
+    // 获取相关文章
+    if (!category && !tags) {
+      return;
+    }
 
-  // 如果有分类，则获取分类相关的文章
-  const allCategoryArticles = await getArticlesByCategory(category);
-  allCategoryArticles.forEach((item) => {
-    updateRelatedArticles(item);
-  });
-
-  // 如果有标签，则获取标签相关的文章
-  tags.forEach(async (item) => {
-    const tmpArticles = await getArticlesByTag(item);
-    tmpArticles.forEach((tmpItem) => {
-      updateRelatedArticles(tmpItem);
+    // 如果有分类，则获取分类相关的文章
+    const allCategoryArticles = await getArticlesByCategory(category);
+    allCategoryArticles.forEach((item) => {
+      updateRelatedArticles(item);
     });
-  });
-});
+
+    // 如果有标签，则获取标签相关的文章
+    tags.forEach(async (item) => {
+      const tmpArticles = await getArticlesByTag(item);
+      tmpArticles.forEach((tmpItem) => {
+        updateRelatedArticles(tmpItem);
+      });
+    });
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

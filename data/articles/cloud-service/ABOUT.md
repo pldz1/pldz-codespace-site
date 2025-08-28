@@ -6,7 +6,7 @@ serialNo: 0
 status: publish
 summary: cloud-service的随笔
 tags: []
-thumbnail:
+thumbnail: null
 title: ABOUT
 ---
 

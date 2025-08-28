@@ -305,8 +305,6 @@ onDeactivated(() => {
     codemirror.value.removeEventListener("paste", (e) => _handleCodemirrorCopy(e));
     codemirror.value = null;
   }
-
-  console.log("EditorPage 组件已卸载");
 });
 </script>
 

@@ -6,7 +6,7 @@ from pymongo import DESCENDING
 from pymongo.errors import PyMongoError
 from core import Logger, ProjectConfig
 from scripts.mongodb.connection import get_article_mongo_collection
-from typedef import T_ArticleData, T_ArticleMeta
+from typedef import T_ArticleData
 
 
 # 定义文章目录路径

@@ -17,11 +17,11 @@
     <!-- 左侧边栏 -->
     <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
       <div class="sidebar-item sidebar-article-chapter" ref="articleChapterRef">
-        <ChapterBlock v-if="isArticleLoaded" :editor-id="state.id" :theme="state.theme"></ChapterBlock>
+        <ChapterBlock :editor-id="state.id" :theme="state.theme"></ChapterBlock>
       </div>
 
       <div class="sidebar-item sidebar-article-related">
-        <RelatedRecom v-if="isArticleLoaded" :article="article"></RelatedRecom>
+        <RelatedRecom :article="article"></RelatedRecom>
       </div>
     </aside>
     <!-- 中间内容区 -->
@@ -37,15 +37,15 @@
       </div>
 
       <div class="article-content">
-        <MdPreview :id="state.id" :theme="state.theme" :codeFoldable="false" v-model="article.content" @onRemount="onRemount" />
+        <MdPreview :id="state.id" :theme="state.theme" :codeFoldable="false" v-model="article.content" />
       </div>
       <div class="next-previous-article">
         <span>其他文章</span>
-        <PrevNext v-if="isArticleLoaded" :id="article.id" :category="article.meta.category"></PrevNext>
+        <PrevNext :id="article.id" :category="article.meta.category"></PrevNext>
       </div>
       <div class="comments-content">
         <span> 评论留言 </span>
-        <CommentForm v-if="isArticleLoaded" :article-id="article.id"></CommentForm>
+        <CommentForm :article-id="article.id"></CommentForm>
       </div>
     </main>
 
@@ -106,7 +106,6 @@ const articleChapterRef = ref(null);
 const store = useStore();
 const isadmin = computed(() => store.state.authState.isadmin);
 
-const isArticleLoaded = ref(false);
 const mdDivRef = ref(null);
 
 const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "" }, views: 0 });
@@ -153,13 +152,7 @@ onActivated(async () => {
   if (!res) return;
 
   article.value = res;
-
-  isArticleLoaded.value = false;
 });
-
-const onRemount = () => {
-  isArticleLoaded.value = true;
-};
 
 /**
  * 监听窗口大小变化，自动关闭移动端菜单

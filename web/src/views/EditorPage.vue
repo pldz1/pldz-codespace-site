@@ -183,8 +183,6 @@ const showUploadImageDialog = ref(false);
 function onShowUploadImageDialog() {
   showUploadImageDialog.value = true;
   showImageUploadConfirm.value = false;
-  const app = document.getElementById("app");
-  if (app) app.style.opacity = "0.04";
 }
 
 /**
@@ -193,8 +191,6 @@ function onShowUploadImageDialog() {
 function onCloseUploadImageDialog() {
   showUploadImageDialog.value = false;
   showImageUploadConfirm.value = false;
-  const app = document.getElementById("app");
-  if (app) app.style.cssText = "";
 }
 
 /**
@@ -309,6 +305,8 @@ onDeactivated(() => {
     codemirror.value.removeEventListener("paste", (e) => _handleCodemirrorCopy(e));
     codemirror.value = null;
   }
+
+  console.log("EditorPage 组件已卸载");
 });
 </script>
 

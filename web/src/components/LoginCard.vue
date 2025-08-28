@@ -221,12 +221,13 @@ async function onUploadAvatar(event) {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 999;
+  z-index: 10030;
   height: 100vh;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .auth-container {

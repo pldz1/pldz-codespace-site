@@ -147,12 +147,13 @@ function onClose() {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 100009;
+  z-index: 10020;
   height: 100%;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .image-upload-container {

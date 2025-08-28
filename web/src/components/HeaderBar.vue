@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
   padding: 0 16px;
   height: 60px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  z-index: 10001;
+  z-index: 10000;
 }
 
 .header--hidden {

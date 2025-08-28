@@ -81,8 +81,6 @@ function onTagsChange() {
  */
 function onShowUploadImageDialog() {
   showUploadImageDialog.value = true;
-  const app = document.getElementById("app");
-  if (app) app.style.opacity = "0.04";
 }
 
 /**
@@ -90,8 +88,6 @@ function onShowUploadImageDialog() {
  */
 function onCloseUploadImageDialog() {
   showUploadImageDialog.value = false;
-  const app = document.getElementById("app");
-  if (app) app.style.cssText = "";
 }
 /**
  * 上传图像回调
@@ -129,7 +125,7 @@ function onClose() {
   display: flex;
   height: 100vh;
   width: 100vw;
-  z-index: 100000;
+  z-index: 10010;
   flex-direction: column;
   justify-content: center;
   align-items: center;

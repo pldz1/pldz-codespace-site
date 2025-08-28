@@ -112,8 +112,6 @@ async function onShowUploadImageDialog() {
 
   errorMessage.value = "";
   imageMgt.value.upload = true;
-  const app = document.getElementById("app");
-  app.style.opacity = 0.41;
 }
 
 /**
@@ -122,8 +120,6 @@ async function onShowUploadImageDialog() {
  */
 async function onCloseUploadImageDialog() {
   imageMgt.value.upload = false;
-  const app = document.getElementById("app");
-  app.style.cssText = "";
 }
 
 /**

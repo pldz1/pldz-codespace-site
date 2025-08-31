@@ -5,6 +5,9 @@ services:
     restart: always
     volumes:
       - ./.dbpath:/data/db
+    # 主机通过 57017 访问
+    ports:
+      - "57017:27017"
 
   backend:
     build:

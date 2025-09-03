@@ -31,6 +31,8 @@ export const toolbars = [
   "-",
   2,
   "-",
+  3,
+  "-",
   "pageFullscreen",
   "fullscreen",
   "preview",

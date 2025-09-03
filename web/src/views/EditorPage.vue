@@ -24,6 +24,9 @@
       <NormalToolbar title="设置元数据" @onClick="onShowMetaDialog">
         <Settings2 class="md-editor-icon" />
       </NormalToolbar>
+      <NormalToolbar title="同步到本地文件" @onClick="onSyncArticle">
+        <FolderSync class="md-editor-icon" />
+      </NormalToolbar>
       <NormalToolbar title="查看文章" @onClick="onGotoArticle">
         <BookOpen class="md-editor-icon" />
       </NormalToolbar>
@@ -50,7 +53,7 @@ import HeaderBar from "../components/HeaderBar.vue";
 import UploadImage from "../components/UploadImage.vue";
 import MetaDialog from "../components/edit-page/MetaDialog.vue";
 
-import { BookOpen, Image, Settings2 } from "lucide-vue-next";
+import { BookOpen, Image, Settings2, FolderSync } from "lucide-vue-next";
 import { MdEditor, NormalToolbar, NormalFooterToolbar } from "md-editor-v3";
 
 import { ref, onActivated, onDeactivated } from "vue";
@@ -58,7 +61,7 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
 import { toolbars, footers } from "../utils/md-editor.js";
-import { getArticle, editArticle, editMeta } from "../utils/apis";
+import { getArticle, editArticle, editMeta, syncArticleToFile } from "../utils/apis";
 import { setCopyImageFile } from "../utils/file-upload.js";
 import Toast from "../utils/toast.js";
 
@@ -83,6 +86,9 @@ const editorText = ref("");
 const articleID = ref("");
 const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "" });
 
+// 必须同步到本地markdown才能离开
+const isSyncFile = ref(true);
+
 /**
  * 更新保存时间
  * 格式化日期为 YYYY/MM/DD HH:mm:ss
@@ -106,6 +112,7 @@ function updateSaveTime(date = new Date()) {
 async function onSaveArticleContent(showToast = true) {
   await editArticle(articleID.value, editorText.value);
   updateSaveTime();
+  isSyncFile.value = false;
 
   if (showToast) {
     Toast.success("文章已保存！");
@@ -145,7 +152,7 @@ async function onChange() {
 async function onGotoArticle() {
   // 跳转到文章详情页
   await onForceUpdate();
-  router.push({ path: `/article/${articleID.value}` });
+  window.open(`/article/${articleID.value}`, "_blank");
 }
 
 /**
@@ -263,6 +270,19 @@ async function onCloseMetaDialog() {
 }
 
 /**
+ * 必须保存到本地才能离开当前界面
+ */
+async function onSyncArticle() {
+  const res = await syncArticleToFile(articleID.value);
+  if (!res) {
+    Toast.error("保存文章到源文件失败，请稍后再试");
+  } else {
+    Toast.success("文章保存成功");
+  }
+  isSyncFile.value = true;
+}
+
+/**
  * 编辑器的初始化函数
  * 在组件挂载时调用，获取文章内容并初始化编辑器
  * @returns {void}
@@ -293,6 +313,12 @@ onActivated(async () => {
   }
 
   updateSaveTime();
+
+  window.addEventListener("beforeunload", async function (e) {
+    if (!isSyncFile.value) {
+      e.preventDefault();
+    }
+  });
 });
 
 /**

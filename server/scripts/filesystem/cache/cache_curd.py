@@ -7,20 +7,29 @@ CACHE_PATH = ProjectConfig.get_cache_path()
 
 class CacheCurdHandle:
     """
-    缓存文件的增删改查处理类"""
+    缓存文件的增删改查处理类
+    """
 
     @classmethod
     def get_all_cache_files(cls) -> list:
         """
-        获取所有缓存文件的列表
+        获取所有缓存文件的列表, 返回文件名和文件日期的对象数组
+        :return: [{"filename": "file1.txt", "modified_time": 1234567890}, ...]
         """
-        try:
-            files = os.listdir(CACHE_PATH)
-            # 只返回文件名和后缀名
-            return [f for f in files if os.path.isfile(os.path.join(CACHE_PATH, f))]
-        except Exception as e:
-            Logger.error(f"获取缓存文件列表失败: {e}")
-            return []
+        if not os.path.exists(CACHE_PATH):
+            Logger.warning(f"缓存目录不存在, 创建目录: {CACHE_PATH}")
+            os.makedirs(CACHE_PATH)
+
+        files = []
+        for filename in os.listdir(CACHE_PATH):
+            file_path = os.path.join(CACHE_PATH, filename)
+            if os.path.isfile(file_path):
+                file_info = {
+                    "filename": filename,
+                    "modified_time": os.path.getmtime(file_path)
+                }
+                files.append(file_info)
+        return files
 
     @classmethod
     def get_cache_file(cls, filename: str) -> str:

@@ -17,7 +17,7 @@
           <div class="row-serial">{{ index + 1 }}</div>
           <!-- 缓存文件名字 -->
           <div class="row-content" style="flex-direction: row">
-            <input type="text" :value="cache" readonly />
+            <input type="text" :value="cache.modified_time + ' | ' + cache.filename" readonly />
             <div class="item-actions" style="justify-content: right">
               <button @click="onDownloadCacheFile(cache)" style="padding: 8px; width: 54px; background-color: #1890ff">下载</button>
               <button @click="onDeleteCacheFile(cache)" style="padding: 8px; width: 54px; margin-left: 8px">删除</button>
@@ -105,7 +105,15 @@ async function onUploadCacheFile() {
  */
 async function onSelectCacheManagement() {
   const res = await getAllCache();
-  if (res) {
+  if (Array.isArray(res)) {
+    // 把res里的对象的根据modified_time按照日期排序,并且改成年-月-日 时:分:秒格式
+    res
+      .sort((a, b) => b.modified_time - a.modified_time)
+      .forEach((item) => {
+        const d = new Date(item.modified_time * 1000);
+        item.modified_time = d.toISOString().replace("T", " ").split(".")[0];
+        // 结果: 2025-08-15 21:53:17
+      });
     cacheMgt.value = res;
     Toast.success("缓存数据加载成功");
     errorMessage.value = "";

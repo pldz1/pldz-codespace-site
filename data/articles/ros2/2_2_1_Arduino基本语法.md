@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 102
 status: publish
 summary: Arduino单片机的基本语法.

@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: cloud-service
+csdn: ''
 date: '2025-08-24'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 5
 status: publish
 summary: frp 更适合轻量级的端口暴露与远程调试，而 OpenVPN/ZeroTier/Tailscale 更像是把你“拉进”内网，适合完整网络互通

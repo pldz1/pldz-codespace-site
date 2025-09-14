@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: others
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 0
 status: publish
 summary: 一些比较乱的内容,记录在这里

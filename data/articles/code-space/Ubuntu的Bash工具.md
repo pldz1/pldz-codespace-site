@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: code-space
+csdn: ''
 date: '2025-01-09'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 3
 status: publish
 summary: 简单的更新一点这个指令bash脚本.

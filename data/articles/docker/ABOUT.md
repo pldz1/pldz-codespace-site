@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: docker
+csdn: ''
 date: '2025-08-05'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 0
 status: publish
 summary: docker的随笔

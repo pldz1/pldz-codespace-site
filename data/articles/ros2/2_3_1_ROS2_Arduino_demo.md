@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 3
 status: publish
 summary: 正式开始介绍ROS2和arduino通讯实现的方式 -- 直接获取串口数据再解析.

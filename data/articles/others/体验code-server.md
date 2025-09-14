@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: others
+csdn: ''
 date: '2025-07-28'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 2
 status: publish
 summary: 体验code-server, 搭建在线的vscode开发环境.

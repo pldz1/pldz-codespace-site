@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 4
 status: publish
 summary: MircoROS初步体验, 搭建一个MircoROS环境.

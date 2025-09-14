@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 202
 status: publish
 summary: 用仿真环境快速体验ROS2的navigation.

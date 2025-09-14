@@ -13,6 +13,10 @@ class T_ArticleMeta(TypedDict):
     - date: 文章发布日期
     - thumbnail: 缩略图链接
     - summary: 文章摘要
+    - csdn: CSDN 链接
+    - juejin: 掘金链接
+    - github: GitHub 链接
+    - gitee: Gitee 链接
     """
     title: str
     author: str
@@ -23,6 +27,10 @@ class T_ArticleMeta(TypedDict):
     date: str
     thumbnail: str
     summary: str
+    csdn: str
+    juejin: str
+    github: str
+    gitee: str
 
 
 class T_ArticleData(TypedDict):

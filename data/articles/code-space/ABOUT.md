@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: code-space
+csdn: ''
 date: '2025-01-08'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 0
 status: publish
 summary: 存放各个博客网页的推送文章

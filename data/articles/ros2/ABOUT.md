@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 0
 status: publish
 summary: ROS2系列的开篇.

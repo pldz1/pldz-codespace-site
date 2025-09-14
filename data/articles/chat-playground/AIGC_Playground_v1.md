@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: chat-playground
+csdn: ''
 date: '2025-05-08'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 4
 status: publish
 summary: chat-playground的前言部分内容, 主要是推荐内容的导读页。

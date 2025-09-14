@@ -1,12 +1,16 @@
 ---
 author: admin@pldz1.com
 category: others
-date: 2025-09-01
+csdn: ''
+date: '2025-09-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 99999
 status: publish
-summary:
+summary: null
 tags: []
-thumbnail:
+thumbnail: null
 title: npm安装electron的踩坑
 ---
 

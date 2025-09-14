@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: code-space
+csdn: ''
 date: '2025-01-08'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 1
 status: publish
 summary: VUE3 来做这个静态的网站.

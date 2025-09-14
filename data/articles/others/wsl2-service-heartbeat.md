@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: others
+csdn: ''
 date: '2025-08-04'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 3
 status: publish
 summary: 在每个整点（00 分）检查一次服务是不是活着，如果挂了就自动重启

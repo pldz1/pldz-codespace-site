@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: cloud-service
+csdn: ''
 date: '2025-08-20'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 2
 status: publish
 summary: 快速用公网ip和端口搭建云服务

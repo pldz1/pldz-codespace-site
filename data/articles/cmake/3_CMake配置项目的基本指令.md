@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: cmake
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 3
 status: publish
 summary: 介绍怎么用CMake配置一个项目

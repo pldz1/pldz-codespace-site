@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: chat-playground
+csdn: ''
 date: '2025-02-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 3
 status: publish
 summary: 简单的Python全代理服务器:支持 HTTP 和 WebSocket 请求转发。通过aiohttp库实现异步处理，有效支持高并发请求，适用于需要代理服务的场景.

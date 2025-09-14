@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: chat-playground
+csdn: ''
 date: '2025-01-12'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 2
 status: publish
 summary: 用 markdown-it 这个库在 HTML 上动态更新 markdown 内容(不是重新刷新).

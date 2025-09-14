@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: docker
+csdn: ''
 date: '2025-08-05'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 1
 status: publish
 summary: 本章整合常见的 Dockerfile 使用与容器管理实战经验, 重点涵盖Dockerfile 基础与关键指令, docker build 与常用选项,docker

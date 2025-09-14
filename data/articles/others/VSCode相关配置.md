@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: others
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 1
 status: publish
 summary: VSCode相关配置, 工欲善其事必先利其器.

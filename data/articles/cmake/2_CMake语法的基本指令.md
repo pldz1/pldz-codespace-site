@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: cmake
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 2
 status: publish
 summary: CMake的最简单的基础的语法.

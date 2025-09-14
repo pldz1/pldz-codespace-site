@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 201
 status: publish
 summary: Docker搭建ROS2环境, 和Docker指令的熟悉.

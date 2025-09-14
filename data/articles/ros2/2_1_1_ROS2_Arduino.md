@@ -1,7 +1,11 @@
 ---
 author: admin@pldz1.com
 category: ros2
+csdn: ''
 date: '2025-01-01'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 101
 status: publish
 summary: ROS2和Arduino通讯的介绍, 两个通讯可能实现的方式.

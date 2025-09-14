@@ -30,7 +30,9 @@ def set_article_content_by_id(article_id: str, content: str) -> bool:
         return False
 
 
-def set_article_meta_by_id(id: str, title: str, category: str, serialNo: int, tags: List[str], date: str, thumbnail: str, summary: str) -> bool:
+def set_article_meta_by_id(
+        id: str, title: str, category: str, serialNo: int, tags: List[str],
+        date: str, thumbnail: str, summary: str, csdn: str, juejin: str, github: str, gitee: str) -> bool:
     """
     根据文章的ID编辑文章元数据
     Args:
@@ -42,6 +44,10 @@ def set_article_meta_by_id(id: str, title: str, category: str, serialNo: int, ta
         date (str): 文章日期
         thumbnail (str): 缩略图链接
         summary (str): 文章摘要
+        csdn (str): CSDN链接
+        juejin (str): 掘金链接
+        github (str): GitHub链接
+        gitee (str): Gitee链接
     Returns:
         bool: 编辑后的文章数据
     """
@@ -58,7 +64,11 @@ def set_article_meta_by_id(id: str, title: str, category: str, serialNo: int, ta
                     'meta.tags': tags,
                     'meta.date': date,
                     'meta.thumbnail': thumbnail,
-                    'meta.summary': summary
+                    'meta.summary': summary,
+                    'meta.csdn': csdn,
+                    'meta.juejin': juejin,
+                    'meta.github': github,
+                    'meta.gitee': gitee
                 }
             }
         )

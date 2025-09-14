@@ -56,8 +56,12 @@
   </div>
 
   <!-- 反馈按钮 -->
-  <div class="to-top" @click="onToTop">⏫</div>
-  <div class="to-bottom" @click="onToBottom">💬</div>
+  <div class="to-top top-icon" id="to-top" @click="onToTop"></div>
+  <div class="to-bottom message-icon" id="to-bottom" @click="onToBottom"></div>
+  <div v-show="article.meta.csdn" class="to-csdn csdn-icon" id="to-csdn" @click="onToCsdn"></div>
+  <div v-show="article.meta.juejin" class="to-juejin juejin-icon" id="to-juejin" @click="onToJuejin"></div>
+  <div v-show="article.meta.github" class="to-github github-icon" id="to-github" @click="onToGithub"></div>
+  <div v-show="article.meta.gitee" class="to-gitee gitee-icon" id="to-gitee" @click="onToGitee"></div>
 
   <!-- 底部的信息栏 -->
   <FooterBar></FooterBar>
@@ -72,6 +76,8 @@ import ChapterBlock from "../components/article-page/ChapterBlock.vue";
 import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
 import RelatedRecom from "../components/article-page/RelatedRecom.vue";
+
+import ToolTip from "../utils/tooltip.js";
 
 import { ref, onActivated, watch, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
@@ -95,8 +101,6 @@ const state = reactive({
   id: "my-editor",
 });
 
-const scrollElement = document.documentElement;
-
 const isMobileMenuOpen = ref(false);
 const mainSidebarContainerRef = ref(null);
 const mobileSidebarContainerRef = ref(null);
@@ -106,9 +110,7 @@ const articleChapterRef = ref(null);
 const store = useStore();
 const isadmin = computed(() => store.state.authState.isadmin);
 
-const mdDivRef = ref(null);
-
-const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "" }, views: 0 });
+const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
@@ -152,6 +154,8 @@ onActivated(async () => {
   if (!res) return;
 
   article.value = res;
+
+  ToolTip.loadArticleTooltip();
 });
 
 /**
@@ -242,7 +246,11 @@ watch(
 }
 
 .to-top,
-.to-bottom {
+.to-bottom,
+.to-csdn,
+.to-juejin,
+.to-github,
+.to-gitee {
   position: fixed;
   width: 50px;
   height: 50px;
@@ -260,9 +268,65 @@ watch(
   bottom: 20px;
 }
 
+.top-icon {
+  background: url("../assets/svgs/top-48.svg") no-repeat center;
+  background-size: 60%;
+  background-color: #1e80ff5a;
+}
+
 .to-bottom {
   right: 20px;
   bottom: 80px;
+}
+
+.message-icon {
+  background: url("../assets/svgs/message-48.svg") no-repeat center;
+  background-size: 60%;
+  background-color: #1e80ff5a;
+}
+
+.to-csdn {
+  right: 20px;
+  bottom: 140px;
+}
+
+.csdn-icon {
+  background: url("../assets/svgs/csdn-48.svg") no-repeat center;
+  background-size: 60%;
+  background-color: #1e80ff5a;
+}
+
+.to-juejin {
+  right: 20px;
+  bottom: 200px;
+}
+
+.juejin-icon {
+  background: url("../assets/svgs/juejin-48.svg") no-repeat center;
+  background-size: 60%;
+  background-color: #1e80ff5a;
+}
+
+.to-github {
+  right: 20px;
+  bottom: 260px;
+}
+
+.github-icon {
+  background: url("../assets/svgs/github-48.svg") no-repeat center;
+  background-size: 60%;
+  background-color: #1e80ff5a;
+}
+
+.to-gitee {
+  right: 20px;
+  bottom: 320px;
+}
+
+.gitee-icon {
+  background: url("../assets/svgs/gitee-48.svg") no-repeat center;
+  background-size: 60%;
+  background-color: #1e80ff5a;
 }
 
 /* 响应式设计 */

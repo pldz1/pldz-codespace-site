@@ -84,7 +84,7 @@ const updateTime = ref("");
 // 编辑器内容和文章元数据
 const editorText = ref("");
 const articleID = ref("");
-const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "" });
+const articleMeta = ref({ title: "", thumbnail: "", category: "", tags: "", date: "", serialNo: 0, summary: "", csdn: "", juejin: "", github: "", gitee: "" });
 
 // 必须同步到本地markdown才能离开
 const isSyncFile = ref(true);
@@ -262,10 +262,10 @@ async function onSaveMeta(data) {
 /**
  * 关闭元数据对话框
  */
-async function onCloseMetaDialog() {
+async function onCloseMetaDialog(data) {
   Toast.info("正在保存元数据...");
   showMetaDialog.value = false;
-  await onSaveMeta();
+  await onSaveMeta(data);
   Toast.success("元数据已保存！");
 }
 

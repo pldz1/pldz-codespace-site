@@ -23,6 +23,10 @@ def build_all_article_format(art: T_ArticleData) -> T_ArticleInfo:
         views=art.get('views', 0),
         date=meta.get('date', ''),
         path=art.get('path', ''),
+        csdn=meta.get('csdn', ''),
+        juejin=meta.get('juejin', ''),
+        github=meta.get('github', ''),
+        gitee=meta.get('gitee', '')
     )
 
 

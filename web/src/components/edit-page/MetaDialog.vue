@@ -23,6 +23,22 @@
           <input class="meta-setting-input" v-model="articleTags" placeholder="逗号分隔" @change="onTagsChange" />
         </div>
         <div class="meta-setting-item">
+          <span>CSDN</span>
+          <input class="meta-setting-input" v-model="articleMeta.csdn" placeholder="请输入CSDN链接" />
+        </div>
+        <div class="meta-setting-item">
+          <span>掘金</span>
+          <input class="meta-setting-input" v-model="articleMeta.juejin" placeholder="请输入掘金链接" />
+        </div>
+        <div class="meta-setting-item">
+          <span>GitHub</span>
+          <input class="meta-setting-input" v-model="articleMeta.github" placeholder="请输入GitHub链接" />
+        </div>
+        <div class="meta-setting-item">
+          <span>Gitee</span>
+          <input class="meta-setting-input" v-model="articleMeta.gitee" placeholder="请输入Gitee链接" />
+        </div>
+        <div class="meta-setting-item">
           <span>总结</span>
           <textarea class="meta-setting-textarea" v-model="articleMeta.summary" placeholder="一句话总结" type="textarea" rows="4"></textarea>
         </div>
@@ -61,6 +77,10 @@ const props = defineProps({
       date: "",
       serialNo: 0,
       summary: "",
+      csdn: "",
+      juejin: "",
+      github: "",
+      gitee: "",
     }),
   },
 });
@@ -96,15 +116,6 @@ function onCloseUploadImageDialog() {
 function onUploadImage(data) {
   articleMeta.value.thumbnail = data?.url;
   showUploadImageDialog.value = false;
-}
-
-/**
- * 监听元数据变化
- * 更新本地状态
- */
-function onClick() {
-  articleMeta.value = { ...props.meta };
-  articleTags.value = JSON.stringify(props.meta?.tags || []);
 }
 
 /**

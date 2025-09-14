@@ -51,9 +51,13 @@ class ArticleHandler:
             tags: List[str],
             date: str,
             thumbnail: str,
-            summary: str
+            summary: str,
+            csdn: str,
+            juejin: str,
+            github: str,
+            gitee: str
     ) -> bool:
-        return set_article_meta_by_id(id, title, category, serialNo, tags, date, thumbnail, summary)
+        return set_article_meta_by_id(id, title, category, serialNo, tags, date, thumbnail, summary, csdn, juejin, github, gitee)
 
     @classmethod
     def get_latest_serial_no(cls, category: str) -> int:

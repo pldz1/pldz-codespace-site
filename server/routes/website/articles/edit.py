@@ -38,6 +38,10 @@ class T_Article_MetaEdit_Request(BaseModel):
     date: str = ""
     thumbnail: str = ""
     summary: str = ""
+    csdn: str = ""
+    juejin: str = ""
+    github: str = ""
+    gitee: str = ""
 
 
 async def edit_article_meta(article_meta: T_Article_MetaEdit_Request, user: dict):
@@ -57,7 +61,11 @@ async def edit_article_meta(article_meta: T_Article_MetaEdit_Request, user: dict
         article_meta.tags,
         article_meta.date,
         article_meta.thumbnail,
-        article_meta.summary
+        article_meta.summary,
+        article_meta.csdn,
+        article_meta.juejin,
+        article_meta.github,
+        article_meta.gitee
     )
     return T_Articl_Edit_Response(data=res)
 

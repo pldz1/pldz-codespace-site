@@ -13,6 +13,9 @@ import { lineNumbers } from "@codemirror/view";
 // 引入编辑器的全部样式
 import "md-editor-v3/lib/style.css";
 
+// 引入 tippy.js 的样式
+import "tippy.js/dist/tippy.css";
+
 // 异步初始化动作
 const initializeApp = async () => {
   // 配置编辑界面显示行号和字数

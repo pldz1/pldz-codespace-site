@@ -13,6 +13,10 @@ class T_ArticleInfo(TypedDict):
     - tags: 文章标签列表
     - views: 文章浏览量
     - date: 文章发布日期
+    - csdn: CSDN 链接
+    - juejin: 掘金链接
+    - github: GitHub 链接
+    - gitee: Gitee 链接
     """
     id: str
     title: str
@@ -24,3 +28,7 @@ class T_ArticleInfo(TypedDict):
     views: int
     date: str
     path: str
+    csdn: str
+    juejin: str
+    github: str
+    gitee: str

@@ -15,8 +15,9 @@ const router = createRouter({
       component: HomePage,
     },
     {
-      path: "/admin",
+      path: "/admin/:id?",
       component: AdminPage,
+      props: true,
     },
     {
       path: "/whiteboard",

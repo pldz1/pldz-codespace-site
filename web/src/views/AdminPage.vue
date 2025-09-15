@@ -87,12 +87,31 @@ import NavMgt from "../components/admin-page/NavMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
 import GitPlugin from "../components/admin-page/GitPlugin.vue";
 
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { ref, onMounted, watch } from "vue";
 import { getAllCategories } from "../utils/apis";
 
+const props = defineProps({
+  id: {
+    type: String,
+    required: true,
+    default: "",
+  },
+});
+
+const routeMap = {
+  usermgt: "用户管理",
+  articlemgt: "新增文章",
+  categorymgt: "专栏管理",
+  imagemgt: "图片管理",
+  navmgt: "网站导航管理",
+  cachemgt: "缓存资源管理",
+  gitplugin: "Git插件",
+};
+
 const store = useStore();
+const route = useRoute();
 const router = useRouter();
 
 const backgroundColorList = [
@@ -128,6 +147,8 @@ function onActiveCard(category) {
 
   // 设置当前活动分类
   activeCard.value = category;
+  const key = Object.keys(routeMap).find((k) => routeMap[k] === category);
+  router.push(`/admin/${key}`);
 }
 
 /**
@@ -164,8 +185,27 @@ async function onOnUpdateCategories() {
   }
 }
 
+// --- 监听路由参数变化 ---
+function syncActiveFromRoute(id) {
+  if (id && routeMap[id]) {
+    activeCard.value = routeMap[id];
+  } else {
+    activeCard.value = "用户管理";
+    // 保持 URL 规范
+    router.replace("/admin/usermgt");
+  }
+}
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    syncActiveFromRoute(newId);
+  },
+  { immediate: true }
+);
+
 /**
- * 在组件挂载时获取所有文章和分类数据和标签统计数据
+ * 在组件激活时获取所有文章和分类数据和标签统计数据
  */
 onMounted(async () => {
   // 检查是否为管理员

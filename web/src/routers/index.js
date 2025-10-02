@@ -5,6 +5,7 @@ import EditorPage from "../views/EditorPage.vue";
 import NotFound from "../views/NotFound.vue";
 import AdminPage from "../views/AdminPage.vue";
 import WhiteBoard from "../views/WhiteBoard.vue";
+import CodespacePage from "../views/CodespacePage.vue";
 
 const router = createRouter({
   // 使用 HTML5 的 History 模式
@@ -22,6 +23,10 @@ const router = createRouter({
     {
       path: "/whiteboard",
       component: WhiteBoard,
+    },
+    {
+      path: "/codespace",
+      component: CodespacePage,
     },
     {
       // 动态路由，用 :id 捕获文章 ID

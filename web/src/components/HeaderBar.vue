@@ -14,6 +14,9 @@
           <li :class="['nav-item', routeName === '首页' ? 'active' : '']">
             <a href="/"> 首页 </a>
           </li>
+          <li :class="['nav-item', routeName === 'Code Space' ? 'active' : '']">
+            <a href="/codespace"> Code Space </a>
+          </li>
           <li :class="['nav-item', routeName === '白板' ? 'active' : '']">
             <a href="/whiteboard"> 白板 </a>
           </li>

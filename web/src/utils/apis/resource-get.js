@@ -15,3 +15,11 @@ export async function getAllAdBannerItem() {
 export async function getNavigation() {
   return apiGet(`${webSitePrefix}/navs/all`);
 }
+
+/**
+ *  获取全部的代码空间项目
+ * @returns {Promise<Array>} - 返回代码空间项目列表
+ */
+export async function getAllACodeSpace() {
+  return apiGet(`${webSitePrefix}/codespace/all`);
+}

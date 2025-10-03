@@ -2,59 +2,51 @@
   <!-- 顶部导航栏 -->
   <HeaderBar @toggle-mobile-menu="onToggleMobileMenu" />
 
-  <div class="home">
-    <div class="container">
-      <div class="home-content">
-        <!-- 卡片 -->
-        <article v-for="c in mockData" :key="c.title || c.url || c.previewgif" class="code-space-card">
-          <!-- 标题 -->
-          <header class="preview-title" :title="c.title">
-            <span>{{ c.title || "未命名" }}</span>
-          </header>
+  <div class="main-container">
+    <div class="home-content">
+      <!-- 卡片 -->
+      <article v-for="c in mockData" :key="c.title || c.url || c.previewgif" class="code-space-card">
+        <!-- 标题 -->
+        <header class="preview-title" :title="c.title">
+          <span>{{ c.title || "未命名" }}</span>
+        </header>
 
-          <!-- 媒体：缩略图 / 悬停切换 GIF -->
-          <figure class="preview-gif" @mouseenter="hovered = c.url || c.previewgif || c.thumbnail" @mouseleave="hovered = null">
-            <img :src="mediaSrc(c)" :alt="c.title || '预览图'" loading="lazy" decoding="async" @error="(e) => handleImgError(e, c)" />
-          </figure>
+        <!-- 媒体：缩略图 / 悬停切换 GIF -->
+        <figure class="preview-gif" @mouseenter="hovered = c.url || c.previewgif || c.thumbnail" @mouseleave="hovered = null">
+          <img :src="mediaSrc(c)" :alt="c.title || '预览图'" loading="lazy" decoding="async" @error="(e) => handleImgError(e, c)" />
+        </figure>
 
-          <!-- 元信息：日期 + 目录 -->
-          <div class="card-meta">
-            <time v-if="c.date" class="chip" :datetime="c.date">{{ fmtDate(c.date) }}</time>
-            <span v-if="c.folder" class="chip chip-muted" :title="c.folder">{{ c.folder }}</span>
-          </div>
+        <!-- 元信息：日期 + 目录 -->
+        <div class="card-meta">
+          <time v-if="c.date" class="chip" :datetime="c.date">{{ fmtDate(c.date) }}</time>
+          <span v-if="c.folder" class="chip chip-muted" :title="c.folder">{{ c.folder }}</span>
+        </div>
 
-          <!-- 描述 -->
-          <p v-if="c.description" class="preview-description" :title="c.description">
-            {{ c.description }}
-          </p>
+        <!-- 描述 -->
+        <p v-if="c.description" class="preview-description" :title="c.description">
+          {{ c.description }}
+        </p>
 
-          <!-- 操作 -->
-          <div class="actions">
-            <button
-              class="btn"
-              :aria-label="`打开预览：${c.title}`"
-              @click="onGoPreview(c.url)"
-              :disabled="!c.url"
-              :title="c.url ? '打开预览' : '暂无预览地址'"
-            >
-              冲 🚀
-            </button>
+        <!-- 操作 -->
+        <div class="actions">
+          <button class="btn" :aria-label="`打开预览：${c.title}`" @click="onGoPreview(c.url)" :disabled="!c.url" :title="c.url ? '打开预览' : '暂无预览地址'">
+            冲 🚀
+          </button>
 
-            <a
-              v-if="c.sourcelink"
-              class="btn btn-secondary"
-              :href="c.sourcelink"
-              target="_blank"
-              rel="noopener noreferrer"
-              :aria-label="`查看源码：${c.title}`"
-              title="查看源码"
-            >
-              源码 🌐
-            </a>
-            <button v-else class="btn btn-secondary" disabled title="暂无源码">源码 🌐</button>
-          </div>
-        </article>
-      </div>
+          <a
+            v-if="c.sourcelink"
+            class="btn btn-secondary"
+            :href="c.sourcelink"
+            target="_blank"
+            rel="noopener noreferrer"
+            :aria-label="`查看源码：${c.title}`"
+            title="查看源码"
+          >
+            源码 🌐
+          </a>
+          <button v-else class="btn btn-secondary" disabled title="暂无源码">源码 🌐</button>
+        </div>
+      </article>
     </div>
   </div>
 
@@ -67,7 +59,7 @@ import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
 
 import { ref, onMounted } from "vue";
-import { getAllAdBannerItem } from "../utils/apis";
+import { getAllACodeSpace } from "../utils/apis";
 
 /**
  * 单个配置项
@@ -127,13 +119,15 @@ const onToggleMobileMenu = () => {
  * @returns {Promise<Array>} 返回codespace配置项数组
  */
 onMounted(async () => {
-  const res = await getAllAdBannerItem();
+  const res = await getAllACodeSpace();
   mockData.value = res || [];
 });
 </script>
 
 <style scoped>
-/* 设计令牌 */
+@import url("../assets/views/main-container.css");
+@import url("../assets/views/mobile-overlay.css");
+
 :root {
   --bg: #f7f9fa;
   --text: #0f172a;
@@ -145,36 +139,11 @@ onMounted(async () => {
   --gap: 24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1220;
-    --text: #e5e7eb;
-    --muted: #9aa4b2;
-    --card-bg: #111827;
-    --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  }
-}
-
-.home {
-  min-height: 100dvh;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.container {
-  --side: 20px;
-  padding: 48px var(--side);
-  max-width: 1200px;
-  margin: 0 auto;
-  animation: fadeInUp 500ms ease both;
-}
-
 /* 默认 3 列 */
 .home-content {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--gap);
-  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 
 /* 卡片 */
@@ -186,6 +155,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   transition: transform 160ms ease, box-shadow 160ms ease;
+  max-width: 440px;
 }
 
 .code-space-card:hover {
@@ -247,7 +217,6 @@ onMounted(async () => {
   line-height: 1.55;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2; /* 两行省略 */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -313,47 +282,12 @@ onMounted(async () => {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .container {
-    animation: none;
-  }
   .code-space-card {
     transition: none;
   }
 }
 
-/* ───── 你的断点体系 ───── */
-@media (max-width: 1200px) {
-  .container {
-    max-width: 1064px;
-  }
-  .home-content {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 22px;
-  }
-}
-
-@media (max-width: 992px) {
-  .container {
-    max-width: 920px;
-    padding-top: 40px;
-    padding-bottom: 40px;
-  }
-  .home-content {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-}
-
 @media (max-width: 768px) {
-  .container {
-    --side: 16px;
-    padding-top: 32px;
-    padding-bottom: 32px;
-  }
-  .home-content {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
   .preview-title {
     font-size: 16px;
   }
@@ -364,7 +298,7 @@ onMounted(async () => {
   }
   .preview-gif {
     aspect-ratio: 4 / 3;
-  } /* 横屏时更扁，避免占满高度 */
+  }
 
   .to-bottom,
   .to-top {
@@ -386,15 +320,9 @@ onMounted(async () => {
     flex-wrap: wrap;
     row-gap: 6px;
   }
-  .container {
-    --side: 14px;
-  }
 }
 
 @media (max-width: 768px) and (orientation: landscape) {
-  .home-content {
-    gap: 14px;
-  }
   .code-space-card {
     box-shadow: 0 4px 16px rgba(2, 6, 23, 0.08);
   }

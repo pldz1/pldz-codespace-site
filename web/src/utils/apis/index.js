@@ -1,5 +1,5 @@
-export * from "./nav-get.js";
-export * from "./nav-post.js";
+export * from "./resource-get.js";
+export * from "./resource-post.js";
 export * from "./comment-post.js";
 export * from "./whiteboard-post.js";
 export * from "./request.js";

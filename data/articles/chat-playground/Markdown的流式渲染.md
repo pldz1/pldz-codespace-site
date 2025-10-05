@@ -1,11 +1,11 @@
 ---
 author: admin@pldz1.com
 category: chat-playground
-csdn: ''
+csdn: 'https://blog.csdn.net/qq_42727752/article/details/145092638'
 date: '2025-01-12'
 gitee: ''
-github: ''
-juejin: ''
+github: 'https://github.com/pldz1/demos/tree/main/sse_markdown'
+juejin: 'https://juejin.cn/post/7458656534718316595'
 serialNo: 2
 status: publish
 summary: 用 markdown-it 这个库在 HTML 上动态更新 markdown 内容(不是重新刷新).

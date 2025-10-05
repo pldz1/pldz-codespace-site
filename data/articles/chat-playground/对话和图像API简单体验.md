@@ -1,11 +1,11 @@
 ---
 author: admin@pldz1.com
 category: chat-playground
-csdn: ''
+csdn: 'https://blog.csdn.net/qq_42727752/article/details/145082786'
 date: '2025-01-11'
 gitee: ''
-github: ''
-juejin: ''
+github: 'https://github.com/pldz1/demos/tree/main/learn_chat_image_api'
+juejin: 'https://juejin.cn/post/7458496437614788646'
 serialNo: 1
 status: publish
 summary: 前言 JS 和 Python 是比较受欢迎的两个调用 OpenAI 对话 API 的两个库, 这里 简单记录这两个库对 OpenAI 的对话(Chat)和图像(Image)的使用.

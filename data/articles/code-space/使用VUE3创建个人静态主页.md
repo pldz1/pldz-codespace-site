@@ -1,11 +1,11 @@
 ---
 author: admin@pldz1.com
 category: code-space
-csdn: ''
+csdn: 'https://blog.csdn.net/qq_42727752/article/details/144980871'
 date: '2025-01-08'
 gitee: ''
 github: ''
-juejin: ''
+juejin: 'https://juejin.cn/post/7456991599350251532'
 serialNo: 1
 status: publish
 summary: VUE3 来做这个静态的网站.

@@ -4,7 +4,7 @@ category: chat-playground
 csdn: ''
 date: '2025-02-01'
 gitee: ''
-github: ''
+github: 'https://github.com/pldz1/demos/tree/main/python_proxy'
 juejin: ''
 serialNo: 3
 status: publish

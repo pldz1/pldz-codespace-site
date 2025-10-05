@@ -1,11 +1,11 @@
 ---
 author: admin@pldz1.com
 category: code-space
-csdn: ''
+csdn: 'https://blog.csdn.net/qq_42727752/article/details/145044058'
 date: '2025-01-09'
 gitee: ''
 github: ''
-juejin: ''
+juejin: 'https://juejin.cn/post/7457811062940434447'
 serialNo: 3
 status: publish
 summary: 简单的更新一点这个指令bash脚本.

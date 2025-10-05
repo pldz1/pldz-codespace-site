@@ -260,7 +260,7 @@ watch(
   justify-content: center;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(30, 128, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .to-top {
@@ -271,7 +271,6 @@ watch(
 .top-icon {
   background: url("../assets/svgs/top-48.svg") no-repeat center;
   background-size: 60%;
-  background-color: #1e80ff5a;
 }
 
 .to-bottom {
@@ -282,7 +281,6 @@ watch(
 .message-icon {
   background: url("../assets/svgs/message-48.svg") no-repeat center;
   background-size: 60%;
-  background-color: #1e80ff5a;
 }
 
 .to-csdn {
@@ -293,7 +291,6 @@ watch(
 .csdn-icon {
   background: url("../assets/svgs/csdn-48.svg") no-repeat center;
   background-size: 60%;
-  background-color: #1e80ff5a;
 }
 
 .to-juejin {
@@ -304,7 +301,6 @@ watch(
 .juejin-icon {
   background: url("../assets/svgs/juejin-48.svg") no-repeat center;
   background-size: 60%;
-  background-color: #1e80ff5a;
 }
 
 .to-github {
@@ -315,7 +311,6 @@ watch(
 .github-icon {
   background: url("../assets/svgs/github-48.svg") no-repeat center;
   background-size: 60%;
-  background-color: #1e80ff5a;
 }
 
 .to-gitee {
@@ -326,7 +321,6 @@ watch(
 .gitee-icon {
   background: url("../assets/svgs/gitee-48.svg") no-repeat center;
   background-size: 60%;
-  background-color: #1e80ff5a;
 }
 
 /* 响应式设计 */

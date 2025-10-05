@@ -42,14 +42,35 @@
           <div class="row-content">
             <div class="row-block"><span>标题: </span><input type="text" v-model="ad.title" placeholder="请输入广告标题" @change="onSetAds" /></div>
             <div class="row-block"><span>连接: </span><input type="url" v-model="ad.url" placeholder="https://example.com" @change="onSetAds" /></div>
-            <div class="row-block"><span>文件夹: </span><input type="text" v-model="ad.folder" placeholder="请输入广告文件夹" @change="onSetAds" /></div>
-            <div class="row-block"><span>缩略图: </span><input type="text" v-model="ad.thumbnail" placeholder="请输入广告缩略图" @change="onSetAds" /></div>
-            <div class="row-block"><span>预览图: </span><input type="text" v-model="ad.previewgif" placeholder="请输入广告预览图" @change="onSetAds" /></div>
-            <div class="row-block"><span>源码连接: </span><input type="text" v-model="ad.sourcelink" placeholder="请输入广告源链接" @change="onSetAds" /></div>
-            <div class="row-block"><span>日期: </span><input type="text" v-model="ad.date" placeholder="请输入广告日期" @change="onSetAds" /></div>
             <div class="row-block"><span>描述: </span><input type="text" v-model="ad.description" placeholder="请输入广告描述" @change="onSetAds" /></div>
             <div class="row-actions" style="justify-content: right">
               <button @click="onDeleteAdItem(index)">删除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Codespace内容 -->
+      <div class="content-item">
+        <span>CodeSpace内容</span>
+        <button class="btn btn-primary" @click="onAddCodeSpaceItem">新增CodeSpace项</button>
+        <div class="content-item" style="border-top: 1px solid #e4e6ea; margin-top: 8px"></div>
+      </div>
+      <div class="row-list">
+        <div class="row-item" v-for="(cs, index) in webNavAdMgt.codespaces" :key="index">
+          <!-- 序号 -->
+          <div class="row-serial">{{ index + 1 }}</div>
+
+          <div class="row-content">
+            <div class="row-block"><span>标题: </span><input type="text" v-model="cs.title" placeholder="标题" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>连接: </span><input type="url" v-model="cs.url" placeholder="https://example.com" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>文件夹: </span><input type="text" v-model="cs.folder" placeholder="文件夹" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>缩略图: </span><input type="text" v-model="cs.thumbnail" placeholder="缩略图" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>预览图: </span><input type="text" v-model="cs.previewgif" placeholder="预览图" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>源码连接: </span><input type="text" v-model="cs.sourcelink" placeholder="源码连接" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>日期: </span><input type="text" v-model="cs.date" placeholder="日期" @change="onSetCodeSpaces" /></div>
+            <div class="row-block"><span>描述: </span><input type="text" v-model="cs.description" placeholder="描述" @change="onSetCodeSpaces" /></div>
+            <div class="row-actions" style="justify-content: right">
+              <button @click="onDeleteCodeSpaceItem(index)">删除</button>
             </div>
           </div>
         </div>
@@ -60,11 +81,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getNavigation, getAllAdBannerItem, setNavigation, setAllAdBannerItems } from "../../utils/apis";
+import { getNavigation, getAllAdBannerItem, getAllACodeSpace, setCodeSpace, setNavigation, setAllAdBannerItems } from "../../utils/apis";
 import Toast from "../../utils/toast.js";
 
 const errorMessage = ref("");
-const webNavAdMgt = ref({ navs: [], ads: [] });
+const webNavAdMgt = ref({ navs: [], ads: [], codespaces: [] });
 
 /**
  * 获取网站导航数据和广告横幅数据
@@ -79,6 +100,8 @@ async function setNavAdCategory() {
     Toast.error("获取网站导航失败，请稍后再试");
   }
 
+  Toast.success("网站导航获取成功");
+
   const ads = await getAllAdBannerItem();
   if (ads) {
     webNavAdMgt.value.ads = ads;
@@ -86,6 +109,18 @@ async function setNavAdCategory() {
     errorMessage.value = "获取广告横幅失败，请稍后再试";
     Toast.error("获取广告横幅失败，请稍后再试");
   }
+
+  Toast.success("广告横幅获取成功");
+
+  const codespaces = await getAllACodeSpace();
+  if (codespaces) {
+    webNavAdMgt.value.codespaces = codespaces;
+  } else {
+    errorMessage.value = "获取Codespace失败，请稍后再试";
+    Toast.error("获取Codespace失败，请稍后再试");
+  }
+
+  Toast.success("Codespace获取成功");
 }
 
 /**
@@ -99,6 +134,22 @@ async function onSetNavs() {
     Toast.error("设置网站导航失败，请稍后再试");
     return;
   }
+  Toast.success("网站导航设置成功");
+}
+
+/**
+ * 设置CodeSpace数据
+ * 将当前的CodeSpace数据保存到服务器
+ */
+async function onSetCodeSpaces() {
+  const res = await setCodeSpace(webNavAdMgt.value.codespaces);
+  console.error(webNavAdMgt.value.codespaces);
+  if (!res) {
+    errorMessage.value = "设置Codespace失败，请稍后再试";
+    Toast.error("设置Codespace失败，请稍后再试");
+    return;
+  }
+  Toast.success("Codespace设置成功");
 }
 
 /**
@@ -108,6 +159,15 @@ async function onSetNavs() {
 async function onAddNavItem() {
   webNavAdMgt.value.navs.push({ title: "", url: "", new: false });
   await onSetNavs();
+}
+
+/**
+ * 新增网站导航项
+ * 在导航列表中添加一个新的空白项
+ */
+async function onAddCodeSpaceItem() {
+  webNavAdMgt.value.codespaces.push({ title: "", url: "", new: false });
+  await onSetCodeSpaces();
 }
 
 /**
@@ -130,6 +190,7 @@ async function onSetAds() {
     Toast.error("设置广告失败，请稍后再试");
     return;
   }
+  Toast.success("广告设置成功");
 }
 
 /**
@@ -157,6 +218,15 @@ async function onAddAdItem() {
 async function onDeleteAdItem(index) {
   webNavAdMgt.value.ads.splice(index, 1);
   await onSetAds();
+}
+
+/**
+ * 删除codespace项
+ * @param index {number} codespace项索引
+ */
+async function onDeleteCodeSpaceItem(index) {
+  webNavAdMgt.value.codespaces.splice(index, 1);
+  await onSetCodeSpaces();
 }
 
 /**

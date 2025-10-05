@@ -1,26 +1,26 @@
 {
-  "update": "2025-06-17",
-  "version": "1.0.0",
-  "data": [
-    {
-      "title": "Markdown流渲染体验",
-      "folder": "sse-markdown",
-      "url": "sse-markdown",
-      "thumbnail": "/api/v1/website/image/chat-playground/2_markdown_sse_thumbnail.png",
-      "previewgif": "/api/v1/website/image/chat-playground/2_sse_md_preview.gif",
-      "sourcelink": "https://github.com/pldz1/Demos/tree/main/sse_markdown",
-      "date": "2025-01-15",
-      "description": "用markdown-it这个库在HTML上动态更新 markdown 内容(不是重新刷新)."
-    },
-    {
-      "title": "chat plaground v1 体验",
-      "folder": "chat-playground-v1",
-      "url": "chat-playground-v1",
-      "thumbnail": "/api/v1/website/image/chat-playground/4_chat-playground_v1_thumbnail.png",
-      "previewgif": "/api/v1/website/image/code-space/chat-playground_v1_preview.gif",
-      "sourcelink": "https://github.com/pldz1/AIGC_Playground",
-      "date": "2025-05-08",
-      "description": "在线网页体验chat playground v1的对话和绘图的功能."
-    }
-  ]
+    "update": "2025-06-17",
+    "version": "1.0.0",
+    "data": [
+        {
+            "title": "Markdown流渲染体验",
+            "folder": "sse-markdown",
+            "url": "sse-markdown",
+            "thumbnail": "/api/v1/website/image/chat-playground/2_markdown_sse_thumbnail.png",
+            "previewgif": "/api/v1/website/image/chat-playground/2_sse_md_preview.gif",
+            "sourcelink": "https://github.com/pldz1/Demos/tree/main/sse_markdown",
+            "date": "2025-01-15",
+            "description": "用markdown-it这个库在HTML上动态更新 markdown 内容(不是重新刷新)."
+        },
+        {
+            "title": "chat plaground v1 体验",
+            "folder": "chat-playground-v1",
+            "url": "chat-playground-v1",
+            "thumbnail": "/api/v1/website/image/chat-playground/4_chat-playground_v1_thumbnail.png",
+            "previewgif": "/api/v1/website/image/code-space/chat-playground_v1_preview.gif",
+            "sourcelink": "https://github.com/pldz1/AIGC_Playground",
+            "date": "2025-05-08",
+            "description": "在线网页体验chat playground v1的对话和绘图的功能."
+        }
+    ]
 }

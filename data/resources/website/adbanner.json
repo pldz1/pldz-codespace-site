@@ -1,16 +1,16 @@
 {
-  "update": "2025-06-17",
-  "version": "1.0.0",
-  "data": [
-    {
-      "title": "Markdown流渲染体验",
-      "url": "/io/sse-markdown",
-      "description": "用markdown-it这个库在HTML上动态更新 markdown 内容(不是重新刷新)."
-    },
-    {
-      "title": "chat playground v1 体验",
-      "url": "/io/chat-playground-v1",
-      "description": "在线网页体验chat playground v1的对话和绘图的功能."
-    }
-  ]
+    "update": "2025-06-17",
+    "version": "1.0.0",
+    "data": [
+        {
+            "title": "Markdown流渲染体验",
+            "url": "/io/sse-markdown",
+            "description": "用markdown-it这个库在HTML上动态更新 markdown 内容(不是重新刷新)."
+        },
+        {
+            "title": "chat playground v1 体验",
+            "url": "/io/chat-playground-v1",
+            "description": "在线网页体验chat playground v1的对话和绘图的功能."
+        }
+    ]
 }

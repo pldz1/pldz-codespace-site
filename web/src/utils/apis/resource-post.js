@@ -16,3 +16,11 @@ export async function setAllAdBannerItems(ads) {
 export async function setNavigation(navs) {
   return apiPost(`${webSitePrefix}/navs/set`, { navs });
 }
+
+/**
+ * 设置代码空间导航信息
+ * @param {Array} data
+ */
+export async function setCodeSpace(data) {
+  return apiPost(`${webSitePrefix}/codespace/set`, { data });
+}

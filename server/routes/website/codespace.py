@@ -24,7 +24,7 @@ class SetCodespaceRequest(BaseModel):
     设置 CodeSpace 信息的请求体
     """
     # 每个字典代表一个 CodeSpace 项，包含 title, url, new 等字段
-    codespaces: list = []
+    data: list = []
 
 
 @CODESPACE_ROUTER.post("/set")
@@ -45,5 +45,5 @@ async def api_set_codespace(request: SetCodespaceRequest, user: dict = Depends(A
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to sync articles."
         )
-    flag = CODESPACE_HANDLE.set_codespace_items(request.codespaces)
+    flag = CODESPACE_HANDLE.set_codespace_items(request.data)
     return {"data": flag}

@@ -7,21 +7,11 @@ class AdBannerItem(typing.TypedDict):
     """
     Web site的 adbanner 的单个配置项
     title: 标题
-    folder: 文件夹名称
     url: 访问链接
-    thumbnail: 缩略图链接
-    previewgif: 预览GIF链接
-    sourcelink: 源代码链接
-    date: 发布日期
     description: 描述信息
     """
     title: str
-    folder: str
     url: str
-    thumbnail: str
-    previewgif: str
-    sourcelink: str
-    date: str
     description: str
 
 
@@ -55,12 +45,7 @@ class AdBannerHandler:
             try:
                 items.append(AdBannerItem(
                     title=item['title'],
-                    folder=item['folder'],
                     url=item['url'],
-                    thumbnail=item['thumbnail'],
-                    previewgif=item['previewgif'],
-                    sourcelink=item['sourcelink'],
-                    date=item['date'],
                     description=item.get('description', '')
                 ))
             except KeyError as e:

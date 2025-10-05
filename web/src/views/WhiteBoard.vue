@@ -10,7 +10,7 @@
   </div>
 
   <!-- 顶部导航栏 -->
-  <HeaderBar @toggle-mobile-menu="onToggleMobileMenu"></HeaderBar>
+  <HeaderBar @toggle-mobile-menu="onToggleMobileMenu" :route-name="'白板'" :show-mobile-menu="false"></HeaderBar>
 
   <!-- 主内容区 -->
   <div class="main-container">

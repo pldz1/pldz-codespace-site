@@ -11,7 +11,7 @@ from core import ProjectConfig
 
 from .authorization import AUTH_ROUTER
 from .resource import RESOURCE_ROUTE
-from .website import ARTICLES_ROUTE, IMAGES_ROUTE, NAV_ROUTER, AD_BANNER_ROUTER, COMMENTS_ROUTE, WHITEBOARD_ROUTE
+from .website import ARTICLES_ROUTE, IMAGES_ROUTE, NAV_ROUTER, AD_BANNER_ROUTER, COMMENTS_ROUTE, WHITEBOARD_ROUTE, CODESPACE_ROUTER
 
 
 # 生命周期具体执行的内容
@@ -32,6 +32,7 @@ app.include_router(NAV_ROUTER, prefix="/api/v1")
 app.include_router(AD_BANNER_ROUTER, prefix="/api/v1")
 app.include_router(COMMENTS_ROUTE, prefix="/api/v1")
 app.include_router(WHITEBOARD_ROUTE, prefix="/api/v1")
+app.include_router(CODESPACE_ROUTER, prefix="/api/v1")
 
 
 def start_dev():

@@ -3,10 +3,10 @@
     <div class="ad-banner-container-title">相关推荐</div>
 
     <!-- 广告 -->
-    <div class="ad-banner" v-for="(ad, index) in adbannerList" :key="ad.id" :style="{ background: backgroundColorList[index % backgroundColorList.length] }">
+    <div class="ad-banner" v-for="(ad, index) in adbannerList" :key="ad.url" :style="{ background: backgroundColorList[index % backgroundColorList.length] }">
       <div class="ad-content">
         <div class="ad-title">
-          <a :href="'/io/' + ad.url" rel="noreferrer" target="_blank">{{ ad.title }}</a>
+          <a :href="ad.url" rel="noreferrer" target="_blank">{{ ad.title }}</a>
         </div>
         <div class="ad-subtitle">{{ ad.description }}</div>
       </div>

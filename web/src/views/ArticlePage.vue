@@ -60,10 +60,10 @@
   <!-- 反馈按钮 -->
   <div class="to-top top-icon" id="to-top" @click="onToTop"></div>
   <div class="to-bottom message-icon" id="to-bottom" @click="onToBottom"></div>
-  <div v-show="article.meta.csdn" class="to-csdn csdn-icon" id="to-csdn" @click="onToCsdn"></div>
-  <div v-show="article.meta.juejin" class="to-juejin juejin-icon" id="to-juejin" @click="onToJuejin"></div>
-  <div v-show="article.meta.github" class="to-github github-icon" id="to-github" @click="onToGithub"></div>
-  <div v-show="article.meta.gitee" class="to-gitee gitee-icon" id="to-gitee" @click="onToGitee"></div>
+  <div v-show="article.meta.csdn" class="to-csdn csdn-icon" id="to-csdn" @click="onGotoLink(article.meta.csdn)"></div>
+  <div v-show="article.meta.juejin" class="to-juejin juejin-icon" id="to-juejin" @click="onGotoLink(article.meta.juejin)"></div>
+  <div v-show="article.meta.github" class="to-github github-icon" id="to-github" @click="onGotoLink(article.meta.github)"></div>
+  <div v-show="article.meta.gitee" class="to-gitee gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)"></div>
 
   <!-- 底部的信息栏 -->
   <FooterBar></FooterBar>
@@ -159,6 +159,10 @@ function onToTop() {
  */
 function onToBottom() {
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+function onGotoLink(url) {
+  window.open(url, "_blank");
 }
 
 /**

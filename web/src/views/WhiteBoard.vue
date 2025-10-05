@@ -1,16 +1,6 @@
 <template>
-  <!-- 移动端侧边栏 -->
-  <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="onCloseMobileMenu()"></div>
-  <div v-show="isMobileMenuOpen" class="mobile-sidebar">
-    <div class="mobile-sidebar-header">
-      <div class="logo">爬楼的猪 CodeSpace</div>
-      <button class="close-btn" @click="onCloseMobileMenu()">×</button>
-    </div>
-    <div class="mobile-sidebar-container" ref="mobileSidebarContainerRef"></div>
-  </div>
-
   <!-- 顶部导航栏 -->
-  <HeaderBar @toggle-mobile-menu="onToggleMobileMenu" :route-name="'白板'" :show-mobile-menu="false"></HeaderBar>
+  <HeaderBar :route-name="'白板'" :show-mobile-menu="false"></HeaderBar>
 
   <!-- 主内容区 -->
   <div class="main-container">
@@ -34,33 +24,6 @@ import HeaderBar from "../components/HeaderBar.vue";
 import { ref } from "vue";
 import Toast from "../utils/toast.js";
 import { getWhiteBoardByKey, getWhiteBoardByUser, updateWhiteBoardContent } from "../utils/apis";
-
-// 引用移动端和主侧边栏容器
-const isMobileMenuOpen = ref(false);
-const mobileSidebarContainerRef = ref(null);
-const mainSidebarContainerRef = ref(null);
-const sidebarContentRef = ref(null);
-
-/**
- * 打开移动端菜单
- */
-function onToggleMobileMenu() {
-  isMobileMenuOpen.value = true;
-  if (mobileSidebarContainerRef.value && sidebarContentRef.value) {
-    mobileSidebarContainerRef.value.appendChild(sidebarContentRef.value);
-  }
-}
-
-/**
- * 关闭移动端菜单
- */
-function onCloseMobileMenu() {
-  isMobileMenuOpen.value = false;
-
-  if (mainSidebarContainerRef.value && sidebarContentRef.value) {
-    mainSidebarContainerRef.value.appendChild(sidebarContentRef.value);
-  }
-}
 
 // 白板交互
 const active = ref(false);

@@ -6,6 +6,7 @@
       <div class="logo">爬楼的猪 CodeSpace</div>
       <button class="close-btn" @click="onCloseMobileMenu()">×</button>
     </div>
+    <div class="nav-placeholder"></div>
     <div class="mobile-sidebar-container" ref="mobileSidebarContainerRef"></div>
   </div>
 

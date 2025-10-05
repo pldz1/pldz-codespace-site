@@ -10,7 +10,7 @@
 
       <!-- 导航 -->
       <nav>
-        <ul class="nav-menu">
+        <ul class="nav-menu" ref="navAllRef">
           <li :class="['nav-item', routeName === '首页' ? 'active' : '']">
             <a href="/"> 首页 </a>
           </li>
@@ -64,10 +64,13 @@ const props = defineProps({
     default: true,
   },
 });
+
 const emit = defineEmits(["toggle-mobile-menu"]);
 
 // 引入 Vuex store
 const store = useStore();
+
+const navAllRef = ref("navAllRef");
 
 // 取用户头像
 const avatar = computed(() => store.state.authState.avatar);
@@ -128,6 +131,14 @@ function onScrollThrottled() {
  * 切换移动端菜单
  */
 function toggleMobileMenu() {
+  const placeholders = document.querySelectorAll(".nav-placeholder");
+  if (placeholders && navAllRef.value) {
+    const copyNav = navAllRef.value.cloneNode(true);
+    placeholders.forEach((item) => {
+      item.innerHTML = "";
+      item.appendChild(copyNav);
+    });
+  }
   emit("toggle-mobile-menu");
 }
 
@@ -232,5 +243,24 @@ onBeforeUnmount(() => {
   line-height: 1;
   cursor: pointer;
   text-decoration: none;
+}
+</style>
+
+<style>
+.nav-placeholder {
+  width: 100%;
+  height: auto;
+}
+
+.nav-placeholder .nav-menu {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 8px !important;
+  gap: 16px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.nav-placeholder .badge {
+  right: 100px !important;
 }
 </style>

@@ -127,6 +127,8 @@ async function onCloseUploadImageDialog() {
  * @param index {number} 图片索引
  */
 async function onEditImageName(index) {
+  if (!confirm("确定要修改这张图片的名称吗？")) return;
+
   const newname = imageMgt.value.newImages[index];
   const oldname = imageMgt.value.oldImages[index];
   const suffix = imageMgt.value.suffix[index];
@@ -160,6 +162,7 @@ async function onEditImageName(index) {
  * @param index
  */
 async function onDeleteImage(index) {
+  if (!confirm("确定要删除这张图片吗？")) return;
   // 删除图片
   const imageName = imageMgt.value.newImages[index];
   const suffix = imageMgt.value.suffix[index];

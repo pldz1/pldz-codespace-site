@@ -42,6 +42,8 @@ const gitCommit = ref("");
  * 同步所有文章到源文件
  */
 async function onSyncAll() {
+  if (!confirm("确定要将所有文章保存到源文件吗？")) return;
+
   // 防抖——如果正在同步，就直接返回
   if (isSyncing.value) return;
 
@@ -56,6 +58,7 @@ async function onSyncAll() {
  * Git Pull
  */
 async function onGitPull() {
+  if (!confirm("确定要执行 Git Pull 操作吗？请确保已经备份好本地改动！")) return;
   if (isSyncing.value) return;
 
   isSyncing.value = true;
@@ -71,6 +74,8 @@ async function onGitPull() {
  * @returns {Promise<void>}
  */
 async function onGitSync() {
+  if (!confirm("确定要将本地改动同步到远程仓库吗？")) return;
+
   if (isSyncing.value) return;
   // 检查是否填写了 Git commit
 

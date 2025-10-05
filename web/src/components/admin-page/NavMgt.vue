@@ -175,6 +175,7 @@ async function onAddCodeSpaceItem() {
  * @param index {number} 导航项索引
  */
 async function onDeleteNavItem(index) {
+  if (!confirm("确定要删除这个导航吗？")) return;
   webNavAdMgt.value.navs.splice(index, 1);
   await onSetNavs();
 }
@@ -216,6 +217,7 @@ async function onAddAdItem() {
  * @param index {number} 广告项索引
  */
 async function onDeleteAdItem(index) {
+  if (!confirm("确定要删除这个广告吗？")) return;
   webNavAdMgt.value.ads.splice(index, 1);
   await onSetAds();
 }
@@ -225,6 +227,7 @@ async function onDeleteAdItem(index) {
  * @param index {number} codespace项索引
  */
 async function onDeleteCodeSpaceItem(index) {
+  if (!confirm("确定要删除这个Codespace吗？")) return;
   webNavAdMgt.value.codespaces.splice(index, 1);
   await onSetCodeSpaces();
 }

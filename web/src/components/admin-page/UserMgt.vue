@@ -41,6 +41,7 @@ const userMgt = ref({ users: [] });
  * @param username
  */
 async function onDeleteUserByUsername(username) {
+  if (!confirm(`确定要删除用户 ${username} 吗？`)) return;
   // 删除用户
   const res = await deleteUserByUsername(username);
   if (res) {

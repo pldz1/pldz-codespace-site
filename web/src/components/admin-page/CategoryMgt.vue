@@ -169,6 +169,7 @@ function onEditArticle(articleId) {
  * @param title
  */
 async function onEditTitle(id, title) {
+  if (!confirm(`确定要修改文章: ${id} 的标题为 ${title} 吗？`)) return;
   // 更新文章的标题
   const res = await editTitle(id, title);
   if (!res) {
@@ -186,6 +187,7 @@ async function onEditTitle(id, title) {
  * @returns {Promise<void>}
  */
 async function onEditFileName(articleId, filename) {
+  if (!confirm(`确定要修改文章: ${articleId} 的文件名为 ${filename} 吗？`)) return;
   // 检查文件名是否已存在
   const isExist = await editIsExist(categoryMgt.value.category, filename);
   if (isExist) {
@@ -215,6 +217,7 @@ async function onEditFileName(articleId, filename) {
  * @throws {Error} 如果序号更新失败
  */
 async function onEditSerialNo(article) {
+  if (!confirm(`确定要修改文章: ${article.id} 的序号为 ${article.serialNo} 吗？`)) return;
   // 更新文章的序号
   const res = await editSerialNo(article.id, article.serialNo);
   if (!res) {
@@ -232,6 +235,7 @@ async function onEditSerialNo(article) {
  * @returns {Promise<void>}
  */
 async function onDeleteArticle(articleId) {
+  if (!confirm(`确定要删除文章: ${articleId}吗？`)) return;
   // 删除文章
   const res = await deleteArticle(articleId);
   if (res) {
@@ -250,6 +254,7 @@ async function onDeleteArticle(articleId) {
  * @param articleId
  */
 async function onSyncArticleDiff(articleId) {
+  if (!confirm(`确定要将文章: ${articleId} 保存到源文件吗？`)) return;
   // 保存文章到缓存
   const res = await syncArticleToFile(articleId);
   if (!res) {

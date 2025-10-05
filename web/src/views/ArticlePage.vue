@@ -34,6 +34,7 @@
           <span>👀 {{ article.views }} 次</span>
           <span>🏷️ 专栏：{{ article.meta.category }}</span>
           <span v-if="isadmin" class="article-edit" @click="onEditArticle"> 重新编辑 </span>
+          <span v-if="isadmin" class="article-delete" @click="onDeleteArticle"> 删除 </span>
         </div>
       </div>
 
@@ -82,10 +83,11 @@ import ToolTip from "../utils/tooltip.js";
 
 import { ref, onActivated, watch, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { getArticle } from "../utils/apis";
+import { getArticle, deleteArticle } from "../utils/apis";
 import { useStore } from "vuex";
 
 import { MdPreview } from "md-editor-v3";
+import Toast from "../utils/toast.js";
 
 const props = defineProps({
   id: {
@@ -129,6 +131,18 @@ function toggleMobileMenu() {
 
 function onEditArticle() {
   router.push({ path: `/edit/${article.value.id}` });
+}
+
+async function onDeleteArticle() {
+  if (!confirm("确定要删除这篇文章吗？")) return;
+
+  const res = await deleteArticle(article.value.id);
+  if (res) {
+    Toast.success("文章删除成功");
+    router.push({ path: "/" });
+  } else {
+    Toast.error("文章删除失败");
+  }
 }
 
 /**
@@ -217,6 +231,11 @@ watch(
 
 .article-edit {
   color: #1e80ff;
+  cursor: pointer;
+}
+
+.article-delete {
+  color: #ff4d4f;
   cursor: pointer;
 }
 

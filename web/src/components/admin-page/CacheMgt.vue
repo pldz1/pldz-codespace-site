@@ -45,6 +45,7 @@ const cacheMgt = ref([]);
  * @returns {Promise<void>}
  */
 async function onDeleteCacheFile(filename) {
+  if (!confirm(`确定要删除${filename.filename}吗？`)) return;
   // 删除缓存文件
   const res = await deleteCacheFile(filename);
   if (res) {

@@ -141,3 +141,99 @@ docker run -it --name code-server \
 注意 如果你使用的是 Token 登录的 记得给 token 分配 Github Copilot 的权限
 
 ![code-server-ghp-github-copilot-tips](/api/v1/website/image/others/code-server-ghp-github-copilot-tips.png)
+
+
+## 2.2 轻量化
+
+只提供基本的远程编辑 + 文件管理功能，不要插件、遥测、同步之类的负担，只占 200–300 MB 内存”的最小工作环境。
+
+---
+
+### 2.2.1 配置最小化启动的config.yaml
+
+编辑配置文件：
+
+```bash
+nano ~/.config/code-server/config.yaml
+```
+
+把内容改成这样 👇：
+
+```yaml
+bind-addr: 0.0.0.0:8080
+auth: password
+password: "你的登录密码"
+cert: false
+
+# 极简化设置
+disable-telemetry: true
+disable-update-check: true
+disable-getting-started-override: true
+disable-workspace-trust: true
+
+# 限制内存缓存等
+app-name: "light-vscode"
+```
+
+这几项能去掉：
+
+* **插件更新与遥测**（减少网络与内存）
+* **欢迎页、提示页**（节省加载）
+* **自动更新检查**
+
+---
+
+### 2.2.2 禁用插件与扩展商店
+
+在设置里彻底禁用插件安装：
+
+1. 打开 VS Code 设置（左下角齿轮 → 设置）。
+2. 搜索 “Extensions: Auto Update”，取消勾选。
+3. 在用户设置（JSON）中添加：
+
+   ```json
+   {
+     "extensions.autoUpdate": false,
+     "extensions.autoCheckUpdates": false,
+     "workbench.startupEditor": "none",
+     "update.mode": "none",
+     "extensionsGallery": {
+       "serviceUrl": ""
+     }
+   }
+   ```
+
+彻底关闭插件市场访问。
+
+---
+
+### 2.2.3 使用 systemd 启动的配置
+
+创建 systemd 服务，方便开机自启：
+
+```bash
+sudo tee /etc/systemd/system/code-server.service <<'EOF'
+[Unit]
+Description=code-server minimal
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Environment=NODE_OPTIONS=--max-old-space-size=512
+ExecStart=/usr/bin/code-server
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now code-server
+```
+
+`NODE_OPTIONS=--max-old-space-size=512` 会限制最大堆内存 512 MB，非常关键。
+
+
+---

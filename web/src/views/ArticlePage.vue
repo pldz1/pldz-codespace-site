@@ -65,6 +65,24 @@
   <div v-show="article.meta.github" class="to-github github-icon" id="to-github" @click="onGotoLink(article.meta.github)"></div>
   <div v-show="article.meta.gitee" class="to-gitee gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)"></div>
 
+  <!-- 浮动展开菜单（FAB）：所有屏幕均使用 -->
+  <transition name="overlay">
+    <div class="fab-overlay" v-if="isFabOpen" @click="closeFab"></div>
+  </transition>
+  <div class="fab-container">
+    <div class="fab-toggle" :class="{ open: isFabOpen }" @click="toggleFab" aria-expanded="isFabOpen"></div>
+    <transition name="fab">
+      <div class="fab-actions" v-if="isFabOpen">
+        <div class="fab-item message-icon" @click="onToBottom" id="to-bottom" title="到底部"></div>
+        <div class="fab-item top-icon" @click="onToTop" id="to-top" title="到顶部"></div>
+        <div v-show="article.meta.csdn" class="fab-item csdn-icon" id="to-csdn" @click="onGotoLink(article.meta.csdn)" title="CSDN"></div>
+        <div v-show="article.meta.juejin" class="fab-item juejin-icon" id="to-juejin" @click="onGotoLink(article.meta.juejin)" title="掘金"></div>
+        <div v-show="article.meta.github" class="fab-item github-icon" id="to-github" @click="onGotoLink(article.meta.github)" title="GitHub"></div>
+        <div v-show="article.meta.gitee" class="fab-item gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)" title="Gitee"></div>
+      </div>
+    </transition>
+  </div>
+
   <!-- 底部的信息栏 -->
   <FooterBar></FooterBar>
 </template>
@@ -79,7 +97,6 @@ import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
 import RelatedRecom from "../components/article-page/RelatedRecom.vue";
 
-import ToolTip from "../utils/tooltip.js";
 
 import { ref, onActivated, watch, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
@@ -114,6 +131,16 @@ const store = useStore();
 const isadmin = computed(() => store.state.authState.isadmin);
 
 const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
+// 小屏幕浮动菜单展开状态
+const isFabOpen = ref(false);
+
+function toggleFab() {
+  isFabOpen.value = !isFabOpen.value;
+}
+
+function closeFab() {
+  isFabOpen.value = false;
+}
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
@@ -173,8 +200,6 @@ onActivated(async () => {
   if (!res) return;
 
   article.value = res;
-
-  ToolTip.loadArticleTooltip();
 });
 
 /**
@@ -185,6 +210,8 @@ watch(
   (newWidth) => {
     if (newWidth > 768) {
       closeMobileMenu();
+      // 退出小屏菜单展开
+      closeFab();
     }
   }
 );
@@ -285,6 +312,7 @@ watch(
   color: white;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 30;
 }
 
 .to-top {
@@ -345,6 +373,125 @@ watch(
 .gitee-icon {
   background: url("../assets/svgs/gitee-48.svg") no-repeat center;
   background-size: 60%;
+}
+
+/* 使用 FAB 后，默认隐藏原有固定按钮（所有屏幕尺寸） */
+.to-bottom,
+.to-top,
+.to-csdn,
+.to-juejin,
+.to-github,
+.to-gitee {
+  display: none !important;
+}
+
+/* 小屏幕浮动菜单（FAB）样式 */
+.fab-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent; /* 透明遮罩，仅用于点击关闭 */
+  z-index: 40;
+}
+
+.fab-container {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+  display: block;
+}
+
+.fab-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #4e5969;
+  font-size: 24px;
+  line-height: 52px;
+  text-align: center;
+  border: 1px solid #e5e6eb;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  background: url("../assets/svgs/option-32.svg") no-repeat center center;
+}
+
+.fab-toggle:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.fab-toggle.open {
+  transform: rotate(90deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.fab-actions {
+  position: absolute;
+  right: 0;
+  bottom: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fab-item {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background-size: 60% !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* 动画：展开/收起 */
+.fab-enter-active,
+.fab-leave-active {
+  transition: all 0.25s ease;
+}
+.fab-enter-from,
+.fab-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+}
+
+/* 子项轻微级联动画 */
+.fab-enter-active > .fab-item {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.fab-enter-from > .fab-item {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+}
+.fab-enter-active > .fab-item:nth-child(1) {
+  transition-delay: 0ms;
+}
+.fab-enter-active > .fab-item:nth-child(2) {
+  transition-delay: 40ms;
+}
+.fab-enter-active > .fab-item:nth-child(3) {
+  transition-delay: 80ms;
+}
+.fab-enter-active > .fab-item:nth-child(4) {
+  transition-delay: 120ms;
+}
+.fab-enter-active > .fab-item:nth-child(5) {
+  transition-delay: 160ms;
+}
+.fab-enter-active > .fab-item:nth-child(6) {
+  transition-delay: 200ms;
+}
+
+/* 遮罩淡入淡出 */
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.2s ease;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
 }
 
 /* 响应式设计 */

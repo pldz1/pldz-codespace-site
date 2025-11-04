@@ -30,7 +30,9 @@
       </nav>
     </div>
     <div class="header-right">
-      <input type="text" class="search-box" placeholder="探索文章" style="display: none" />
+      <input type="search" class="search-box" placeholder="探索文章" readonly @focus="onOpenSearch" @click="onOpenSearch" />
+      <!-- 窄屏下显示的放大镜按钮，点击打开搜索 -->
+      <button class="search-icon-btn" type="button" aria-label="打开搜索" title="搜索" @click="onOpenSearch"></button>
       <!-- 登录卡片 -->
       <div v-if="avatar" class="user-avatar" @click="onToggleLoginForm">
         <img :src="avatar" alt="avatar" />
@@ -41,6 +43,8 @@
 
   <!-- 登录表单 -->
   <LoginCard v-if="showLoginForm" @close-login-form="onCloseLoginForm" />
+  <!-- 搜索 -->
+  <SearchOverlay v-model="searchOpen" />
 </template>
 
 <script setup>
@@ -51,6 +55,7 @@ import { getNavigation } from "../utils/apis";
 
 import LoginCard from "./LoginCard.vue";
 import Toast from "../utils/toast.js";
+import SearchOverlay from "./SearchOverlay.vue";
 
 const props = defineProps({
   routeName: {
@@ -77,6 +82,7 @@ const avatar = computed(() => store.state.authState.avatar);
 const username = computed(() => store.state.authState.username);
 const navs = ref([]);
 const showLoginForm = ref(false);
+const searchOpen = ref(false);
 
 // header 显示/隐藏控制
 const isHeaderVisible = ref(true);
@@ -162,6 +168,9 @@ function onCloseLoginForm() {
   if (app) app.style.cssText = "";
   showLoginForm.value = false;
 }
+function onOpenSearch() {
+  searchOpen.value = true;
+}
 
 /**
  * 初始化时候获取导航数据
@@ -169,6 +178,17 @@ function onCloseLoginForm() {
 onMounted(async () => {
   lastScrollY = window.scrollY;
   window.addEventListener("scroll", onScrollThrottled, { passive: true });
+  // 快捷键：按下 / 打开搜索
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "/" && !searchOpen.value) {
+      const tag = e.target && e.target.tagName;
+      const isTyping = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable);
+      if (!isTyping) {
+        e.preventDefault();
+        searchOpen.value = true;
+      }
+    }
+  });
   const res = await getNavigation();
   navs.value = res || [];
 });
@@ -194,7 +214,7 @@ onBeforeUnmount(() => {
   padding: 0 16px;
   height: 60px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  z-index: 10000;
+  z-index: 10005;
 }
 
 .header--hidden {
@@ -220,16 +240,24 @@ onBeforeUnmount(() => {
   justify-content: flex-start;
   color: unset !important;
   text-decoration: none;
+  /* 允许在小屏上收缩，避免与右侧重叠 */
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .app-logo {
   width: 32px;
   height: 32px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   margin-right: 8px;
   vertical-align: middle;
   background: url("../assets/svgs/logo-32.svg") no-repeat center;
   background-size: contain;
+  /* 防止在窄屏下因 flex 收缩而形变 */
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .login-register-btn {

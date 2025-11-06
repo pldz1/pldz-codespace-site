@@ -3,6 +3,15 @@
     <div class="content-header">
       <h1>缓存资源管理</h1>
     </div>
+    <div class="progress-toast-container" v-if="activeDownloads.length">
+      <div v-for="item in activeDownloads" :key="item.name" :class="['progress-toast', 'progress-toast--' + item.state]">
+        <div class="progress-toast-title">{{ item.name }}</div>
+        <div class="progress-toast-bar">
+          <div class="progress-toast-bar-inner" :style="{ width: item.state === 'error' ? '100%' : (item.percent || 0) + '%' }"></div>
+        </div>
+        <div class="progress-toast-percent">{{ formatProgressText(item) }}</div>
+      </div>
+    </div>
     <div class="content-body">
       <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
       <div class="content-item">
@@ -30,14 +39,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { getAllCache, deleteCacheFile, downloadCacheFile } from "../../utils/apis";
+import { ref, onMounted, reactive, computed } from "vue";
+import { getAllCache, deleteCacheFile } from "../../utils/apis";
 import { uploadCacheFile } from "../../utils/file-upload.js";
 import Toast from "../../utils/toast.js";
 
 const errorMessage = ref("");
 // 用于存储缓存资源管理的数据
 const cacheMgt = ref([]);
+// 下载进度: { [filename]: { percent: number, loaded: number, total: number, state: 'downloading'|'done'|'error' } }
+const downloadProgress = reactive({});
+
+const activeDownloads = computed(() =>
+  Object.entries(downloadProgress)
+    .filter(([, item]) => item.state !== "hidden")
+    .map(([name, item]) => ({ name, ...item }))
+);
 
 /**
  * 删除缓存文件
@@ -47,7 +64,7 @@ const cacheMgt = ref([]);
 async function onDeleteCacheFile(filename) {
   if (!confirm(`确定要删除${filename.filename}吗？`)) return;
   // 删除缓存文件
-  const res = await deleteCacheFile(filename);
+  const res = await deleteCacheFile(filename.filename);
   if (res) {
     // 成功删除后，重新获取所有缓存数据
     await onSelectCacheManagement();
@@ -62,27 +79,112 @@ async function onDeleteCacheFile(filename) {
  * 下载缓存文件
  * @param filename {string} 缓存文件名
  */
-async function onDownloadCacheFile(filename) {
-  // 下载缓存文件
-  const res = await downloadCacheFile(filename);
-  if (res) {
-    // 创建一个 Blob 对象并下载
-    const blob = new Blob([res], { type: "application/octet-stream" });
+async function onDownloadCacheFile(fileObj) {
+  const fname = fileObj.filename;
+  // 初始化进度
+  downloadProgress[fname] = { percent: 0, loaded: 0, total: 0, state: "downloading" };
+
+  try {
+    const res = await fetch("/api/v1/resource/cache/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename: fname }),
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+
+    const total = Number(res.headers.get("content-length")) || 0;
+    downloadProgress[fname].total = total;
+
+    if (!res.body || !res.body.getReader) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      if (downloadProgress[fname]) {
+        downloadProgress[fname].loaded = total || downloadProgress[fname].loaded || 0;
+        downloadProgress[fname].percent = 100;
+        downloadProgress[fname].state = "done";
+      }
+      setTimeout(() => {
+        if (downloadProgress[fname]) {
+          downloadProgress[fname].state = "hidden";
+        }
+        setTimeout(() => {
+          delete downloadProgress[fname];
+        }, 200);
+      }, 800);
+      Toast.success("缓存文件下载成功");
+      errorMessage.value = "";
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const chunks = [];
+    let loaded = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      downloadProgress[fname].loaded = loaded;
+      if (total > 0) {
+        downloadProgress[fname].percent = Math.min(100, (loaded / total) * 100);
+      } else {
+        // 无总长度时，仅展示已下载字节数
+        downloadProgress[fname].percent = 0;
+      }
+    }
+
+    const blob = new Blob(chunks, { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
+    a.download = fname;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  } else {
+
+    if (downloadProgress[fname]) {
+      downloadProgress[fname].loaded = total || downloadProgress[fname].loaded;
+      downloadProgress[fname].percent = 100;
+      downloadProgress[fname].state = "done";
+    }
+    setTimeout(() => {
+      if (downloadProgress[fname]) {
+        downloadProgress[fname].state = "hidden";
+      }
+      setTimeout(() => {
+        delete downloadProgress[fname];
+      }, 200);
+    }, 800);
+    Toast.success("缓存文件下载成功");
+    errorMessage.value = "";
+  } catch (err) {
+    console.error("下载缓存文件失败:", err);
+    if (downloadProgress[fname]) {
+      downloadProgress[fname].state = "error";
+    }
+    setTimeout(() => {
+      if (downloadProgress[fname]) {
+        downloadProgress[fname].state = "hidden";
+      }
+      setTimeout(() => {
+        delete downloadProgress[fname];
+      }, 200);
+    }, 1600);
     errorMessage.value = "下载缓存文件失败，请稍后再试";
     Toast.error("下载缓存文件失败，请稍后再试");
-    return;
   }
-  Toast.success("缓存文件下载成功");
-  errorMessage.value = "";
 }
 
 /**
@@ -131,6 +233,32 @@ onMounted(async () => {
   // 初始化时获取所有缓存数据
   await onSelectCacheManagement();
 });
+
+function formatProgressText(item) {
+  if (!item) return "";
+  if (item.state === "error") {
+    return "下载失败";
+  }
+  if (item.state === "done") {
+    return "100%";
+  }
+  if (item.total > 0) {
+    const percent = item.percent || 0;
+    return `${Math.min(100, percent).toFixed(0)}%`;
+  }
+
+  const loaded = item.loaded || 0;
+  if (!loaded) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let size = loaded;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  const precision = size >= 10 || unitIndex === 0 ? 0 : 1;
+  return `${size.toFixed(precision)} ${units[unitIndex]}`;
+}
 </script>
 
 <style scoped>
@@ -206,5 +334,71 @@ onMounted(async () => {
 
 .item-actions button:hover {
   background: #c0392b;
+}
+.progress-toast-container {
+  position: fixed;
+  top: 64px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.progress-toast {
+  min-width: 220px;
+  max-width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.progress-toast-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+
+.progress-toast-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-toast-bar-inner {
+  height: 100%;
+  background: #1890ff;
+  transition: width 0.2s ease;
+}
+
+.progress-toast-percent {
+  margin-top: 8px;
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  font-weight: 500;
+}
+
+.progress-toast--done {
+  border-color: #52c41a;
+}
+
+.progress-toast--done .progress-toast-bar-inner {
+  background: #52c41a;
+}
+
+.progress-toast--error {
+  border-color: #ff4d4f;
+}
+
+.progress-toast--error .progress-toast-bar-inner {
+  background: #ff4d4f;
 }
 </style>

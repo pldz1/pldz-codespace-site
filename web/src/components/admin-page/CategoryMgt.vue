@@ -2,62 +2,80 @@
   <div class="content-container">
     <div class="content-header">
       <h1>专栏管理</h1>
+      <p>维护专栏结构、调整文章顺序并同步文件信息</p>
     </div>
+
     <div class="content-body">
-      <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+      <div class="error-banner" v-if="errorMessage">{{ errorMessage }}</div>
+
       <div class="content-item">
         <span>新建专栏</span>
-        <input type="text" placeholder="请输入专栏名称" v-model="categoryMgt.newCategoryName" />
-        <button class="btn btn-primary" @click="onNewCategory">新增专栏</button>
+        <input
+          type="text"
+          placeholder="请输入专栏名称（字母、数字、下划线，且不能以下划线开头）"
+          v-model.trim="categoryMgt.newCategoryName"
+          :disabled="isCreatingCategory"
+        />
+        <button class="btn btn-primary" :class="{ 'is-loading': isCreatingCategory }" @click="onNewCategory" :disabled="isCreatingCategory">新增专栏</button>
       </div>
+
       <div class="content-item">
         <span>选择专栏</span>
-        <!-- 下拉菜单选择专栏 -->
         <div class="select-wrapper">
-          <select v-model="categoryMgt.category" @change="onSelectArticleCategory">
-            <option disabled selected>请选择专栏</option>
-            <option v-for="category in allCategories" :key="category" :value="category">
+          <select v-model="categoryMgt.category" @change="onSelectArticleCategory" :disabled="isLoading || isArticleLoading">
+            <option value="" disabled>请选择专栏</option>
+            <option v-for="category in categories" :key="category" :value="category">
               {{ category }}
             </option>
           </select>
         </div>
+        <button class="btn btn-outline" type="button" @click="onRefreshArticles" :disabled="!categoryMgt.category || isArticleLoading">刷新列表</button>
       </div>
 
-      <!-- 专栏内的文章列表 -->
-      <div class="card-list">
-        <div v-for="article in categoryMgt.articles" :key="article.id" class="card-item">
-          <div class="card-thumb" title="编辑文章" @click="onEditArticle(article.id)">
-            <img :src="article.thumbnail" />
-          </div>
+      <div v-if="isArticleLoading" class="loading-stack">
+        <div v-for="n in 4" :key="`article-list-skeleton-${n}`" class="loading-card">
+          <div class="skeleton-line w-60"></div>
+          <div class="skeleton-line w-40" style="margin-top: 12px"></div>
+          <div class="skeleton-line w-80" style="margin-top: 12px"></div>
+        </div>
+      </div>
 
-          <div class="card-meta">
-            <div class="card-info">
-              <div class="card-option-name">标题:</div>
-              <input class="card-input-editor" type="text" v-model="article.title" @change="onEditTitle(article.id, article.title)" />
-            </div>
-            <div class="card-info">
-              <div class="card-option-name">文件名:</div>
-              <input class="card-input-editor" type="text" v-model="article.path" @change="onEditFileName(article.id, article.path)" />
-            </div>
-            <div class="card-info">
-              <div class="meta-item">浏览次数: {{ article.views }}</div>
-              <div class="meta-item">序号: <input type="text" v-model="article.serialNo" @change="onEditSerialNo(article)" /></div>
-            </div>
+      <div v-else-if="categoryMgt.category && categoryMgt.articles.length" class="list-block">
+        <div class="list-row article-row" v-for="article in categoryMgt.articles" :key="article.id">
+          <strong @click="onEditArticle(article.id)" class="article-link">
+            {{ article.title || article.id }}
+          </strong>
+          <div class="field field-grow">
+            <span class="field-label">文件名</span>
+            <input class="field-input" type="text" v-model="article.path" @change="onEditFileName(article.id, article.path)" />
           </div>
-
-          <div class="card-action">
-            <button class="btn-danger" @click="onDeleteArticle(article.id)">删除</button>
-            <button class="btn-info" @click="onSyncArticleDiff(article.id)">同步</button>
-            <button class="btn-info" @click="onDownLoadMDFile(article.id, article.title)">下载</button>
+          <div class="field">
+            <span class="field-label">浏览</span>
+            <span class="field-value">{{ article.views }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">序号</span>
+            <input type="number" class="field-input field-input--xs" v-model.number="article.serialNo" @change="onEditSerialNo(article)" />
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-info" @click="onSyncArticleDiff(article.id)" :disabled="isArticleLoading">同步</button>
+            <button class="btn btn-outline" @click="onDownLoadMDFile(article.id, article.title)" :disabled="isArticleLoading">下载</button>
+            <button class="btn btn-danger" @click="onDeleteArticle(article.id)" :disabled="isArticleLoading">删除</button>
           </div>
         </div>
+      </div>
+
+      <div v-else-if="categoryMgt.category" class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>该专栏暂无文章，试试创建或同步内容。</p>
+        <button class="btn btn-outline" @click="onRefreshArticles" :disabled="isArticleLoading">重新载入</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {
   getArticlesByCategory,
   editSerialNo,
@@ -70,6 +88,7 @@ import {
   addCategory,
 } from "../../utils/apis";
 import Toast from "../../utils/toast.js";
+import { useLoading } from "../../utils/use-loading";
 
 const emit = defineEmits(["on-update-categories"]);
 
@@ -79,49 +98,68 @@ const props = defineProps({
     required: true,
     default: () => [],
   },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const errorMessage = ref("");
-// 用于存储当前选中的分类下的文章
 const categoryMgt = ref({ newCategoryName: "", category: "", articles: [] });
 
-/**
- * 对文章进行排序
- */
+const { isLoading: isArticleLoading, start: startArticleLoading, stop: stopArticleLoading } = useLoading("admin.category.articleList");
+const { isLoading: isCreatingCategory, start: startCreatingCategory, stop: stopCreatingCategory } = useLoading("admin.category.create");
+
+const hasCategorySelected = computed(() => Boolean(categoryMgt.value.category));
+const categories = computed(() => props.allCategories || []);
+
 function sortBySerialNo() {
-  return categoryMgt.value.articles.sort((a, b) => a.serialNo - b.serialNo);
+  categoryMgt.value.articles = [...categoryMgt.value.articles].sort((a, b) => (a.serialNo ?? 0) - (b.serialNo ?? 0));
 }
 
-/**
- * 选择分类时获取该分类下的所有文章
- */
-async function onSelectArticleCategory() {
-  if (!categoryMgt.value.category) return;
+function normalizeArticle(article) {
+  const match = article.path?.match(/([^/]+)\.md$/);
+  return {
+    ...article,
+    path: match ? match[1] : article.path,
+  };
+}
 
-  // 获取该分类下的所有文章
-  const res = await getArticlesByCategory(categoryMgt.value.category);
-  if (Array.isArray(res)) {
-    categoryMgt.value.articles = [];
-    res.forEach((article) => {
-      // 对文章路径进行处理，去掉 .md 后缀, 保留有效的文件的名字
-      const path = article.path;
-      const match = path.match(/([^/]+)\.md$/);
-      if (match) {
-        article.path = match[1];
+async function fetchArticlesByCategory(category, { showFeedback = true } = {}) {
+  startArticleLoading();
+  try {
+    const res = await getArticlesByCategory(category);
+    if (Array.isArray(res)) {
+      categoryMgt.value.articles = res.map(normalizeArticle);
+      sortBySerialNo();
+      errorMessage.value = "";
+      if (showFeedback) {
+        Toast.success("文章数据加载成功");
       }
-      categoryMgt.value.articles.push(article);
-    });
-    sortBySerialNo();
-    Toast.success("文章数据加载成功");
-  } else {
+      return true;
+    }
+    throw new Error("获取文章失败");
+  } catch (error) {
+    console.error("获取文章失败:", error);
+    categoryMgt.value.articles = [];
     errorMessage.value = "获取文章失败，请稍后再试";
     Toast.error("获取文章失败，请稍后再试");
+    return false;
+  } finally {
+    stopArticleLoading();
   }
 }
 
-/**
- * 新建分类
- */
+async function onSelectArticleCategory() {
+  if (!categoryMgt.value.category) return;
+  await fetchArticlesByCategory(categoryMgt.value.category);
+}
+
+async function onRefreshArticles() {
+  if (!categoryMgt.value.category) return;
+  await fetchArticlesByCategory(categoryMgt.value.category, { showFeedback: true });
+}
+
 async function onNewCategory() {
   if (!categoryMgt.value.newCategoryName) {
     errorMessage.value = "请输入分类名称";
@@ -129,13 +167,12 @@ async function onNewCategory() {
     return;
   }
 
-  if (props.allCategories.includes(categoryMgt.value.newCategoryName)) {
+  if (categories.value.includes(categoryMgt.value.newCategoryName)) {
     errorMessage.value = "分类名称已存在，请使用其他名称";
     Toast.error("分类名称已存在，请使用其他名称");
     return;
   }
 
-  // 新分类名字只能是数字和字母和下划线的组合并且下划线不能开头
   const regex = /^[a-zA-Z0-9_]+$/;
   if (!regex.test(categoryMgt.value.newCategoryName) || categoryMgt.value.newCategoryName.startsWith("_")) {
     errorMessage.value = "分类名称只能包含字母、数字和下划线，且不能以下划线开头";
@@ -143,34 +180,31 @@ async function onNewCategory() {
     return;
   }
 
-  const res = await addCategory(categoryMgt.value.newCategoryName);
-  if (res) {
-    Toast.success("新分类创建成功");
-    categoryMgt.value.newCategoryName = "";
-    emit("on-update-categories");
-  } else {
+  startCreatingCategory();
+  try {
+    const res = await addCategory(categoryMgt.value.newCategoryName);
+    if (res) {
+      Toast.success("新分类创建成功");
+      categoryMgt.value.newCategoryName = "";
+      emit("on-update-categories");
+    } else {
+      throw new Error("新分类创建失败");
+    }
+  } catch (error) {
+    console.error("新分类创建失败:", error);
     errorMessage.value = "新分类创建失败，请稍后再试";
     Toast.error("新分类创建失败，请稍后再试");
+  } finally {
+    stopCreatingCategory();
   }
 }
 
-/**
- * 跳转到编辑文章页面
- * @param articleId {string|number} 文章 ID
- * @returns {void}
- */
 function onEditArticle(articleId) {
   window.location.href = `/edit/${articleId}`;
 }
 
-/**
- * 修改文章标题
- * @param id
- * @param title
- */
 async function onEditTitle(id, title) {
   if (!confirm(`确定要修改文章: ${id} 的标题为 ${title} 吗？`)) return;
-  // 更新文章的标题
   const res = await editTitle(id, title);
   if (!res) {
     errorMessage.value = "标题更新失败，请稍后再试";
@@ -180,15 +214,8 @@ async function onEditTitle(id, title) {
   }
 }
 
-/**
- * 修改文章文件名
- * @param articleId {string|number} 文章 ID
- * @param filename {string} 新的文件名
- * @returns {Promise<void>}
- */
 async function onEditFileName(articleId, filename) {
   if (!confirm(`确定要修改文章: ${articleId} 的文件名为 ${filename} 吗？`)) return;
-  // 检查文件名是否已存在
   const isExist = await editIsExist(categoryMgt.value.category, filename);
   if (isExist) {
     errorMessage.value = "文件名已存在，请使用其他名称";
@@ -196,7 +223,6 @@ async function onEditFileName(articleId, filename) {
     return;
   }
 
-  // 更新文章的文件名
   const res = await renameArticleFile(articleId, filename);
   if (!res) {
     errorMessage.value = "文件名更新失败，请稍后再试";
@@ -210,37 +236,24 @@ async function onEditFileName(articleId, filename) {
   }
 }
 
-/**
- * 更新文章的序列号
- * @param article {Object} 文章对象，包含 id 和 serialNo
- * @returns {Promise<void>}
- * @throws {Error} 如果序号更新失败
- */
 async function onEditSerialNo(article) {
   if (!confirm(`确定要修改文章: ${article.id} 的序号为 ${article.serialNo} 吗？`)) return;
-  // 更新文章的序号
   const res = await editSerialNo(article.id, article.serialNo);
   if (!res) {
     errorMessage.value = "序号更新失败，请稍后再试";
     Toast.error("序号更新失败，请稍后再试");
+  } else {
+    sortBySerialNo();
+    Toast.success("序号更新成功");
+    errorMessage.value = "";
   }
-  sortBySerialNo();
-  Toast.success("序号更新成功");
-  errorMessage.value = "";
 }
 
-/**
- * 删除文章
- * @param articleId {string|number} 文章 ID
- * @returns {Promise<void>}
- */
 async function onDeleteArticle(articleId) {
   if (!confirm(`确定要删除文章: ${articleId}吗？`)) return;
-  // 删除文章
   const res = await deleteArticle(articleId);
   if (res) {
-    // 成功删除后，重新获取当前分类下的文章
-    await onSelectArticleCategory();
+    await onRefreshArticles();
     Toast.success("文章删除成功");
   } else {
     errorMessage.value = "删除文章失败，请稍后再试";
@@ -248,14 +261,8 @@ async function onDeleteArticle(articleId) {
   }
 }
 
-/**
- * 将文章保存到缓存
- * @returns {Promise<void>}
- * @param articleId
- */
 async function onSyncArticleDiff(articleId) {
   if (!confirm(`确定要将文章: ${articleId} 保存到源文件吗？`)) return;
-  // 保存文章到缓存
   const res = await syncArticleToFile(articleId);
   if (!res) {
     errorMessage.value = "保存文章到源文件失败，请稍后再试";
@@ -265,15 +272,9 @@ async function onSyncArticleDiff(articleId) {
   }
 }
 
-/**
- * 下载文章的 Markdown 文件
- * @param articleId {string|number} 文章 ID
- * @returns {Promise<void>}
- */
 async function onDownLoadMDFile(id, title) {
   const res = await getArticleText(id);
   if (res) {
-    // 创建一个 Blob 对象并下载
     const blob = new Blob([res], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -287,7 +288,6 @@ async function onDownLoadMDFile(id, title) {
   } else {
     errorMessage.value = "下载文章失败，请稍后再试";
     Toast.error("下载文章失败，请稍后再试");
-    return;
   }
 }
 </script>
@@ -295,109 +295,21 @@ async function onDownLoadMDFile(id, title) {
 <style scoped>
 @import url("../../assets/components/admin-content.css");
 
-.card-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: left;
-}
-
-.card-item {
-  padding: 8px;
-  border-bottom: 1px solid #f1f1f1;
-  display: flex;
+.article-row {
   align-items: center;
-  flex-direction: column;
-  width: 232px;
-  background-color: #86909c42;
-  height: 256px;
-  border-radius: 16px;
-  gap: 4px;
-  justify-content: space-between;
 }
 
-.card-item a {
-  color: #171717;
-  text-decoration: none;
-}
-
-.card-thumb {
-  width: 120px;
-  height: 80px;
-  background: #f1f1f1;
-  border-radius: 4px;
-  background-size: cover;
-  background-position: center;
-  flex-shrink: 0;
+.article-link {
+  color: #1d4ed8;
   cursor: pointer;
+  text-decoration: underline;
 }
 
-.card-thumb img {
-  height: inherit;
-  width: inherit;
-  object-fit: contain;
+.article-link:hover {
+  color: #1e40af;
 }
 
-.card-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-}
-
-.card-title:hover {
-  color: #1e80ff;
-}
-
-.card-action,
-.card-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #86909c;
-  justify-content: space-between;
-}
-
-.card-meta {
-  flex-direction: column;
-}
-
-.card-action {
-  flex-direction: row;
-}
-
-.card-info {
-  display: flex;
-  gap: 8px;
-  flex-direction: row;
-  max-height: 36px;
-  justify-content: center;
-  align-items: center;
-}
-
-.card-option-name {
-  font-weight: bold;
-  color: #333;
-  max-width: 42px;
-  width: 42px;
-}
-
-.card-input-editor {
-  height: 24px;
-  max-width: 154px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.meta-item input {
-  width: 60px;
-  padding: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+.field-input.field-input--xs {
+  text-align: center;
 }
 </style>

@@ -2,7 +2,9 @@
   <div class="content-container">
     <div class="content-header">
       <h1>缓存资源管理</h1>
+      <p>上传、下载或清理站点缓存资源文件</p>
     </div>
+
     <div class="progress-toast-container" v-if="activeDownloads.length">
       <div v-for="item in activeDownloads" :key="item.name" :class="['progress-toast', 'progress-toast--' + item.state]">
         <div class="progress-toast-title">{{ item.name }}</div>
@@ -12,27 +14,40 @@
         <div class="progress-toast-percent">{{ formatProgressText(item) }}</div>
       </div>
     </div>
+
     <div class="content-body">
-      <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+      <div class="error-banner" v-if="errorMessage">{{ errorMessage }}</div>
+
       <div class="content-item">
         <span>上传缓存资源</span>
-        <button class="btn btn-primary" @click="onUploadCacheFile">上传</button>
-        <div class="content-item" style="border-top: 1px solid #e4e6ea; margin-top: 8px"></div>
+        <button class="btn btn-primary" @click="onUploadCacheFile" :disabled="isCacheLoading">上传</button>
       </div>
-      <!-- 广告的列表 -->
-      <div class="row-list">
-        <div class="row-item" v-for="(cache, index) in cacheMgt" :key="index" style="flex: 1; flex-direction: row">
-          <!-- 序号 -->
-          <div class="row-serial">{{ index + 1 }}</div>
-          <!-- 缓存文件名字 -->
-          <div class="row-content" style="flex-direction: row">
-            <input type="text" :value="cache.modified_time + ' | ' + cache.filename" readonly />
-            <div class="item-actions" style="justify-content: right">
-              <button @click="onDownloadCacheFile(cache)" style="padding: 8px; width: 54px; background-color: #1890ff">下载</button>
-              <button @click="onDeleteCacheFile(cache)" style="padding: 8px; width: 54px; margin-left: 8px">删除</button>
-            </div>
+
+      <div v-if="isCacheLoading" class="loading-stack">
+        <div v-for="n in 5" :key="`cache-skeleton-${n}`" class="loading-card">
+          <div class="skeleton-line w-60"></div>
+          <div class="skeleton-line w-40" style="margin-top: 12px"></div>
+        </div>
+      </div>
+
+      <div v-else-if="cacheMgt.length" class="list-block">
+        <div class="list-row" v-for="(cache, index) in cacheMgt" :key="`cache-${index}`">
+          <strong>{{ cache.filename }}</strong>
+          <div class="field">
+            <span class="field-label">更新时间</span>
+            <span class="field-value field-value--muted">{{ cache.modified_time }}</span>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-info" @click="onDownloadCacheFile(cache)">下载</button>
+            <button class="btn btn-danger" @click="onDeleteCacheFile(cache)">删除</button>
           </div>
         </div>
+      </div>
+
+      <div v-else class="empty-state">
+        <div class="empty-icon">📂</div>
+        <p>暂无缓存资源文件。</p>
+        <button class="btn btn-outline" @click="onSelectCacheManagement" :disabled="isCacheLoading">刷新</button>
       </div>
     </div>
   </div>
@@ -43,12 +58,12 @@ import { ref, onMounted, reactive, computed } from "vue";
 import { getAllCache, deleteCacheFile } from "../../utils/apis";
 import { uploadCacheFile } from "../../utils/file-upload.js";
 import Toast from "../../utils/toast.js";
+import { useLoading } from "../../utils/use-loading";
 
 const errorMessage = ref("");
-// 用于存储缓存资源管理的数据
 const cacheMgt = ref([]);
-// 下载进度: { [filename]: { percent: number, loaded: number, total: number, state: 'downloading'|'done'|'error' } }
 const downloadProgress = reactive({});
+const { isLoading: isCacheLoading, start: startCacheLoading, stop: stopCacheLoading } = useLoading("admin.cache.list");
 
 const activeDownloads = computed(() =>
   Object.entries(downloadProgress)
@@ -56,32 +71,28 @@ const activeDownloads = computed(() =>
     .map(([name, item]) => ({ name, ...item }))
 );
 
-/**
- * 删除缓存文件
- * @param filename {string} 缓存文件名
- * @returns {Promise<void>}
- */
-async function onDeleteCacheFile(filename) {
-  if (!confirm(`确定要删除${filename.filename}吗？`)) return;
-  // 删除缓存文件
-  const res = await deleteCacheFile(filename.filename);
-  if (res) {
-    // 成功删除后，重新获取所有缓存数据
-    await onSelectCacheManagement();
-  } else {
+async function onDeleteCacheFile(file) {
+  if (!confirm(`确定要删除 ${file.filename} 吗？`)) return;
+  startCacheLoading();
+  try {
+    const res = await deleteCacheFile(file.filename);
+    if (res) {
+      await onSelectCacheManagement();
+      Toast.success("缓存文件删除成功");
+    } else {
+      throw new Error("删除缓存文件失败");
+    }
+  } catch (error) {
+    console.error(error);
     errorMessage.value = "删除缓存文件失败，请稍后再试";
     Toast.error("删除缓存文件失败，请稍后再试");
-    return;
+  } finally {
+    stopCacheLoading();
   }
 }
 
-/**
- * 下载缓存文件
- * @param filename {string} 缓存文件名
- */
 async function onDownloadCacheFile(fileObj) {
   const fname = fileObj.filename;
-  // 初始化进度
   downloadProgress[fname] = { percent: 0, loaded: 0, total: 0, state: "downloading" };
 
   try {
@@ -99,28 +110,8 @@ async function onDownloadCacheFile(fileObj) {
 
     if (!res.body || !res.body.getReader) {
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fname;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      if (downloadProgress[fname]) {
-        downloadProgress[fname].loaded = total || downloadProgress[fname].loaded || 0;
-        downloadProgress[fname].percent = 100;
-        downloadProgress[fname].state = "done";
-      }
-      setTimeout(() => {
-        if (downloadProgress[fname]) {
-          downloadProgress[fname].state = "hidden";
-        }
-        setTimeout(() => {
-          delete downloadProgress[fname];
-        }, 200);
-      }, 800);
+      triggerDownload(blob, fname);
+      completeDownload(fname, total);
       Toast.success("缓存文件下载成功");
       errorMessage.value = "";
       return;
@@ -139,98 +130,110 @@ async function onDownloadCacheFile(fileObj) {
       if (total > 0) {
         downloadProgress[fname].percent = Math.min(100, (loaded / total) * 100);
       } else {
-        // 无总长度时，仅展示已下载字节数
         downloadProgress[fname].percent = 0;
       }
     }
 
     const blob = new Blob(chunks, { type: "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fname;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    if (downloadProgress[fname]) {
-      downloadProgress[fname].loaded = total || downloadProgress[fname].loaded;
-      downloadProgress[fname].percent = 100;
-      downloadProgress[fname].state = "done";
-    }
-    setTimeout(() => {
-      if (downloadProgress[fname]) {
-        downloadProgress[fname].state = "hidden";
-      }
-      setTimeout(() => {
-        delete downloadProgress[fname];
-      }, 200);
-    }, 800);
+    triggerDownload(blob, fname);
+    completeDownload(fname, total || loaded);
     Toast.success("缓存文件下载成功");
     errorMessage.value = "";
   } catch (err) {
     console.error("下载缓存文件失败:", err);
-    if (downloadProgress[fname]) {
-      downloadProgress[fname].state = "error";
-    }
-    setTimeout(() => {
-      if (downloadProgress[fname]) {
-        downloadProgress[fname].state = "hidden";
-      }
-      setTimeout(() => {
-        delete downloadProgress[fname];
-      }, 200);
-    }, 1600);
+    markDownloadFailed(fname);
     errorMessage.value = "下载缓存文件失败，请稍后再试";
     Toast.error("下载缓存文件失败，请稍后再试");
   }
 }
 
-/**
- * 上传缓存文件
- */
+function triggerDownload(blob, fname) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function completeDownload(fname, total) {
+  if (!downloadProgress[fname]) return;
+  downloadProgress[fname].loaded = total;
+  downloadProgress[fname].percent = 100;
+  downloadProgress[fname].state = "done";
+  setTimeout(() => {
+    if (downloadProgress[fname]) {
+      downloadProgress[fname].state = "hidden";
+    }
+    setTimeout(() => {
+      delete downloadProgress[fname];
+    }, 200);
+  }, 800);
+}
+
+function markDownloadFailed(fname) {
+  if (!downloadProgress[fname]) return;
+  downloadProgress[fname].state = "error";
+  setTimeout(() => {
+    if (downloadProgress[fname]) {
+      downloadProgress[fname].state = "hidden";
+    }
+    setTimeout(() => {
+      delete downloadProgress[fname];
+    }, 200);
+  }, 1600);
+}
+
 async function onUploadCacheFile() {
-  const res = await uploadCacheFile();
-  if (res) {
-    // 成功上传后，重新获取所有缓存数据
-    await onSelectCacheManagement();
-    Toast.success("缓存文件上传成功");
-    errorMessage.value = "";
-  } else {
+  startCacheLoading();
+  try {
+    const res = await uploadCacheFile();
+    if (res) {
+      await onSelectCacheManagement();
+      Toast.success("缓存文件上传成功");
+      errorMessage.value = "";
+    } else {
+      throw new Error("上传缓存文件失败");
+    }
+  } catch (error) {
+    console.error(error);
     errorMessage.value = "上传缓存文件失败，请稍后再试";
     Toast.error("上传缓存文件失败，请稍后再试");
+  } finally {
+    stopCacheLoading();
   }
 }
 
-/**
- * 获取所有缓存数据
- */
 async function onSelectCacheManagement() {
-  const res = await getAllCache();
-  if (Array.isArray(res)) {
-    // 把res里的对象的根据modified_time按照日期排序,并且改成年-月-日 时:分:秒格式
-    res
-      .sort((a, b) => b.modified_time - a.modified_time)
-      .forEach((item) => {
-        const d = new Date(item.modified_time * 1000);
-        item.modified_time = d.toISOString().replace("T", " ").split(".")[0];
-        // 结果: 2025-08-15 21:53:17
-      });
-    cacheMgt.value = res;
-    Toast.success("缓存数据加载成功");
-    errorMessage.value = "";
-  } else {
+  startCacheLoading();
+  try {
+    const res = await getAllCache();
+    if (Array.isArray(res)) {
+      res
+        .sort((a, b) => b.modified_time - a.modified_time)
+        .forEach((item) => {
+          const d = new Date(item.modified_time * 1000);
+          item.modified_time = d.toISOString().replace("T", " ").split(".")[0];
+        });
+      cacheMgt.value = res;
+      Toast.success("缓存数据加载成功");
+      errorMessage.value = "";
+    } else {
+      throw new Error("获取缓存数据失败");
+    }
+  } catch (error) {
+    console.error(error);
     errorMessage.value = "获取缓存数据失败，请稍后再试";
     Toast.error("获取缓存数据失败，请稍后再试");
+    cacheMgt.value = [];
+  } finally {
+    stopCacheLoading();
   }
 }
 
-/**
- * 初始化时获取所有缓存数据
- */
 onMounted(async () => {
-  // 初始化时获取所有缓存数据
   await onSelectCacheManagement();
 });
 
@@ -264,80 +267,9 @@ function formatProgressText(item) {
 <style scoped>
 @import url("../../assets/components/admin-content.css");
 
-.row-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.row-item {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.row-serial {
-  font-size: 18px;
-  font-weight: bold;
-  color: #555;
-  width: 24px;
-  text-align: center;
-  margin-right: 8px;
-  border-right: 2px solid #e0e0e0;
-}
-
-.row-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.row-content input[type="text"],
-.row-content input[type="url"] {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.item-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  justify-content: right;
-}
-
-.item-actions label {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.item-actions button {
-  padding: 8px 14px;
-  font-size: 14px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background: #e74c3c;
-  color: #fff;
-  transition: background 0.2s;
-}
-
-.item-actions button:hover {
-  background: #c0392b;
-}
 .progress-toast-container {
   position: fixed;
-  top: 64px;
+  top: 88px;
   right: 24px;
   display: flex;
   flex-direction: column;
@@ -348,17 +280,18 @@ function formatProgressText(item) {
 .progress-toast {
   min-width: 220px;
   max-width: 280px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 12px 16px;
-  border: 1px solid #e0e0e0;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f8fafc;
+  box-shadow: 0 14px 40px -20px rgba(15, 23, 42, 0.6);
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  backdrop-filter: blur(14px);
 }
 
 .progress-toast-title {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
   margin-bottom: 8px;
   word-break: break-all;
 }
@@ -367,14 +300,14 @@ function formatProgressText(item) {
   position: relative;
   width: 100%;
   height: 6px;
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-toast-bar-inner {
   height: 100%;
-  background: #1890ff;
+  background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
   transition: width 0.2s ease;
 }
 
@@ -382,23 +315,41 @@ function formatProgressText(item) {
   margin-top: 8px;
   text-align: right;
   font-size: 12px;
-  color: #555;
+  color: rgba(248, 250, 252, 0.8);
   font-weight: 500;
 }
 
 .progress-toast--done {
-  border-color: #52c41a;
+  border-color: rgba(52, 211, 153, 0.45);
 }
 
 .progress-toast--done .progress-toast-bar-inner {
-  background: #52c41a;
+  background: linear-gradient(135deg, #10b981 0%, #22d3ee 100%);
 }
 
 .progress-toast--error {
-  border-color: #ff4d4f;
+  border-color: rgba(248, 113, 113, 0.6);
 }
 
 .progress-toast--error .progress-toast-bar-inner {
-  background: #ff4d4f;
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+}
+
+.inline-actions {
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .progress-toast-container {
+    top: auto;
+    bottom: 24px;
+    right: 16px;
+  }
+
+  .inline-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>

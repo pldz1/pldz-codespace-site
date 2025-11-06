@@ -1,79 +1,68 @@
 <template>
-  <!-- 移动端侧边栏 -->
-  <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="onCloseMobileMenu()"></div>
-  <div v-show="isMobileMenuOpen" class="mobile-sidebar">
-    <div class="mobile-sidebar-header">
-      <div class="logo">爬楼的猪 CodeSpace</div>
-      <button class="close-btn" @click="onCloseMobileMenu()">×</button>
-    </div>
-    <div class="nav-placeholder"></div>
-    <div class="mobile-sidebar-container" ref="mobileSidebarContainerRef"></div>
-  </div>
+  <div class="admin-page">
+    <transition name="fade">
+      <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="onCloseMobileMenu()"></div>
+    </transition>
 
-  <!-- 顶部导航栏 -->
-  <HeaderBar @toggle-mobile-menu="onToggleMobileMenu"></HeaderBar>
-
-  <!-- 主体内容 -->
-  <div class="main-container">
-    <!-- 左侧边栏 -->
-    <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
-      <div class="sidebar-card" ref="sidebarContentRef">
-        <div class="sidebar-card-title">⚙ 菜单</div>
-
-        <div class="sidebar-item" @click="onActiveCard('用户管理')" :style="{ background: backgroundColorList[0] }">
-          <span class="sidebar-icon">🤠 </span>
-          用户管理
+    <transition name="slide-in">
+      <div v-show="isMobileMenuOpen" class="mobile-sidebar modern-mobile-sidebar">
+        <div class="mobile-sidebar-header">
+          <div class="logo">
+            <span class="logo-icon">🐷</span>
+            <span>爬楼的猪 CodeSpace</span>
+          </div>
+          <button class="close-btn" @click="onCloseMobileMenu()">×</button>
         </div>
-
-        <div class="sidebar-item" @click="onActiveCard('新增文章')" :style="{ background: backgroundColorList[1] }">
-          <span class="sidebar-icon">➕ </span>
-          新增文章
-        </div>
-
-        <div class="sidebar-item" @click="onActiveCard('专栏管理')" :style="{ background: backgroundColorList[2] }">
-          <span class="sidebar-icon">📙 </span>
-          专栏管理
-        </div>
-        <div class="sidebar-item" @click="onActiveCard('图片管理')" :style="{ background: backgroundColorList[3] }">
-          <span class="sidebar-icon">📷</span>
-          图片管理
-        </div>
-        <div class="sidebar-item" @click="onActiveCard('网站导航管理')" :style="{ background: backgroundColorList[4] }">
-          <span class="sidebar-icon">🌐</span>
-          网站导航管理
-        </div>
-        <div class="sidebar-item" @click="onActiveCard('缓存资源管理')" :style="{ background: backgroundColorList[5] }">
-          <span class="sidebar-icon">💾</span>
-          缓存资源管理
-        </div>
-        <div class="sidebar-item" @click="onActiveCard('Git插件')" :style="{ background: backgroundColorList[6] }">
-          <span class="sidebar-icon">🔁</span>
-          Git插件
-        </div>
+        <div class="nav-placeholder"></div>
+        <div class="mobile-sidebar-container" ref="mobileSidebarContainerRef"></div>
       </div>
-    </aside>
+    </transition>
 
-    <!-- 中间内容区 -->
-    <main class="content">
-      <!-- 用户管理 -->
-      <UserMgt v-if="activeCard === '用户管理'"></UserMgt>
-      <!-- 新增文章 -->
-      <ArticleMgt v-if="activeCard === '新增文章'" :all-categories="allCategories"></ArticleMgt>
-      <!-- 专栏管理 -->
-      <CategoryMgt v-if="activeCard === '专栏管理'" :all-categories="allCategories" @on-update-categories="onOnUpdateCategories"> </CategoryMgt>
-      <!-- 图片管理 -->
-      <ImageMgt v-if="activeCard === '图片管理'" :all-categories="allCategories"></ImageMgt>
-      <!-- 网站导航管理 -->
-      <NavMgt v-if="activeCard === '网站导航管理'"></NavMgt>
-      <!-- 缓存资源管理 -->
-      <CacheMgt v-if="activeCard === '缓存资源管理'"></CacheMgt>
-      <!-- 🔁 Git 插件 -->
-      <GitPlugin v-if="activeCard === 'Git插件'"></GitPlugin>
-    </main>
+    <HeaderBar @toggle-mobile-menu="onToggleMobileMenu"></HeaderBar>
+
+    <div class="main-container admin-main" :class="{ 'mobile-menu-open': isMobileMenuOpen }">
+      <aside class="sidebar sidebar-sticky admin-sidebar" ref="mainSidebarContainerRef">
+        <nav class="sidebar-nav admin-sidebar-card" ref="sidebarContentRef">
+          <p class="sidebar-heading">控制台菜单</p>
+          <button
+            v-for="item in menuItems"
+            :key="item.key"
+            class="sidebar-link"
+            :class="{ active: activeMenuKey === item.key }"
+            @click="onActiveCard(item.key)"
+          >
+            <span class="sidebar-link-label">{{ item.name }}</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="content admin-content">
+        <section class="admin-content-body" :class="{ 'is-dimmed': showLoadingOverlay }">
+          <transition name="fade">
+            <div v-if="showLoadingOverlay" class="loading-overlay">
+              <div class="loading-spinner"></div>
+              <p>数据加载中，请稍候...</p>
+            </div>
+          </transition>
+
+          <UserMgt v-if="activeMenuKey === 'usermgt'"></UserMgt>
+          <ArticleMgt v-if="activeMenuKey === 'articlemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ArticleMgt>
+          <CategoryMgt
+            v-if="activeMenuKey === 'categorymgt'"
+            :all-categories="allCategories"
+            :is-loading="isCategoriesLoading"
+            @on-update-categories="onOnUpdateCategories"
+          ></CategoryMgt>
+          <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
+          <NavMgt v-if="activeMenuKey === 'navmgt'"></NavMgt>
+          <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
+          <GitPlugin v-if="activeMenuKey === 'gitplugin'"></GitPlugin>
+        </section>
+      </main>
+    </div>
+
+    <FooterBar></FooterBar>
   </div>
-
-  <!-- 底部隐私数据 -->
-  <FooterBar></FooterBar>
 </template>
 
 <script setup>
@@ -90,8 +79,10 @@ import GitPlugin from "../components/admin-page/GitPlugin.vue";
 
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { getAllCategories } from "../utils/apis";
+import Toast from "../utils/toast.js";
+import { useLoading } from "../utils/use-loading";
 
 const props = defineProps({
   id: {
@@ -101,135 +92,197 @@ const props = defineProps({
   },
 });
 
-const routeMap = {
-  usermgt: "用户管理",
-  articlemgt: "新增文章",
-  categorymgt: "专栏管理",
-  imagemgt: "图片管理",
-  navmgt: "网站导航管理",
-  cachemgt: "缓存资源管理",
-  gitplugin: "Git插件",
-};
+const menuItems = [
+  {
+    key: "usermgt",
+    name: "用户管理",
+    icon: "🤠",
+    caption: "管理后台用户权限与基础资料",
+    gradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+    requiresCategories: false,
+  },
+  {
+    key: "articlemgt",
+    name: "新增文章",
+    icon: "➕",
+    caption: "快速创建新的文章草稿",
+    gradient: "linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%)",
+    requiresCategories: true,
+  },
+  {
+    key: "categorymgt",
+    name: "专栏管理",
+    icon: "📙",
+    caption: "组织与排序内容专栏",
+    gradient: "linear-gradient(135deg, #f97316 0%, #facc15 100%)",
+    requiresCategories: true,
+  },
+  {
+    key: "imagemgt",
+    name: "图片管理",
+    icon: "📷",
+    caption: "上传与维护内容配图",
+    gradient: "linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%)",
+    requiresCategories: true,
+  },
+  {
+    key: "navmgt",
+    name: "网站导航管理",
+    icon: "🌐",
+    caption: "配置站点导航与展示位",
+    gradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)",
+    requiresCategories: false,
+  },
+  {
+    key: "cachemgt",
+    name: "缓存资源管理",
+    icon: "💾",
+    caption: "维护静态缓存与资源文件",
+    gradient: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
+    requiresCategories: false,
+  },
+  {
+    key: "gitplugin",
+    name: "Git插件",
+    icon: "🔁",
+    caption: "同步内容到 Git 仓库",
+    gradient: "linear-gradient(135deg, #f472b6 0%, #f43f5e 100%)",
+    requiresCategories: false,
+  },
+];
+
+const routeMap = menuItems.reduce((map, item) => {
+  map[item.key] = item;
+  return map;
+}, {});
+
+const categoriesDependentMenu = new Set(menuItems.filter((item) => item.requiresCategories).map((item) => item.key));
+
+const defaultMenuKey = menuItems[0].key;
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
 
-const backgroundColorList = [
-  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  "linear-gradient(135deg, #4facfe, #00f2fe)",
-  "linear-gradient(135deg, #ff7e5f, #feb47b)",
-  "linear-gradient(135deg, #43cea2, #185a9d)",
-  "linear-gradient(135deg, #f7971e, #ffd200)",
-  "linear-gradient(135deg, #00c6ff, #0072ff)",
-  "linear-gradient(135deg, #ff6a00, #ee0979)",
-  "linear-gradient(135deg, #00c6ff, #0072ff)",
-];
-
-// 用于存储所有分类
 const allCategories = ref([]);
+const activeMenuKey = ref(defaultMenuKey);
 
-// 引用移动端和主侧边栏容器
 const isMobileMenuOpen = ref(false);
 const mobileSidebarContainerRef = ref(null);
 const mainSidebarContainerRef = ref(null);
 const sidebarContentRef = ref(null);
 
-// 用于存储当前选中的分类
-const activeCard = ref("用户管理");
+const { isLoading: isCategoriesLoading, start: startCategoriesLoading, stop: stopCategoriesLoading } = useLoading("admin.categories");
 
-/**
- * 设置当前活动分类并获取相应的文章
- * @param category {string} 选中的分类
- */
-function onActiveCard(category) {
-  // 如果点击的是当前分类，则不做任何操作``
-  if (activeCard.value === category) return;
+const activeMenu = computed(() => routeMap[activeMenuKey.value] || routeMap[defaultMenuKey]);
+const showLoadingOverlay = computed(() => isCategoriesLoading.value && categoriesDependentMenu.has(activeMenuKey.value));
 
-  // 设置当前活动分类
-  activeCard.value = category;
-  const key = Object.keys(routeMap).find((k) => routeMap[k] === category);
-  router.push(`/admin/${key}`);
-}
-
-/**
- * 打开移动端菜单
- */
-function onToggleMobileMenu() {
-  isMobileMenuOpen.value = true;
-  if (mobileSidebarContainerRef.value && sidebarContentRef.value) {
-    mobileSidebarContainerRef.value.appendChild(sidebarContentRef.value);
+function onActiveCard(key) {
+  if (activeMenuKey.value === key) return;
+  activeMenuKey.value = key;
+  if (route.params.id !== key) {
+    router.push(`/admin/${key}`);
   }
 }
 
-/**
- * 关闭移动端菜单
- */
+function onToggleMobileMenu() {
+  if (isMobileMenuOpen.value) {
+    onCloseMobileMenu();
+    return;
+  }
+
+  if (mobileSidebarContainerRef.value && sidebarContentRef.value) {
+    mobileSidebarContainerRef.value.appendChild(sidebarContentRef.value);
+  }
+  isMobileMenuOpen.value = true;
+}
+
 function onCloseMobileMenu() {
   isMobileMenuOpen.value = false;
-
-  if (mainSidebarContainerRef.value && sidebarContentRef.value) {
+  if (mainSidebarContainerRef.value && sidebarContentRef.value && !mainSidebarContainerRef.value.contains(sidebarContentRef.value)) {
     mainSidebarContainerRef.value.appendChild(sidebarContentRef.value);
   }
 }
 
-/**
- * 更新所有分类数据
- */
-async function onOnUpdateCategories() {
-  const res = await getAllCategories();
-  if (res) {
-    allCategories.value = res;
-    Toast.success("分类数据更新成功");
-  } else {
-    Toast.error("分类数据更新失败，请稍后再试");
+function handleResize() {
+  if (window.innerWidth > 768 && isMobileMenuOpen.value) {
+    onCloseMobileMenu();
   }
 }
 
-// --- 监听路由参数变化 ---
+async function fetchCategories({ showSuccessToast = false } = {}) {
+  startCategoriesLoading();
+  try {
+    const res = await getAllCategories();
+    if (res) {
+      allCategories.value = res;
+      if (showSuccessToast) {
+        Toast.success("分类数据更新成功");
+      }
+      return true;
+    }
+    Toast.error("分类数据获取失败，请稍后再试");
+    return false;
+  } catch (error) {
+    console.error("获取分类数据失败:", error);
+    Toast.error("分类数据获取失败，请稍后再试");
+    return false;
+  } finally {
+    stopCategoriesLoading();
+  }
+}
+
+async function onOnUpdateCategories() {
+  await fetchCategories({ showSuccessToast: true });
+}
+
 function syncActiveFromRoute(id) {
   if (id && routeMap[id]) {
-    activeCard.value = routeMap[id];
-  } else {
-    activeCard.value = "用户管理";
-    // 保持 URL 规范
-    router.replace("/admin/usermgt");
+    activeMenuKey.value = id;
+    return;
+  }
+
+  const routeId = route.params.id;
+  if (routeId && routeMap[routeId]) {
+    activeMenuKey.value = routeId;
+    return;
+  }
+
+  activeMenuKey.value = defaultMenuKey;
+  if (route.params.id !== defaultMenuKey) {
+    router.replace(`/admin/${defaultMenuKey}`);
   }
 }
 
-watch(
-  () => route.params.id,
-  (newId) => {
-    syncActiveFromRoute(newId);
-  },
-  { immediate: true }
-);
-
-/**
- * 在组件激活时获取所有文章和分类数据和标签统计数据
- */
 onMounted(async () => {
-  // 检查是否为管理员
+  window.addEventListener("resize", handleResize);
+
   const isadmin = store.state.authState.isadmin;
   if (!isadmin) {
     router.push({ path: "/" });
     return;
   }
-  // 获得全部的博客文章
-  let res = await getAllCategories();
-  if (!res) return;
 
-  allCategories.value = res;
+  await fetchCategories();
+  syncActiveFromRoute(props.id || route.params.id);
 });
 
-/**
- * 监听窗口大小变化，自动关闭移动端菜单
- */
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
 watch(
-  () => window.innerWidth,
-  (newWidth) => {
-    if (newWidth > 768) {
-      onCloseMobileMenu();
+  () => route.params.id,
+  (newId) => {
+    syncActiveFromRoute(newId);
+  }
+);
+
+watch(
+  () => props.id,
+  (newId) => {
+    if (newId) {
+      syncActiveFromRoute(newId);
     }
   }
 );
@@ -239,47 +292,246 @@ watch(
 @import url("../assets/views/main-container.css");
 @import url("../assets/views/mobile-overlay.css");
 
-.sidebar-sticky {
-  position: sticky;
-  top: 80px;
-  height: fit-content;
+.admin-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f7f8fa;
 }
 
-.sidebar-card {
-  padding: 0 8px;
+.admin-main {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 88px 24px 32px;
+  min-height: calc(100vh - 112px);
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  overflow: hidden;
+  transition: filter 0.3s ease, transform 0.3s ease;
 }
 
-.sidebar-card-title {
+.admin-sidebar {
+  width: 240px;
+  flex: 0 0 240px;
+  display: flex;
+}
+
+.admin-sidebar-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.sidebar-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sidebar-link {
+  text-align: left;
+  padding: 10px 4px;
+  border: none;
+  background: none;
+  font-size: 15px;
+  color: #1f2937;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sidebar-link:hover {
+  color: #2563eb;
+}
+
+.sidebar-link.active {
+  color: #1d4ed8;
+  border-bottom-color: currentColor;
+  font-weight: 600;
+}
+
+.admin-content {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  max-width: none;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-content-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 8px 32px;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+.admin-content-body.is-dimmed {
+  pointer-events: none;
+  filter: blur(1px);
+  opacity: 0.6;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  color: #475569;
+}
+
+.loading-spinner {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 4px solid rgba(99, 102, 241, 0.16);
+  border-top-color: #6366f1;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-in-enter-active,
+.slide-in-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.slide-in-enter-from,
+.slide-in-leave-to {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.modern-mobile-sidebar {
+  background: #0f172a;
+  color: #fff;
+  border-top-right-radius: 24px;
+  border-bottom-right-radius: 24px;
+  box-shadow: 0 30px 60px -35px rgba(15, 23, 42, 0.7);
+}
+
+.modern-mobile-sidebar .logo {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 16px;
-  padding: 8px;
-  border-bottom: 1px solid #e4e6ea;
-}
-
-.sidebar-item {
   display: flex;
   align-items: center;
-  padding: 16px 32px;
-  color: #71777c;
-  cursor: pointer;
-  gap: 10px;
-  border-radius: 16px;
-  margin: 8px 0px;
-  color: #171717;
+  gap: 8px;
+}
+
+.logo-icon {
   font-size: 18px;
-  font-weight: 500;
 }
 
-.sidebar-icon {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@media (max-width: 1024px) {
+  .admin-main {
+    padding: 80px 20px 28px;
+    gap: 20px;
+  }
+
+  .admin-sidebar {
+    width: 200px;
+    flex-basis: 200px;
+  }
+
+  .admin-content {
+    padding: 0;
+  }
 }
 
-.content {
-  max-width: unset;
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 88px 16px 32px;
+    overflow-y: auto;
+    gap: 20px;
+  }
+
+  .admin-sidebar {
+    display: none;
+  }
+
+  .admin-content {
+    padding: 24px 20px;
+    backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.25);
+  }
+
+  .sidebar-nav {
+    gap: 10px;
+  }
+
+  .admin-sidebar-card {
+    backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .admin-content-header h1 {
+    font-size: 24px;
+  }
+
+  .modern-mobile-sidebar {
+    backdrop-filter: none;
+    background: rgba(15, 23, 42, 0.94);
+  }
+
+  .admin-main.mobile-menu-open {
+    filter: blur(2px) brightness(0.92);
+    transform: scale(0.995);
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 20px 16px;
+  }
+
+  .admin-content-header {
+    margin-bottom: 20px;
+  }
+
+  .admin-main.mobile-menu-open {
+    filter: blur(2.4px) brightness(0.88);
+    transform: scale(0.99);
+  }
 }
 </style>

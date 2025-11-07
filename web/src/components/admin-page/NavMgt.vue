@@ -24,24 +24,31 @@
           </div>
 
           <div v-if="webNavAdMgt.navs.length" class="list-block">
-            <div class="list-row" v-for="(nav, index) in webNavAdMgt.navs" :key="`nav-${index}`">
-              <strong>导航 #{{ index + 1 }}</strong>
-              <div class="field field-grow">
-                <span class="field-label">标题</span>
-                <input class="field-input" type="text" v-model="nav.title" placeholder="请输入导航标题" @change="onSetNavs" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">链接</span>
-                <input class="field-input" type="url" v-model="nav.url" placeholder="https://example.com" @change="onSetNavs" />
-              </div>
-              <div class="inline-actions">
-                <label class="toggle">
-                  <input type="checkbox" v-model="nav.new" @change="onSetNavs" />
-                  <span>展示 new</span>
+            <article class="item-card" v-for="(nav, index) in webNavAdMgt.navs" :key="`nav-${index}`">
+              <header class="item-card__header">
+                <div class="item-card__title">
+                  <span class="item-card__badge">导航 #{{ index + 1 }}</span>
+                  <span class="item-card__hint" v-if="nav.title">{{ nav.title }}</span>
+                </div>
+                <div class="item-card__actions">
+                  <label class="toggle">
+                    <input type="checkbox" v-model="nav.new" @change="onSetNavs" />
+                    <span>展示 new</span>
+                  </label>
+                  <button class="btn btn-danger" @click="onDeleteNavItem(index)">删除</button>
+                </div>
+              </header>
+              <div class="item-card__grid item-card__grid--nav">
+                <label class="form-field">
+                  <span class="field-label">标题</span>
+                  <input class="field-input" type="text" v-model="nav.title" placeholder="请输入导航标题" @change="onSetNavs" />
                 </label>
-                <button class="btn btn-danger" @click="onDeleteNavItem(index)">删除</button>
+                <label class="form-field">
+                  <span class="field-label">链接</span>
+                  <input class="field-input" type="url" v-model="nav.url" placeholder="https://example.com" @change="onSetNavs" />
+                </label>
               </div>
-            </div>
+            </article>
           </div>
           <div v-else class="empty-state">
             <div class="empty-icon">🧭</div>
@@ -56,44 +63,51 @@
           </div>
 
           <div v-if="webNavAdMgt.ads.length" class="list-block">
-            <div class="list-row" v-for="(ad, index) in webNavAdMgt.ads" :key="`ad-${index}`">
-              <strong>横幅 #{{ index + 1 }}</strong>
-              <div class="field field-grow">
-                <span class="field-label">标题</span>
-                <input class="field-input" type="text" v-model="ad.title" placeholder="请输入广告标题" @change="onSetAds" />
+            <article class="item-card" v-for="(ad, index) in webNavAdMgt.ads" :key="`ad-${index}`">
+              <header class="item-card__header">
+                <div class="item-card__title">
+                  <span class="item-card__badge">横幅 #{{ index + 1 }}</span>
+                  <span class="item-card__hint" v-if="ad.title">{{ ad.title }}</span>
+                </div>
+                <div class="item-card__actions">
+                  <button class="btn btn-danger" @click="onDeleteAdItem(index)">删除</button>
+                </div>
+              </header>
+              <div class="item-card__grid">
+                <label class="form-field">
+                  <span class="field-label">标题</span>
+                  <input class="field-input" type="text" v-model="ad.title" placeholder="请输入广告标题" @change="onSetAds" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">链接</span>
+                  <input class="field-input" type="url" v-model="ad.url" placeholder="https://example.com" @change="onSetAds" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">文件夹</span>
+                  <input class="field-input" type="text" v-model="ad.folder" placeholder="所属文件夹" @change="onSetAds" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">缩略图</span>
+                  <input class="field-input" type="text" v-model="ad.thumbnail" placeholder="缩略图地址" @change="onSetAds" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">预览图</span>
+                  <input class="field-input" type="text" v-model="ad.previewgif" placeholder="预览图地址" @change="onSetAds" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">源码链接</span>
+                  <input class="field-input" type="text" v-model="ad.sourcelink" placeholder="源码链接" @change="onSetAds" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">日期</span>
+                  <input class="field-input" type="text" v-model="ad.date" placeholder="发布日期" @change="onSetAds" />
+                </label>
+                <label class="form-field form-field--full">
+                  <span class="field-label">描述</span>
+                  <textarea class="field-input" v-model="ad.description" placeholder="请输入广告描述" @change="onSetAds"></textarea>
+                </label>
               </div>
-              <div class="field field-grow">
-                <span class="field-label">链接</span>
-                <input class="field-input" type="url" v-model="ad.url" placeholder="https://example.com" @change="onSetAds" />
-              </div>
-              <div class="field">
-                <span class="field-label">文件夹</span>
-                <input class="field-input" type="text" v-model="ad.folder" placeholder="所属文件夹" @change="onSetAds" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">缩略图</span>
-                <input class="field-input" type="text" v-model="ad.thumbnail" placeholder="缩略图地址" @change="onSetAds" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">预览图</span>
-                <input class="field-input" type="text" v-model="ad.previewgif" placeholder="预览图地址" @change="onSetAds" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">源码链接</span>
-                <input class="field-input" type="text" v-model="ad.sourcelink" placeholder="源码链接" @change="onSetAds" />
-              </div>
-              <div class="field">
-                <span class="field-label">日期</span>
-                <input class="field-input" type="text" v-model="ad.date" placeholder="发布日期" @change="onSetAds" />
-              </div>
-              <div class="field field-grow full-width">
-                <span class="field-label">描述</span>
-                <textarea class="field-input" v-model="ad.description" placeholder="请输入广告描述" @change="onSetAds"></textarea>
-              </div>
-              <div class="inline-actions">
-                <button class="btn btn-danger" @click="onDeleteAdItem(index)">删除</button>
-              </div>
-            </div>
+            </article>
           </div>
           <div v-else class="empty-state">
             <div class="empty-icon">🪧</div>
@@ -108,44 +122,51 @@
           </div>
 
           <div v-if="webNavAdMgt.codespaces.length" class="list-block">
-            <div class="list-row" v-for="(cs, index) in webNavAdMgt.codespaces" :key="`cs-${index}`">
-              <strong>CodeSpace #{{ index + 1 }}</strong>
-              <div class="field field-grow">
-                <span class="field-label">标题</span>
-                <input class="field-input" type="text" v-model="cs.title" placeholder="标题" @change="onSetCodeSpaces" />
+            <article class="item-card" v-for="(cs, index) in webNavAdMgt.codespaces" :key="`cs-${index}`">
+              <header class="item-card__header">
+                <div class="item-card__title">
+                  <span class="item-card__badge">CodeSpace #{{ index + 1 }}</span>
+                  <span class="item-card__hint" v-if="cs.title">{{ cs.title }}</span>
+                </div>
+                <div class="item-card__actions">
+                  <button class="btn btn-danger" @click="onDeleteCodeSpaceItem(index)">删除</button>
+                </div>
+              </header>
+              <div class="item-card__grid">
+                <label class="form-field">
+                  <span class="field-label">标题</span>
+                  <input class="field-input" type="text" v-model="cs.title" placeholder="标题" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">链接</span>
+                  <input class="field-input" type="url" v-model="cs.url" placeholder="https://example.com" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">文件夹</span>
+                  <input class="field-input" type="text" v-model="cs.folder" placeholder="文件夹" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">缩略图</span>
+                  <input class="field-input" type="text" v-model="cs.thumbnail" placeholder="缩略图" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">预览图</span>
+                  <input class="field-input" type="text" v-model="cs.previewgif" placeholder="预览图" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">源码链接</span>
+                  <input class="field-input" type="text" v-model="cs.sourcelink" placeholder="源码连接" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field">
+                  <span class="field-label">日期</span>
+                  <input class="field-input" type="text" v-model="cs.date" placeholder="日期" @change="onSetCodeSpaces" />
+                </label>
+                <label class="form-field form-field--full">
+                  <span class="field-label">描述</span>
+                  <textarea class="field-input" v-model="cs.description" placeholder="描述" @change="onSetCodeSpaces"></textarea>
+                </label>
               </div>
-              <div class="field field-grow">
-                <span class="field-label">链接</span>
-                <input class="field-input" type="url" v-model="cs.url" placeholder="https://example.com" @change="onSetCodeSpaces" />
-              </div>
-              <div class="field">
-                <span class="field-label">文件夹</span>
-                <input class="field-input" type="text" v-model="cs.folder" placeholder="文件夹" @change="onSetCodeSpaces" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">缩略图</span>
-                <input class="field-input" type="text" v-model="cs.thumbnail" placeholder="缩略图" @change="onSetCodeSpaces" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">预览图</span>
-                <input class="field-input" type="text" v-model="cs.previewgif" placeholder="预览图" @change="onSetCodeSpaces" />
-              </div>
-              <div class="field field-grow">
-                <span class="field-label">源码链接</span>
-                <input class="field-input" type="text" v-model="cs.sourcelink" placeholder="源码连接" @change="onSetCodeSpaces" />
-              </div>
-              <div class="field">
-                <span class="field-label">日期</span>
-                <input class="field-input" type="text" v-model="cs.date" placeholder="日期" @change="onSetCodeSpaces" />
-              </div>
-              <div class="field field-grow full-width">
-                <span class="field-label">描述</span>
-                <textarea class="field-input" v-model="cs.description" placeholder="描述" @change="onSetCodeSpaces"></textarea>
-              </div>
-              <div class="inline-actions">
-                <button class="btn btn-danger" @click="onDeleteCodeSpaceItem(index)">删除</button>
-              </div>
-            </div>
+            </article>
           </div>
           <div v-else class="empty-state">
             <div class="empty-icon">📦</div>
@@ -291,6 +312,89 @@ onMounted(async () => {
 <style scoped>
 @import url("../../assets/components/admin-content.css");
 
+.list-block {
+  gap: 16px;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+}
+
+.item-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.item-card__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.item-card__badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #e0f2fe;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.item-card__hint {
+  font-size: 13px;
+  color: #64748b;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.item-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.item-card__grid--nav {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.form-field textarea.field-input {
+  min-height: 104px;
+}
+
 .section-block {
   display: flex;
   flex-direction: column;
@@ -333,6 +437,14 @@ textarea {
 }
 
 @media (max-width: 768px) {
+  .item-card {
+    padding: 16px;
+  }
+
+  .item-card__hint {
+    max-width: 100%;
+  }
+
   .section-head {
     flex-direction: column;
     align-items: flex-start;

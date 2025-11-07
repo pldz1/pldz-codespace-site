@@ -8,7 +8,7 @@
       <div v-show="isMobileMenuOpen" class="mobile-sidebar modern-mobile-sidebar">
         <div class="mobile-sidebar-header">
           <div class="logo">
-            <span class="logo-icon">🐷</span>
+            <div class="logo-icon"></div>
             <span>爬楼的猪 CodeSpace</span>
           </div>
           <button class="close-btn" @click="onCloseMobileMenu()">×</button>
@@ -23,7 +23,6 @@
     <div class="main-container admin-main" :class="{ 'mobile-menu-open': isMobileMenuOpen }">
       <aside class="sidebar sidebar-sticky admin-sidebar" ref="mainSidebarContainerRef">
         <nav class="sidebar-nav admin-sidebar-card" ref="sidebarContentRef">
-          <p class="sidebar-heading">控制台菜单</p>
           <button
             v-for="item in menuItems"
             :key="item.key"
@@ -330,15 +329,7 @@ watch(
   flex-direction: column;
   gap: 6px;
   width: 100%;
-}
-
-.sidebar-heading {
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  padding: 8px;
 }
 
 .sidebar-link {
@@ -357,9 +348,9 @@ watch(
   color: #2563eb;
 }
 
-.sidebar-link.active {
+.sidebar-link.active > span {
   color: #1d4ed8;
-  border-bottom-color: currentColor;
+  border-bottom: 2px solid currentColor;
   font-weight: 600;
 }
 
@@ -442,23 +433,21 @@ watch(
 }
 
 .modern-mobile-sidebar {
-  background: #0f172a;
   color: #fff;
-  border-top-right-radius: 24px;
-  border-bottom-right-radius: 24px;
-  box-shadow: 0 30px 60px -35px rgba(15, 23, 42, 0.7);
 }
 
-.modern-mobile-sidebar .logo {
-  font-size: 16px;
-  font-weight: 600;
+.mobile-sidebar-header .logo {
+  color: black;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
 }
 
-.logo-icon {
-  font-size: 18px;
+.mobile-sidebar-header .logo .logo-icon {
+  width: 32px;
+  height: 32px;
+  background: url("../assets/svgs/logo-32.svg") center;
 }
 
 @media (max-width: 1024px) {
@@ -506,11 +495,6 @@ watch(
 
   .admin-content-header h1 {
     font-size: 24px;
-  }
-
-  .modern-mobile-sidebar {
-    backdrop-filter: none;
-    background: rgba(15, 23, 42, 0.94);
   }
 
   .admin-main.mobile-menu-open {

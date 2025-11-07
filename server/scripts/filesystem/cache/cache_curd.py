@@ -13,8 +13,8 @@ class CacheCurdHandle:
     @classmethod
     def get_all_cache_files(cls) -> list:
         """
-        获取所有缓存文件的列表, 返回文件名和文件日期的对象数组
-        :return: [{"filename": "file1.txt", "modified_time": 1234567890}, ...]
+        获取所有缓存文件的列表, 返回文件名、文件日期和文件大小的对象数组
+        :return: [{"filename": "file1.txt", "modified_time": 1234567890, "size": 1024}, ...]
         """
         if not os.path.exists(CACHE_PATH):
             Logger.warning(f"缓存目录不存在, 创建目录: {CACHE_PATH}")
@@ -26,7 +26,8 @@ class CacheCurdHandle:
             if os.path.isfile(file_path):
                 file_info = {
                     "filename": filename,
-                    "modified_time": os.path.getmtime(file_path)
+                    "modified_time": os.path.getmtime(file_path),
+                    "size": os.path.getsize(file_path)
                 }
                 files.append(file_info)
         return files

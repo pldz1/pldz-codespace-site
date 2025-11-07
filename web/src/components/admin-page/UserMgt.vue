@@ -19,15 +19,15 @@
         <div class="list-row" v-for="(user, index) in userMgt.users" :key="user.username || index">
           <strong>#{{ index + 1 }} {{ user.nickname || user.username || "未命名用户" }}</strong>
           <div class="field">
-            <span class="field-label">用户名</span>
+            <span class="field-label">邮箱:</span>
             <span class="field-value">{{ user.username || "-" }}</span>
           </div>
           <div class="field">
-            <span class="field-label">明文密码</span>
+            <span class="field-label">明文密码:</span>
             <span class="field-value field-value--muted">{{ user.raw_password || "-" }}</span>
           </div>
           <div class="field">
-            <span class="field-label">管理员</span>
+            <span class="field-label">管理员:</span>
             <span class="field-value">{{ user.isadmin ? "是" : "否" }}</span>
           </div>
           <div class="field field-grow">

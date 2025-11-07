@@ -32,10 +32,14 @@
 
       <div v-else-if="cacheMgt.length" class="list-block">
         <div class="list-row" v-for="(cache, index) in cacheMgt" :key="`cache-${index}`">
-          <strong>{{ cache.filename }}</strong>
+          <strong class="file-title">{{ cache.filename }}</strong>
           <div class="field">
             <span class="field-label">更新时间</span>
             <span class="field-value field-value--muted">{{ cache.modified_time }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">文件大小</span>
+            <span class="field-value field-value--muted">{{ formatFileSize(cache.size) }}</span>
           </div>
           <div class="inline-actions">
             <button class="btn btn-info" @click="onDownloadCacheFile(cache)">下载</button>
@@ -216,6 +220,8 @@ async function onSelectCacheManagement() {
         .forEach((item) => {
           const d = new Date(item.modified_time * 1000);
           item.modified_time = d.toISOString().replace("T", " ").split(".")[0];
+          const size = Number(item.size);
+          item.size = Number.isFinite(size) ? size : 0;
         });
       cacheMgt.value = res;
       Toast.success("缓存数据加载成功");
@@ -254,6 +260,21 @@ function formatProgressText(item) {
   if (!loaded) return "0 B";
   const units = ["B", "KB", "MB", "GB"];
   let size = loaded;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  const precision = size >= 10 || unitIndex === 0 ? 0 : 1;
+  return `${size.toFixed(precision)} ${units[unitIndex]}`;
+}
+
+function formatFileSize(bytes) {
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value < 0) return "-";
+  if (value === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let size = value;
   let unitIndex = 0;
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
@@ -333,6 +354,10 @@ function formatProgressText(item) {
 
 .progress-toast--error .progress-toast-bar-inner {
   background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+}
+
+.file-title {
+  min-width: 260px;
 }
 
 .inline-actions {

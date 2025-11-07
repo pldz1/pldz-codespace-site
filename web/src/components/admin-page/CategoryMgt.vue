@@ -42,18 +42,21 @@
 
       <div v-else-if="categoryMgt.category && categoryMgt.articles.length" class="list-block">
         <div class="list-row article-row" v-for="article in categoryMgt.articles" :key="article.id">
-          <strong @click="onEditArticle(article.id)" class="article-link">
-            {{ article.title || article.id }}
-          </strong>
+          <div class="field field-grow article-title">
+            <span class="field-label">标题</span>
+            <strong @click="onEditArticle(article.id)" class="article-link">
+              {{ article.title || article.id }}
+            </strong>
+          </div>
           <div class="field field-grow">
             <span class="field-label">文件名</span>
             <input class="field-input" type="text" v-model="article.path" @change="onEditFileName(article.id, article.path)" />
           </div>
-          <div class="field">
+          <div class="field field-compact">
             <span class="field-label">浏览</span>
             <span class="field-value">{{ article.views }}</span>
           </div>
-          <div class="field">
+          <div class="field field-compact">
             <span class="field-label">序号</span>
             <input type="number" class="field-input field-input--xs" v-model.number="article.serialNo" @change="onEditSerialNo(article)" />
           </div>
@@ -296,20 +299,78 @@ async function onDownLoadMDFile(id, title) {
 @import url("../../assets/components/admin-content.css");
 
 .article-row {
+  display: grid;
+  grid-template-columns: minmax(240px, 2fr) minmax(240px, 2fr) auto auto auto;
   align-items: center;
+  gap: 12px 16px;
 }
 
-.article-link {
+.article-row .field-label {
+  min-width: 48px;
+  text-align: right;
+}
+
+.article-row .field.field-compact {
+  min-width: auto;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.article-row .field.field-compact .field-label {
+  min-width: auto;
+  text-align: left;
+}
+
+.article-title {
+  gap: 12px;
+}
+
+.article-title .article-link {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
   color: #1d4ed8;
   cursor: pointer;
   text-decoration: underline;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
-.article-link:hover {
+.article-title .article-link:hover {
   color: #1e40af;
+}
+
+.inline-actions {
+  margin-left: 0;
+  justify-self: end;
 }
 
 .field-input.field-input--xs {
   text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .article-row {
+    grid-template-columns: minmax(200px, 2fr) minmax(200px, 2fr) auto auto;
+  }
+
+  .inline-actions {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .article-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .article-row .field-label {
+    min-width: auto;
+    text-align: left;
+  }
 }
 </style>

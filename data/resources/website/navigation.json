@@ -1,11 +1,8 @@
 {
-  "update": "2025-06-17",
+  "update": "2025-11-10",
   "version": "1.0.0",
   "data": [
     {
-      "title": "open-webui demo",
-      "url": "https://aigc.pldz1.com/auth",
-      "new": true
     }
   ]
 }

@@ -35,22 +35,47 @@ class NavInfoHandler:
         except Exception as e:
             Logger.error(f"加载 Navigation 配置时发生错误: {e}")
             self.codespace_config = {}
+        finally:
+            if not isinstance(self.codespace_config, dict):
+                Logger.warning("Navigation 配置文件根节点格式错误，已初始化为空对象")
+                self.codespace_config = {}
+            data = self.codespace_config.get('data', [])
+            if not isinstance(data, list):
+                Logger.warning("Navigation 配置 data 字段格式错误，已重置为空列表")
+                self.codespace_config['data'] = []
+            else:
+                self.codespace_config.setdefault('data', [])
 
     def get_navigation_items(self) -> typing.List[NavItem]:
         """
         获取 Navigation 配置中的所有项目
         """
         items = []
-        for item in self.codespace_config.get('data', []):
-            try:
-                items.append(NavItem(
-                    title=item['title'],
-                    url=item['url'],
-                    new=item['new'],
-                ))
-            except KeyError as e:
-                Logger.error(f"Navigation 配置项缺少必要字段: {e}")
+        data = self.codespace_config.get('data', [])
+        if not isinstance(data, list):
+            Logger.warning("Navigation 配置 data 字段不是列表，无法解析导航项")
+            return items
+
+        for index, item in enumerate(data):
+            if not isinstance(item, dict):
+                Logger.warning(f"Navigation 配置项类型错误，索引 {index} 已跳过")
                 continue
+
+            title = item.get('title')
+            url = item.get('url')
+            if not title:
+                Logger.warning(f"Navigation 配置项缺少必要字段 title，索引 {index} 已跳过")
+                continue
+            if not url:
+                Logger.warning(f"Navigation 配置项缺少必要字段 url，索引 {index} 已跳过")
+                continue
+
+            nav_item: NavItem = {
+                'title': str(title),
+                'url': str(url),
+                'new': bool(item.get('new', False)),
+            }
+            items.append(nav_item)
         return items
 
     def set_navigation_items(self, items: typing.List[NavItem]) -> None:

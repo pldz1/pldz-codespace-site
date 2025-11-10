@@ -28,59 +28,67 @@ class WhiteBoardHandler:
         pass
 
     @classmethod
-    def random_key(cls, username: str, length: int = 4) -> str:
-        """
-        生成指定长度的随机字符串
-        :param username: 用户名
-        :param length: 字符串长度
-        :return: 随机字符串"""
-        # 可选字符：大写、小写、数字
-        name = username.split('@')[0]
-        rnum = random.randint(100, 999)
-        return f"{name}-{rnum}"
+    def _now(cls) -> datetime.datetime:
+        return datetime.datetime.now()
 
     @classmethod
-    def get_item_by_username(cls, username) -> typing.Optional[WhiteBoardItem]:
-        """
-        获取指定用户名的白板内容
-        :param username: 用户名
-        :return: 白板元素
-        """
-        if not username:
-            return None
-        for item in cls.white_board_list:
-            if item['username'] == username:
-                # 如果创建时间超过 INVALID_TIME 返回空字符串
-                if (item['created'] and
-                        (datetime.datetime.now() - datetime.datetime.fromisoformat(item['created'])).total_seconds() > INVALID_TIME):
+    def _is_expired(cls, created: str, now: typing.Optional[datetime.datetime] = None) -> bool:
+        if not created:
+            return False
+        current = now or cls._now()
+        return (current - datetime.datetime.fromisoformat(created)).total_seconds() > INVALID_TIME
 
-                    # 如果new_key与现有的key重复，重新生成
-                    new_key = cls.random_key(username)
-                    while any(existing_item['key'] == new_key for existing_item in cls.white_board_list):
-                        new_key = cls.random_key(username)
+    @classmethod
+    def _prune_expired(cls) -> None:
+        current = cls._now()
+        cls.white_board_list = [
+            item for item in cls.white_board_list
+            if not cls._is_expired(item['created'], current)
+        ]
 
-                    # 返回新的白板项
-                    cls.white_board_list.remove(item)
-                    new_item = {
-                        'created': datetime.datetime.now().isoformat(),
-                        'key': new_key,
-                        'content': "",
-                        'username': username,
-                    }
-                    cls.white_board_list.append(new_item)
-                    # 返回新的白板项
-                    return new_item
-                # 返回白板内容
-                return item
-        # 如果没有找到或用户名为空，返回空内容但是新的item
-        new_item = {
-            'created': datetime.datetime.now().isoformat(),
-            'key': cls.random_key(username),
+    @classmethod
+    def random_key(cls) -> str:
+        """
+        生成 100-999 的随机数字密钥，保证全局唯一
+        """
+        if len(cls.white_board_list) >= 900:
+            raise RuntimeError("Whiteboard capacity exhausted.")
+        while True:
+            candidate = str(random.randint(100, 999))
+            if all(item['key'] != candidate for item in cls.white_board_list):
+                return candidate
+
+    @classmethod
+    def _create_item(cls, username: str) -> WhiteBoardItem:
+        username = username or ""
+        new_item: WhiteBoardItem = {
+            'created': cls._now().isoformat(),
+            'key': cls.random_key(),
             'content': "",
             'username': username,
         }
         cls.white_board_list.append(new_item)
         return new_item
+
+    @classmethod
+    def get_items_by_username(cls, username: typing.Optional[str], create_new: bool = False) -> typing.List[WhiteBoardItem]:
+        """
+        获取指定用户名的白板内容列表
+        :param username: 用户名，可为空字符串
+        :param create_new: 是否为该用户创建一个新的白板
+        :return: 白板元素列表
+        """
+        cls._prune_expired()
+        target_username = username or ""
+        items = [item for item in cls.white_board_list if item['username'] == target_username]
+
+        if create_new or not items:
+            new_item = cls._create_item(target_username)
+            # 新创建的白板置顶
+            items = [new_item] + [item for item in items if item['key'] != new_item['key']]
+
+        # 按更新时间倒序返回，最近的在前
+        return sorted(items, key=lambda x: x['created'], reverse=True)
 
     @classmethod
     def get_item_by_key(cls, key: str) -> typing.Optional[WhiteBoardItem]:
@@ -91,19 +99,17 @@ class WhiteBoardHandler:
         """
         if not key:
             return None
+        target: typing.Optional[WhiteBoardItem] = None
         for item in cls.white_board_list:
             if item['key'] == key:
-                # 如果创建时间超过 INVALID_TIME 分钟返回空字符串
-                if (item['created'] and
-                        (datetime.datetime.now() - datetime.datetime.fromisoformat(item['created'])).total_seconds() > INVALID_TIME):
-                    return {
-                        'created': datetime.datetime.now().isoformat(),
-                        'key': key,
-                        'content': "",
-                        'username': item['username'],
-                    }
-                # 返回白板内容
-                return item
+                if cls._is_expired(item['created']):
+                    item['created'] = cls._now().isoformat()
+                    item['content'] = ""
+                target = item
+                break
+        cls._prune_expired()
+        if target:
+            return target
         # 如果没有找到或键为空，返回空
         return None
 

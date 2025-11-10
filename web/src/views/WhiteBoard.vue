@@ -6,12 +6,45 @@
   <div class="main-container">
     <div class="whiteboard-wrapper">
       <div class="input-area">
-        <input v-model="key" type="text" placeholder="输入密钥" @keyup.enter="handleClick" />
+        <div class="input-wrapper">
+          <input v-model="key" type="text" placeholder="输入密钥" @keyup.enter="handleClick" />
+          <button v-if="key" class="clear-btn" type="button" @click="clearKey" aria-label="清除密钥">×</button>
+        </div>
         <button @click="handleClick">匹配/新建</button>
       </div>
+      <div v-if="boards.length" class="board-selector">
+        <span class="selector-label">已关联白板</span>
+        <div class="key-list">
+          <button
+            v-for="item in boards"
+            :key="item.key"
+            class="key-chip"
+            :class="{ active: item.key === key }"
+            @click="selectBoard(item.key)"
+          >
+            {{ item.key }}
+          </button>
+        </div>
+      </div>
       <div class="board">
-        <div class="card">
-          <textarea v-model="content" @blur="updateRecord" :disabled="!active"></textarea>
+        <div class="card" :class="{ empty: !selectedBoard }">
+          <div class="card-header">
+            <div class="card-meta">
+              <div class="card-key">密钥: {{ selectedBoard?.key || "-" }}</div>
+              <div class="card-owner">创建者: {{ displayUsername }}</div>
+            </div>
+            <div class="card-actions">
+              <button class="secondary" @click="startEditing" :disabled="!canEdit">编辑</button>
+              <button class="primary" @click="updateRecord" :disabled="!canSave">保存</button>
+            </div>
+          </div>
+          <textarea
+            ref="editorRef"
+            v-model="content"
+            :readonly="!isEditing"
+            :disabled="!selectedBoard"
+            placeholder="请先匹配或创建白板"
+          ></textarea>
           <div class="timestamp">上次更新: {{ formatTimestamp(created) }}</div>
         </div>
       </div>
@@ -21,46 +54,120 @@
 
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
-import { ref } from "vue";
+import { computed, nextTick, ref } from "vue";
+import { useStore } from "vuex";
 import Toast from "../utils/toast.js";
 import { getWhiteBoardByKey, getWhiteBoardByUser, updateWhiteBoardContent } from "../utils/apis";
 
-// 白板交互
-const active = ref(false);
+const store = useStore();
+const username = computed(() => store.state.authState.username || "");
+
+const boards = ref([]);
 const key = ref("");
 const content = ref("");
 const created = ref("");
+const isEditing = ref(false);
+const editorRef = ref(null);
+
+const selectedBoard = computed(() => boards.value.find((item) => item.key === key.value) || null);
+const canEdit = computed(() => !!selectedBoard.value && !isEditing.value);
+const canSave = computed(() => !!selectedBoard.value && isEditing.value);
+const displayUsername = computed(() => {
+  const owner = selectedBoard.value?.username || "";
+  return owner || "匿名";
+});
 
 const formatTimestamp = (ts) => (ts ? new Date(ts).toLocaleString() : "-");
 
-const updateRecord = async () => {
-  if (!key.value.trim()) {
-    Toast.error("无效的密钥");
+const selectBoardByKey = (boardKey) => {
+  const match = boards.value.find((item) => item.key === boardKey);
+  if (!match) {
     return;
   }
-  const res = await updateWhiteBoardContent(key.value, content.value);
-  if (res) {
-    Toast.success("更新成功");
-    created.value = res.created || new Date().toISOString();
-  } else {
-    Toast.error("更新失败，请稍后再试");
+  key.value = match.key;
+  content.value = match.content || "";
+  created.value = match.created || "";
+  isEditing.value = false;
+};
+
+const selectBoard = (boardKey) => {
+  selectBoardByKey(boardKey);
+};
+
+const startEditing = () => {
+  if (!selectedBoard.value) {
+    Toast.error("请先匹配白板");
+    return;
   }
+  if (isEditing.value) {
+    return;
+  }
+  isEditing.value = true;
+  nextTick(() => {
+    editorRef.value?.focus();
+  });
+};
+
+const clearKey = () => {
+  key.value = "";
+  content.value = "";
+  created.value = "";
+  isEditing.value = false;
 };
 
 const handleClick = async () => {
-  let res = null;
-  if (!key.value.trim()) res = await getWhiteBoardByUser();
-  else res = await getWhiteBoardByKey(key.value);
+  const trimmedKey = key.value.trim();
+  isEditing.value = false;
 
-  if (!res) {
-    Toast.error("请登录/注册获得正确的key!");
-    active.value = false;
+  if (trimmedKey) {
+    const res = await getWhiteBoardByKey(trimmedKey);
+    if (!res) {
+      Toast.error("未找到对应的白板");
+      boards.value = [];
+      content.value = "";
+      created.value = "";
+      return;
+    }
+    boards.value = [res];
+    selectBoardByKey(res.key);
+    Toast.success("匹配成功");
     return;
   }
-  key.value = res.key;
-  content.value = res.content;
-  created.value = res.created;
-  active.value = true;
+
+  const res = await getWhiteBoardByUser(username.value, true);
+  if (!res || !res.length) {
+    Toast.error("创建白板失败，请稍后再试");
+    return;
+  }
+  boards.value = [...res];
+  selectBoardByKey(boards.value[0].key);
+  Toast.success("已为你创建新的白板");
+};
+
+const updateRecord = async () => {
+  if (!selectedBoard.value) {
+    Toast.error("请选择要更新的白板");
+    return;
+  }
+  if (!isEditing.value) {
+    Toast.error("请先点击编辑按钮");
+    return;
+  }
+  const res = await updateWhiteBoardContent(key.value, content.value);
+  if (!res || res.flag === false) {
+    Toast.error(res?.log || "更新失败，请稍后再试");
+    return;
+  }
+  const timestamp = res.created || new Date().toISOString();
+  created.value = timestamp;
+  const target = boards.value.find((item) => item.key === key.value);
+  if (target) {
+    target.content = content.value;
+    target.created = timestamp;
+  }
+  boards.value = [...boards.value].sort((a, b) => (b.created || "").localeCompare(a.created || ""));
+  isEditing.value = false;
+  Toast.success("更新成功");
 };
 </script>
 
@@ -90,9 +197,15 @@ const handleClick = async () => {
   display: flex;
   gap: 8px;
 }
+.input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
 .input-area input {
   flex: 1;
   padding: 12px 16px;
+  padding-right: 40px;
   font-size: 1rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -102,7 +215,7 @@ const handleClick = async () => {
   border-color: #3b82f6;
   outline: none;
 }
-.input-area button {
+.input-area > button {
   padding: 12px 24px;
   font-size: 1rem;
   background-color: #3b82f6;
@@ -112,8 +225,64 @@ const handleClick = async () => {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.input-area button:hover {
+.input-area > button:hover {
   background-color: #2563eb;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.clear-btn:hover {
+  color: #4b5563;
+}
+
+.board-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.selector-label {
+  font-weight: 600;
+  color: #374151;
+}
+.key-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.key-chip {
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.key-chip:hover {
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+.key-chip.active {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+  color: #ffffff;
 }
 
 /* 画板区 */
@@ -132,6 +301,64 @@ const handleClick = async () => {
   border-radius: 8px;
   overflow: hidden;
 }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+.card-key {
+  font-weight: 600;
+  color: #111827;
+}
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+.card-actions button {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.card-actions .primary {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+}
+.card-actions .primary:disabled {
+  background-color: #bfdbfe;
+  border-color: #bfdbfe;
+  cursor: not-allowed;
+}
+.card-actions .primary:not(:disabled):hover {
+  background-color: #2563eb;
+}
+.card-actions .secondary {
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+.card-actions .secondary:disabled {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+}
+.card-actions .secondary:not(:disabled):hover {
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
 .card textarea {
   flex: 1;
   padding: 16px;
@@ -140,6 +367,10 @@ const handleClick = async () => {
   resize: none;
   outline: none;
   background-color: #fefefe;
+}
+.card textarea:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
 }
 .timestamp {
   padding: 8px 16px;

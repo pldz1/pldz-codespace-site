@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, Any
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, Request, status
 from fastapi.routing import APIRouter
 from scripts.mongodb import AuthorizedHandler
 from scripts.mongodb import WhiteBoardHandler
@@ -47,26 +47,35 @@ Get Whiteboard by Username
 """
 
 
-@WHITEBOARD_ROUTE.post("/authorized")
-async def api_get_whiteboard_by_username(user: dict = Depends(AuthorizedHandler.get_current_user)):
-    """
-    获取当前用户的白板内容
-    """
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You must be logged in to access your whiteboard."
-        )
+class GetWhiteBoardByUsernameRequest(BaseModel):
+    username: Optional[str] = None
+    create_new: bool = True
 
-    username = user.get('username')
-    item = WhiteBoardHandler.get_item_by_username(username)
-    if not item:
+
+@WHITEBOARD_ROUTE.post("/authorized")
+async def api_get_whiteboard_by_username(request: GetWhiteBoardByUsernameRequest, fastapi_request: Request):
+    """
+    获取当前用户（或指定用户名）的白板内容列表
+    """
+    username = (request.username or "").strip()
+
+    if not username:
+        try:
+            user = AuthorizedHandler.get_current_user(fastapi_request)
+            username = user.get('username', '') if user else ""
+        except HTTPException as exc:
+            if exc.status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_404_NOT_FOUND):
+                raise
+            username = ""
+
+    items = WhiteBoardHandler.get_items_by_username(username, create_new=request.create_new)
+    if not items:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Whiteboard item not found for the current user."
+            detail="Whiteboard items not found."
         )
 
-    return {"data": item}
+    return {"data": items}
 
 
 """

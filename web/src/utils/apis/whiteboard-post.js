@@ -10,11 +10,14 @@ export async function getWhiteBoardByKey(key) {
 }
 
 /**
- * 获取当前用户的白板内容
+ * 获取指定用户的白板内容列表
  * @returns
  */
-export async function getWhiteBoardByUser() {
-  return apiPost(`${webSitePrefix}/whiteboard/authorized`);
+export async function getWhiteBoardByUser(username = "", createNew = true) {
+  return apiPost(`${webSitePrefix}/whiteboard/authorized`, {
+    username,
+    create_new: createNew,
+  });
 }
 
 /**

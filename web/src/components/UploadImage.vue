@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { checkImageExit } from "../utils/apis";
 import { uploadArticleImage, uploadArticleImageFromCopy } from "../utils/file-upload.js";
 
@@ -51,6 +51,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  defaultName: {
+    type: String,
+    default: "",
+  },
 });
 
 // 上传的图像的URL
@@ -58,6 +62,25 @@ const imageName = ref("");
 const imagePreviewUrl = ref("");
 const imageUploadError = ref("图像名称不能为空！");
 let checkNameTimer = null;
+
+watch(
+  () => props.defaultName,
+  (val) => {
+    const normalizedName = typeof val === "string" ? val.trim() : "";
+
+    imageName.value = normalizedName;
+
+    clearTimeout(checkNameTimer);
+
+    if (normalizedName) {
+      imageUploadError.value = "";
+      onCheckImageName();
+    } else {
+      imageUploadError.value = "图像名称不能为空！";
+    }
+  },
+  { immediate: true }
+);
 
 /**
  * 校验上传的图像名字

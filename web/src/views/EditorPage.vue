@@ -43,6 +43,7 @@
     v-if="showUploadImageDialog"
     :category="articleMeta.category"
     :show-confirm-button="showImageUploadConfirm"
+    :default-name="imageUploadDefaultName"
     @on-close="onCloseUploadImageDialog"
     @on-upload="onUploadImage"
   />
@@ -182,6 +183,40 @@ function _updateArticleMeta(data = {}) {
  */
 const showImageUploadConfirm = ref(false);
 const showUploadImageDialog = ref(false);
+const imageUploadDefaultName = ref("");
+
+function generateRandomId(length = 8) {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "";
+  const cryptoObj = typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues ? window.crypto : null;
+
+  if (cryptoObj) {
+    const array = new Uint32Array(length);
+    cryptoObj.getRandomValues(array);
+    for (let i = 0; i < length; i += 1) {
+      id += chars[array[i] % chars.length];
+    }
+    return id;
+  }
+
+  while (id.length < length) {
+    const index = Math.floor(Math.random() * chars.length);
+    id += chars[index];
+  }
+
+  return id;
+}
+
+function buildDefaultImageName() {
+  const rawCategory = articleMeta.value?.category ?? "";
+  const sanitizedCategory = String(rawCategory)
+    .trim()
+    .replace(/[^A-Za-z0-9_-]/g, "")
+    .replace(/^-+/, "");
+  const prefix = sanitizedCategory || "category";
+
+  return `${prefix}-${generateRandomId(8)}`;
+}
 
 /**
  * 显示上传图像对话框
@@ -190,6 +225,7 @@ const showUploadImageDialog = ref(false);
 function onShowUploadImageDialog() {
   showUploadImageDialog.value = true;
   showImageUploadConfirm.value = false;
+  imageUploadDefaultName.value = buildDefaultImageName();
 }
 
 /**
@@ -198,6 +234,7 @@ function onShowUploadImageDialog() {
 function onCloseUploadImageDialog() {
   showUploadImageDialog.value = false;
   showImageUploadConfirm.value = false;
+  imageUploadDefaultName.value = "";
 }
 
 /**
@@ -229,6 +266,7 @@ function _handleCodemirrorCopy(e) {
   const files = (e.clipboardData || window.clipboardData).files;
   // 如果有文件，并且第一个是 image 类型
   if (files.length > 0 && files[0].type.startsWith("image/")) {
+    imageUploadDefaultName.value = buildDefaultImageName();
     showUploadImageDialog.value = true;
     showImageUploadConfirm.value = true;
     setCopyImageFile(files[0]);

@@ -132,20 +132,60 @@ export async function uploadArticleImageFromCopy(category, name) {
  * @param {string} name - 文件名称
  * @returns {Promise<Response>}
  */
-export async function uploadCacheFile() {
+export async function uploadCacheFile(options = {}) {
+  const { onSelected, onProgress, onError } = options;
   const uploadUrl = "/api/v1/resource/cache/upload";
   try {
-    const file = await selectImage();
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch(uploadUrl, { method: "POST", body: formData });
-    if (!res.ok) {
-      console.error("上传缓存文件失败:", res.statusText);
+    const file = await selectFile();
+    if (!file) {
+      console.warn("未选择文件");
       return null;
     }
-    return res.json();
+    onSelected?.(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", uploadUrl);
+
+      xhr.upload.onprogress = (event) => {
+        if (!onProgress) return;
+        const detail = {
+          loaded: event.loaded,
+          total: event.lengthComputable ? event.total : file.size || 0,
+        };
+        onProgress(detail, file);
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          let data = null;
+          if (xhr.responseText) {
+            try {
+              data = JSON.parse(xhr.responseText);
+            } catch {
+              data = xhr.responseText;
+            }
+          }
+          resolve(data);
+        } else {
+          const error = new Error(`上传缓存文件失败: ${xhr.status} ${xhr.statusText}`);
+          onError?.(error, file);
+          reject(error);
+        }
+      };
+
+      xhr.onerror = () => {
+        const error = new Error("上传缓存文件失败");
+        onError?.(error, file);
+        reject(error);
+      };
+
+      xhr.send(formData);
+    });
+    return result;
   } catch (error) {
     console.error("上传缓存文件失败:", error);
-    return null;
+    throw error;
   }
 }

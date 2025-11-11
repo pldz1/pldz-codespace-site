@@ -5,8 +5,8 @@
       <p>上传、下载或清理站点缓存资源文件</p>
     </div>
 
-    <div class="progress-toast-container" v-if="activeDownloads.length">
-      <div v-for="item in activeDownloads" :key="item.name" :class="['progress-toast', 'progress-toast--' + item.state]">
+    <div class="progress-toast-container" v-if="activeTransfers.length">
+      <div v-for="item in activeTransfers" :key="item.name" :class="['progress-toast', 'progress-toast--' + item.state]">
         <div class="progress-toast-title">{{ item.name }}</div>
         <div class="progress-toast-bar">
           <div class="progress-toast-bar-inner" :style="{ width: item.state === 'error' ? '100%' : (item.percent || 0) + '%' }"></div>
@@ -66,11 +66,11 @@ import { useLoading } from "../../utils/use-loading";
 
 const errorMessage = ref("");
 const cacheMgt = ref([]);
-const downloadProgress = reactive({});
+const transferProgress = reactive({});
 const { isLoading: isCacheLoading, start: startCacheLoading, stop: stopCacheLoading } = useLoading("admin.cache.list");
 
-const activeDownloads = computed(() =>
-  Object.entries(downloadProgress)
+const activeTransfers = computed(() =>
+  Object.entries(transferProgress)
     .filter(([, item]) => item.state !== "hidden")
     .map(([name, item]) => ({ name, ...item }))
 );
@@ -97,7 +97,7 @@ async function onDeleteCacheFile(file) {
 
 async function onDownloadCacheFile(fileObj) {
   const fname = fileObj.filename;
-  downloadProgress[fname] = { percent: 0, loaded: 0, total: 0, state: "downloading" };
+  transferProgress[fname] = { percent: 0, loaded: 0, total: 0, state: "downloading", mode: "download" };
 
   try {
     const res = await fetch("/api/v1/resource/cache/download", {
@@ -110,12 +110,12 @@ async function onDownloadCacheFile(fileObj) {
     }
 
     const total = Number(res.headers.get("content-length")) || 0;
-    downloadProgress[fname].total = total;
+    transferProgress[fname].total = total;
 
     if (!res.body || !res.body.getReader) {
       const blob = await res.blob();
       triggerDownload(blob, fname);
-      completeDownload(fname, total);
+      completeTransfer(fname, total);
       Toast.success("缓存文件下载成功");
       errorMessage.value = "";
       return;
@@ -130,22 +130,22 @@ async function onDownloadCacheFile(fileObj) {
       if (done) break;
       chunks.push(value);
       loaded += value.length;
-      downloadProgress[fname].loaded = loaded;
+      transferProgress[fname].loaded = loaded;
       if (total > 0) {
-        downloadProgress[fname].percent = Math.min(100, (loaded / total) * 100);
+        transferProgress[fname].percent = Math.min(100, (loaded / total) * 100);
       } else {
-        downloadProgress[fname].percent = 0;
+        transferProgress[fname].percent = 0;
       }
     }
 
     const blob = new Blob(chunks, { type: "application/octet-stream" });
     triggerDownload(blob, fname);
-    completeDownload(fname, total || loaded);
+    completeTransfer(fname, total || loaded);
     Toast.success("缓存文件下载成功");
     errorMessage.value = "";
   } catch (err) {
     console.error("下载缓存文件失败:", err);
-    markDownloadFailed(fname);
+    markTransferFailed(fname);
     errorMessage.value = "下载缓存文件失败，请稍后再试";
     Toast.error("下载缓存文件失败，请稍后再试");
   }
@@ -162,39 +162,78 @@ function triggerDownload(blob, fname) {
   URL.revokeObjectURL(url);
 }
 
-function completeDownload(fname, total) {
-  if (!downloadProgress[fname]) return;
-  downloadProgress[fname].loaded = total;
-  downloadProgress[fname].percent = 100;
-  downloadProgress[fname].state = "done";
+function completeTransfer(fname, total) {
+  if (!transferProgress[fname]) return;
+  const entry = transferProgress[fname];
+  const finalTotal = total || entry.total || entry.loaded || 0;
+  entry.total = finalTotal;
+  entry.loaded = finalTotal;
+  entry.percent = 100;
+  entry.state = "done";
   setTimeout(() => {
-    if (downloadProgress[fname]) {
-      downloadProgress[fname].state = "hidden";
+    if (transferProgress[fname]) {
+      transferProgress[fname].state = "hidden";
     }
     setTimeout(() => {
-      delete downloadProgress[fname];
+      delete transferProgress[fname];
     }, 200);
   }, 800);
 }
 
-function markDownloadFailed(fname) {
-  if (!downloadProgress[fname]) return;
-  downloadProgress[fname].state = "error";
+function markTransferFailed(fname) {
+  if (!transferProgress[fname]) return;
+  transferProgress[fname].state = "error";
   setTimeout(() => {
-    if (downloadProgress[fname]) {
-      downloadProgress[fname].state = "hidden";
+    if (transferProgress[fname]) {
+      transferProgress[fname].state = "hidden";
     }
     setTimeout(() => {
-      delete downloadProgress[fname];
+      delete transferProgress[fname];
     }, 200);
   }, 1600);
 }
 
 async function onUploadCacheFile() {
-  startCacheLoading();
+  let uploadStarted = false;
+  let uploadName = "";
   try {
-    const res = await uploadCacheFile();
+    const res = await uploadCacheFile({
+      onSelected(file) {
+        uploadStarted = true;
+        uploadName = file.name;
+        startCacheLoading();
+        transferProgress[uploadName] = {
+          percent: 0,
+          loaded: 0,
+          total: file.size || 0,
+          state: "uploading",
+          mode: "upload",
+        };
+      },
+      onProgress({ loaded, total }, file) {
+        if (!file || !transferProgress[file.name]) return;
+        const entry = transferProgress[file.name];
+        entry.loaded = loaded;
+        entry.total = total || entry.total || file.size || 0;
+        if (entry.total > 0) {
+          entry.percent = Math.min(100, (entry.loaded / entry.total) * 100);
+        } else {
+          entry.percent = 0;
+        }
+      },
+      onError(_, file) {
+        if (file) {
+          markTransferFailed(file.name);
+        }
+      },
+    });
+
+    if (!uploadStarted) {
+      return;
+    }
+
     if (res) {
+      completeTransfer(uploadName, transferProgress[uploadName]?.total || 0);
       await onSelectCacheManagement();
       Toast.success("缓存文件上传成功");
       errorMessage.value = "";
@@ -203,10 +242,15 @@ async function onUploadCacheFile() {
     }
   } catch (error) {
     console.error(error);
+    if (uploadName) {
+      markTransferFailed(uploadName);
+    }
     errorMessage.value = "上传缓存文件失败，请稍后再试";
     Toast.error("上传缓存文件失败，请稍后再试");
   } finally {
-    stopCacheLoading();
+    if (uploadStarted) {
+      stopCacheLoading();
+    }
   }
 }
 
@@ -246,7 +290,7 @@ onMounted(async () => {
 function formatProgressText(item) {
   if (!item) return "";
   if (item.state === "error") {
-    return "下载失败";
+    return item.mode === "upload" ? "上传失败" : "下载失败";
   }
   if (item.state === "done") {
     return "100%";

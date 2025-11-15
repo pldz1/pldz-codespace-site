@@ -1,21 +1,21 @@
 ---
 author: admin@pldz1.com
 category: others
+csdn: ''
 date: '2025-11-03'
+gitee: ''
+github: ''
+juejin: ''
 serialNo: 4
 status: publish
-summary: null
+summary: Windows 环境下使用codex踩了不少坑。这里记录一下整个过程，主要是安装、配置、模型切换，还有一些注意事项。
 tags: []
-thumbnail: null
+thumbnail: /api/v1/website/image/others/codex-start-001-thumbnail.png
 title: Codex简单使用
 ---
 
 # 在 Windows 上折腾 Codex CLI：环境、配置与一些小坑
 
-最近想试试 OpenAI 推出的 Codex CLI 工具。简单说，它是一个能在终端里直接理解项目代码、执行命令、帮你改文件的小助手。  
-虽然官方文档写得很“轻巧”，但在 Windows 环境下踩了不少坑。这里记录一下整个过程，主要是安装、配置、模型切换，还有一些注意事项。
-
----
 
 ## 一、准备环境
 

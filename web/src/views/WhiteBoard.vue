@@ -15,13 +15,7 @@
       <div v-if="boards.length" class="board-selector">
         <span class="selector-label">已关联白板</span>
         <div class="key-list">
-          <button
-            v-for="item in boards"
-            :key="item.key"
-            class="key-chip"
-            :class="{ active: item.key === key }"
-            @click="selectBoard(item.key)"
-          >
+          <button v-for="item in boards" :key="item.key" class="key-chip" :class="{ active: item.key === key }" @click="selectBoard(item.key)">
             {{ item.key }}
           </button>
         </div>
@@ -36,16 +30,25 @@
             <div class="card-actions">
               <button class="secondary" @click="startEditing" :disabled="!canEdit">编辑</button>
               <button class="primary" @click="updateRecord" :disabled="!canSave">保存</button>
+              <button class="secondary" @click="openFullscreen" :disabled="!selectedBoard">全屏</button>
             </div>
           </div>
-          <textarea
-            ref="editorRef"
-            v-model="content"
-            :readonly="!isEditing"
-            :disabled="!selectedBoard"
-            placeholder="请先匹配或创建白板"
-          ></textarea>
+          <textarea ref="editorRef" v-model="content" :readonly="!isEditing" :disabled="!selectedBoard" placeholder="请先匹配或创建白板"></textarea>
           <div class="timestamp">上次更新: {{ formatTimestamp(created) }}</div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showFullscreen" class="fullscreen-overlay" @click.self="closeFullscreen">
+      <div class="fullscreen-panel" role="dialog" aria-modal="true">
+        <div class="fullscreen-header">
+          <span class="fullscreen-title">白板内容预览</span>
+          <button class="close-btn" type="button" @click="closeFullscreen" aria-label="关闭全屏">×</button>
+        </div>
+        <div class="fullscreen-body">
+          <pre>{{ content || "（暂无内容）" }}</pre>
+        </div>
+        <div class="fullscreen-footer">
+          <button type="button" class="exit-btn" @click="closeFullscreen">退出全屏</button>
         </div>
       </div>
     </div>
@@ -54,7 +57,7 @@
 
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useStore } from "vuex";
 import Toast from "../utils/toast.js";
 import { getWhiteBoardByKey, getWhiteBoardByUser, updateWhiteBoardContent } from "../utils/apis";
@@ -68,6 +71,14 @@ const content = ref("");
 const created = ref("");
 const isEditing = ref(false);
 const editorRef = ref(null);
+const showFullscreen = ref(false);
+const originalBodyOverflow = ref("");
+const keydownHandler = (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeFullscreen();
+  }
+};
 
 const selectedBoard = computed(() => boards.value.find((item) => item.key === key.value) || null);
 const canEdit = computed(() => !!selectedBoard.value && !isEditing.value);
@@ -113,6 +124,18 @@ const clearKey = () => {
   content.value = "";
   created.value = "";
   isEditing.value = false;
+};
+
+const openFullscreen = () => {
+  if (!selectedBoard.value && !content.value) {
+    Toast.info("暂无白板内容可查看");
+    return;
+  }
+  showFullscreen.value = true;
+};
+
+const closeFullscreen = () => {
+  showFullscreen.value = false;
 };
 
 const handleClick = async () => {
@@ -169,6 +192,37 @@ const updateRecord = async () => {
   isEditing.value = false;
   Toast.success("更新成功");
 };
+
+watch(
+  showFullscreen,
+  (value) => {
+    if (typeof document !== "undefined") {
+      if (value) {
+        originalBodyOverflow.value = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = originalBodyOverflow.value || "";
+      }
+    }
+    if (typeof window !== "undefined") {
+      if (value) {
+        window.addEventListener("keydown", keydownHandler);
+      } else {
+        window.removeEventListener("keydown", keydownHandler);
+      }
+    }
+  },
+  { flush: "post" }
+);
+
+onBeforeUnmount(() => {
+  if (typeof document !== "undefined") {
+    document.body.style.overflow = originalBodyOverflow.value || "";
+  }
+  if (typeof window !== "undefined") {
+    window.removeEventListener("keydown", keydownHandler);
+  }
+});
 </script>
 
 <style scoped>
@@ -196,6 +250,7 @@ const updateRecord = async () => {
 .input-area {
   display: flex;
   gap: 8px;
+  align-items: flex-start;
 }
 .input-wrapper {
   position: relative;
@@ -323,6 +378,8 @@ const updateRecord = async () => {
 .card-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 .card-actions button {
   padding: 8px 16px;
@@ -379,5 +436,140 @@ const updateRecord = async () => {
   background-color: #f9fafb;
   text-align: right;
   border-top: 1px solid #e5e7eb;
+}
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10006;
+  padding: 24px;
+}
+.fullscreen-panel {
+  width: min(1200px, 100%);
+  max-height: 100%;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.fullscreen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  z-index: 5;
+}
+.fullscreen-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+.close-btn {
+  line-height: 1;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 4px;
+}
+.close-btn:hover {
+  color: #111827;
+}
+.fullscreen-body {
+  padding: 20px;
+  overflow: auto;
+  flex: 1;
+  background-color: #f9fafb;
+}
+.fullscreen-body pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", Courier, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1f2937;
+}
+.fullscreen-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: flex-end;
+}
+.exit-btn {
+  padding: 10px 20px;
+  background-color: #111827;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+.exit-btn:hover {
+  background-color: #1f2937;
+}
+@media (max-width: 640px) {
+  .whiteboard-wrapper {
+    padding: 16px;
+    gap: 20px;
+  }
+  .input-area {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .input-wrapper {
+    width: 100%;
+  }
+  .input-area > button {
+    width: 100%;
+    padding: 12px;
+  }
+  .key-list {
+    gap: 6px;
+  }
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .card-actions button {
+    width: 100%;
+  }
+  .fullscreen-overlay {
+    padding: 12px;
+  }
+  .fullscreen-panel {
+    max-height: calc(100vh - 24px);
+  }
+  .fullscreen-header {
+    padding: 12px 16px;
+  }
+  .fullscreen-body {
+    padding: 16px;
+  }
+  .fullscreen-footer {
+    padding: 12px 16px 16px;
+    justify-content: center;
+  }
+  .exit-btn {
+    width: 100%;
+  }
 }
 </style>

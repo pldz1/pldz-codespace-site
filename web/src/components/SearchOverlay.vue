@@ -103,7 +103,7 @@ onMounted(() => {
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 10010;
 }
 .backdrop {
   position: absolute;

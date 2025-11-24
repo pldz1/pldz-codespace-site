@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from core import Logger
 from scripts.filesystem import CloudDriveStorage
 from scripts.mongodb import AuthorizedHandler
-from scripts.clouddriver import CloudDriveTokenHandler
+from scripts.clouddrive import CloudDriveTokenHandler
 
 
 CLOUD_DRIVE_ROUTER = APIRouter(prefix="/website/cloud-drive", tags=["website-cloud-drive"])

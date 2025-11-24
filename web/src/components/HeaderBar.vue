@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 
 import { useStore } from "vuex";
 import { getNavigation } from "../utils/apis";
@@ -67,6 +67,11 @@ const props = defineProps({
     default: "",
   },
   showMobileMenu: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  scroll: {
     type: Boolean,
     required: false,
     default: true,
@@ -95,6 +100,7 @@ const deltaToShow = 50; // 向上滚动多少再出现
 const deltaToHide = 5; // 向下滚动多少才隐藏
 let accumulatedUp = 0;
 let accumulatedDown = 0;
+let scrollListenerActive = false;
 
 function handleScroll() {
   const currentY = window.scrollY;
@@ -134,6 +140,22 @@ function onScrollThrottled() {
     });
     ticking = true;
   }
+}
+
+function enableScrollHide() {
+  if (scrollListenerActive) return;
+  lastScrollY = window.scrollY;
+  window.addEventListener("scroll", onScrollThrottled, { passive: true });
+  scrollListenerActive = true;
+}
+
+function disableScrollHide() {
+  if (!scrollListenerActive) return;
+  window.removeEventListener("scroll", onScrollThrottled);
+  scrollListenerActive = false;
+  isHeaderVisible.value = true;
+  accumulatedDown = 0;
+  accumulatedUp = 0;
 }
 
 /**
@@ -179,8 +201,23 @@ function onOpenSearch() {
  * 初始化时候获取导航数据
  */
 onMounted(async () => {
-  lastScrollY = window.scrollY;
-  window.addEventListener("scroll", onScrollThrottled, { passive: true });
+  if (props.scroll) {
+    enableScrollHide();
+  } else {
+    disableScrollHide();
+  }
+
+  watch(
+    () => props.scroll,
+    (shouldScroll) => {
+      if (shouldScroll) {
+        enableScrollHide();
+      } else {
+        disableScrollHide();
+      }
+    },
+    { immediate: false }
+  );
   // 快捷键：按下 / 打开搜索
   window.addEventListener("keydown", (e) => {
     if (e.key === "/" && !searchOpen.value) {
@@ -197,7 +234,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("scroll", onScrollThrottled);
+  disableScrollHide();
 });
 </script>
 

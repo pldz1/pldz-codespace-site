@@ -1,33 +1,21 @@
 <template>
-  <HeaderBar :route-name="'云盘共享'" :show-mobile-menu="false" />
+  <HeaderBar :route-name="'共享'" :show-mobile-menu="false" :scroll="false" />
   <div class="drive-page">
     <div class="progress-toast-container" v-if="activeTransfers.length">
-      <div
-        v-for="item in activeTransfers"
-        :key="item.name"
-        :class="['progress-toast', 'progress-toast--' + item.state]"
-      >
+      <div v-for="item in activeTransfers" :key="item.name" :class="['progress-toast', 'progress-toast--' + item.state]">
         <div class="progress-toast-title">{{ item.name }}</div>
         <div class="progress-toast-bar">
-          <div
-            class="progress-toast-bar-inner"
-            :style="{ width: item.state === 'error' ? '100%' : (item.percent || 0) + '%' }"
-          ></div>
+          <div class="progress-toast-bar-inner" :style="{ width: item.state === 'error' ? '100%' : (item.percent || 0) + '%' }"></div>
         </div>
         <div class="progress-toast-percent">{{ formatProgressText(item) }}</div>
       </div>
     </div>
 
     <div class="panel token-panel">
-      <h1>云盘共享</h1>
+      <h1>共享</h1>
       <p class="subtitle">输入管理员提供的口令，在 7 天有效期内上传或下载文件。</p>
       <div class="token-input">
-        <input
-          v-model="tokenInput"
-          type="text"
-          placeholder="输入云盘口令"
-          @keyup.enter="handleVerify"
-        />
+        <input v-model="tokenInput" type="text" placeholder="输入共享口令" @keyup.enter="handleVerify" />
         <button class="btn btn-primary" @click="handleVerify" :disabled="!tokenInput || verifying">
           {{ verifying ? "验证中…" : "验证口令" }}
         </button>
@@ -64,9 +52,7 @@
           <button class="btn btn-info" @click="handleDownload" :disabled="!canDownload">
             {{ downloadBusy ? "下载中…" : "下载文件" }}
           </button>
-          <button class="btn btn-outline" type="button" @click="refreshTokenInfo" :disabled="verifying">
-            刷新状态
-          </button>
+          <button class="btn btn-outline" type="button" @click="refreshTokenInfo" :disabled="verifying">刷新状态</button>
         </div>
         <p v-if="downloadTip" class="tip">{{ downloadTip }}</p>
       </div>
@@ -75,135 +61,107 @@
     <div v-if="isAdmin" class="panel admin-entry">
       <div class="admin-entry-text">
         <h2>管理员工具</h2>
-        <p>生成云盘口令并管理已有口令。</p>
+        <p>生成口令并管理已有口令。</p>
       </div>
-      <button class="btn btn-primary admin-entry-button" type="button" @click="openAdminOverlay">
-        管理
-      </button>
+      <button class="btn btn-primary admin-entry-button" type="button" @click="openAdminOverlay">管理</button>
     </div>
   </div>
 
-  <div
-    v-if="isAdmin && showAdminOverlay"
-    class="admin-overlay-mask"
-    @click.self="closeAdminOverlay"
-  >
+  <div v-if="isAdmin && showAdminOverlay" class="admin-overlay-mask" @click.self="closeAdminOverlay">
     <div class="panel admin-panel admin-overlay-card" @click.stop>
       <div class="admin-overlay-header">
-        <h2>生成云盘口令（管理员）</h2>
-        <button class="admin-overlay-close" type="button" @click="closeAdminOverlay">
-          关闭
-        </button>
+        <h2>生成口令（管理员）</h2>
+        <button class="admin-overlay-close" type="button" @click="closeAdminOverlay"></button>
       </div>
-      <div class="admin-form">
-        <label>
-          <input type="checkbox" v-model="adminForm.allowUpload" />
-          允许上传
-        </label>
-        <label>
-          <input type="checkbox" v-model="adminForm.allowDownload" />
-          允许下载
-        </label>
-        <div class="cache-select">
-          <select
-            v-model="adminForm.filename"
-            :disabled="!adminForm.allowDownload || cacheLoading"
-          >
-            <option value="">
-              选择下载文件（可选）
-            </option>
-            <option
-              v-for="file in cacheFiles"
-              :key="file.filename"
-              :value="file.filename"
-            >
-              {{ file.filename }} · {{ formatFileSize(file.size || 0) }}
-            </option>
-          </select>
-          <button
-            class="btn btn-outline btn-small"
-            type="button"
-            @click="loadCacheFiles"
-            :disabled="cacheLoading"
-          >
-            {{ cacheLoading ? "加载中…" : "刷新缓存" }}
+      <div class="admin-overlay-body">
+        <div class="admin-form">
+          <label>
+            <input type="checkbox" v-model="adminForm.allowUpload" />
+            允许上传
+          </label>
+          <label>
+            <input type="checkbox" v-model="adminForm.allowDownload" />
+            允许下载
+          </label>
+          <div class="cache-select">
+            <select v-model="adminForm.filename" :disabled="!adminForm.allowDownload || cacheLoading">
+              <option value="">选择下载文件（可选）</option>
+              <option v-for="file in cacheFiles" :key="file.filename" :value="file.filename">{{ file.filename }} · {{ formatFileSize(file.size || 0) }}</option>
+            </select>
+            <button class="btn btn-outline btn-small" type="button" @click="loadCacheFiles" :disabled="cacheLoading">
+              {{ cacheLoading ? "加载中…" : "刷新缓存" }}
+            </button>
+          </div>
+          <p v-if="cacheError" class="cache-error">{{ cacheError }}</p>
+          <input v-model="adminForm.description" type="text" placeholder="备注（可选）" />
+          <button class="btn btn-primary" type="button" @click="handleGenerateToken" :disabled="generating">
+            {{ generating ? "生成中…" : "生成口令" }}
           </button>
         </div>
-        <p v-if="cacheError" class="cache-error">{{ cacheError }}</p>
-        <input v-model="adminForm.description" type="text" placeholder="备注（可选）" />
-        <button class="btn btn-primary" type="button" @click="handleGenerateToken" :disabled="generating">
-          {{ generating ? "生成中…" : "生成口令" }}
-        </button>
-      </div>
-      <div v-if="generatedToken" class="generated-token">
-        <div class="token-display">
-          <span class="token-value">{{ generatedToken.token }}</span>
-          <button class="btn btn-info" type="button" @click="copyGeneratedToken">复制口令</button>
-        </div>
-        <div class="token-summary">
-          <span>有效期至 {{ formatDate(generatedToken.expires_at) }}</span>
-          <span>允许上传: {{ generatedToken.allow_upload ? "是" : "否" }}</span>
-          <span>允许下载: {{ generatedToken.allow_download ? "是" : "否" }}</span>
-        </div>
-        <p v-if="generatedToken.description" class="token-desc">备注: {{ generatedToken.description }}</p>
-      </div>
-
-      <div class="token-list-header">
-        <h3>已生成口令</h3>
-        <button class="btn btn-outline" type="button" @click="loadAdminTokens" :disabled="tokensLoading">
-          {{ tokensLoading ? "刷新中…" : "刷新列表" }}
-        </button>
-      </div>
-
-      <div v-if="tokensError" class="error-banner">{{ tokensError }}</div>
-      <div v-else>
-        <div v-if="tokensLoading" class="loading-stack">
-          <div v-for="n in 4" :key="`token-loading-${n}`" class="loading-card">
-            <div class="skeleton-line w-60"></div>
-            <div class="skeleton-line w-40"></div>
+        <div v-if="generatedToken" class="generated-token">
+          <div class="token-display">
+            <span class="token-value">{{ generatedToken.token }}</span>
+            <button class="btn btn-info" type="button" @click="copyGeneratedToken">复制口令</button>
           </div>
+          <div class="token-summary">
+            <span>有效期至 {{ formatDate(generatedToken.expires_at) }}</span>
+            <span>允许上传: {{ generatedToken.allow_upload ? "是" : "否" }}</span>
+            <span>允许下载: {{ generatedToken.allow_download ? "是" : "否" }}</span>
+          </div>
+          <p v-if="generatedToken.description" class="token-desc">备注: {{ generatedToken.description }}</p>
         </div>
-        <div v-else-if="adminTokens.length" class="token-table-wrapper">
-          <table class="token-table">
-            <thead>
-              <tr>
-                <th>口令</th>
-                <th>有效期</th>
-                <th>上传</th>
-                <th>下载</th>
-                <th>文件</th>
-                <th>备注</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="token in adminTokens" :key="token.token">
-                <td class="mono">{{ token.token }}</td>
-                <td>{{ formatDate(token.expires_at) }}</td>
-                <td>{{ token.allow_upload ? "是" : "否" }}</td>
-                <td>{{ token.allow_download ? "是" : "否" }}</td>
-                <td>
-                  <span v-if="token.has_file">
-                    {{ token.original_filename || token.filename }} · {{ formatFileSize(token.size || 0) }}
-                  </span>
-                  <span v-else>暂无文件</span>
-                </td>
-                <td>{{ token.description || "-" }}</td>
-                <td class="actions">
-                  <button class="btn btn-outline btn-small" type="button" @click="copyExistingToken(token.token)">
-                    复制
-                  </button>
-                  <button class="btn btn-danger btn-small" type="button" @click="openDeleteDialog(token)">
-                    删除
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <div class="token-list-header">
+          <h3>已生成口令</h3>
+          <button class="btn btn-outline" type="button" @click="loadAdminTokens" :disabled="tokensLoading">
+            {{ tokensLoading ? "刷新中…" : "刷新列表" }}
+          </button>
         </div>
-        <div v-else class="empty-state">
-          <div class="empty-icon">🔐</div>
-          <p>暂无可用口令，点击上方按钮生成或刷新。</p>
+
+        <div v-if="tokensError" class="error-banner">{{ tokensError }}</div>
+        <div v-else>
+          <div v-if="tokensLoading" class="loading-stack">
+            <div v-for="n in 4" :key="`token-loading-${n}`" class="loading-card">
+              <div class="skeleton-line w-60"></div>
+              <div class="skeleton-line w-40"></div>
+            </div>
+          </div>
+          <div v-else-if="adminTokens.length" class="token-table-wrapper">
+            <table class="token-table">
+              <thead>
+                <tr>
+                  <th>口令</th>
+                  <th>有效期</th>
+                  <th>上传</th>
+                  <th>下载</th>
+                  <th>文件</th>
+                  <th>备注</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="token in adminTokens" :key="token.token">
+                  <td class="mono">{{ token.token }}</td>
+                  <td>{{ formatDate(token.expires_at) }}</td>
+                  <td>{{ token.allow_upload ? "是" : "否" }}</td>
+                  <td>{{ token.allow_download ? "是" : "否" }}</td>
+                  <td>
+                    <span v-if="token.has_file"> {{ token.original_filename || token.filename }} · {{ formatFileSize(token.size || 0) }} </span>
+                    <span v-else>暂无文件</span>
+                  </td>
+                  <td>{{ token.description || "-" }}</td>
+                  <td class="actions">
+                    <button class="btn btn-outline btn-small" type="button" @click="copyExistingToken(token.token)">复制</button>
+                    <button class="btn btn-danger btn-small" type="button" @click="openDeleteDialog(token)">删除</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="empty-state">
+            <div class="empty-icon">🔐</div>
+            <p>暂无可用口令，点击上方按钮生成或刷新。</p>
+          </div>
         </div>
       </div>
     </div>
@@ -218,20 +176,21 @@
         吗？删除后使用该口令的上传/下载链接将失效。
       </p>
       <div class="dialog-actions">
-        <button class="btn btn-outline" type="button" @click="closeDeleteDialog" :disabled="deletingToken">
-          取消
-        </button>
+        <button class="btn btn-outline" type="button" @click="closeDeleteDialog" :disabled="deletingToken">取消</button>
         <button class="btn btn-danger" type="button" @click="confirmDeleteToken" :disabled="deletingToken">
           {{ deletingToken ? "删除中…" : "确认删除" }}
         </button>
       </div>
     </div>
   </div>
+  <!-- 底部隐私数据 -->
+  <FooterBar></FooterBar>
 </template>
 
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
+import FooterBar from "../components/FooterBar.vue";
 import HeaderBar from "../components/HeaderBar.vue";
 import Toast from "../utils/toast.js";
 import { createDriveToken, verifyDriveToken, listDriveTokens, deleteDriveToken } from "../utils/apis/cloud-drive.js";
@@ -982,6 +941,13 @@ async function handleDownload() {
   max-width: 1040px;
   width: 100%;
   max-height: calc(100vh - 128px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-overlay-body {
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -1001,6 +967,8 @@ async function handleDownload() {
   padding: 6px 10px;
   border-radius: 6px;
   transition: background 0.2s ease, color 0.2s ease;
+  background: url("../assets/svgs/close-24.svg") center no-repeat;
+  background-size: 24px;
 }
 
 .admin-overlay-close:hover {

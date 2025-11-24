@@ -1,6 +1,6 @@
 <template>
   <!-- 顶部导航栏 -->
-  <HeaderBar :route-name="'白板'" :show-mobile-menu="false"></HeaderBar>
+  <HeaderBar :route-name="'白板'" :show-mobile-menu="false" :scroll="false"></HeaderBar>
 
   <!-- 主内容区 -->
   <div class="main-container">
@@ -53,10 +53,13 @@
       </div>
     </div>
   </div>
+  <!-- 底部隐私数据 -->
+  <FooterBar></FooterBar>
 </template>
 
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
+import FooterBar from "../components/FooterBar.vue";
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useStore } from "vuex";
 import Toast from "../utils/toast.js";

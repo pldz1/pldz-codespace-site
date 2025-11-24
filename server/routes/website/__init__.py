@@ -5,6 +5,7 @@ from .image import IMAGES_ROUTE
 from .comment import COMMENTS_ROUTE
 from .whiteboard import WHITEBOARD_ROUTE
 from .codespace import CODESPACE_ROUTER
+from .clouddrive import CLOUD_DRIVE_ROUTER
 
 __all__ = [
     "AD_BANNER_ROUTER",
@@ -14,4 +15,5 @@ __all__ = [
     "COMMENTS_ROUTE",
     "WHITEBOARD_ROUTE",
     "CODESPACE_ROUTER",
+    "CLOUD_DRIVE_ROUTER",
 ]

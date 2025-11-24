@@ -3,7 +3,7 @@ from typing import Optional, Any
 from fastapi import HTTPException, Request, status
 from fastapi.routing import APIRouter
 from scripts.mongodb import AuthorizedHandler
-from scripts.mongodb import WhiteBoardHandler
+from scripts.whiteboard import WhiteBoardHandler
 
 WHITEBOARD_ROUTE = APIRouter(prefix="/website/whiteboard", tags=["website-whiteboard"])
 

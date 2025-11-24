@@ -20,6 +20,9 @@
           <li :class="['nav-item', routeName === '白板' ? 'active' : '']">
             <a href="/whiteboard"> 白板 </a>
           </li>
+          <li :class="['nav-item', routeName === '共享' ? 'active' : '']">
+            <a href="/clouddrive"> 共享 </a>
+          </li>
           <li v-for="nav in navs" :key="nav.title" class="nav-item">
             <a :href="nav.url" target="_blank" rel="noopener noreferrer">
               {{ nav.title }}

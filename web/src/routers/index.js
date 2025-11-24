@@ -6,6 +6,7 @@ import NotFound from "../views/NotFound.vue";
 import AdminPage from "../views/AdminPage.vue";
 import WhiteBoard from "../views/WhiteBoard.vue";
 import CodespacePage from "../views/CodespacePage.vue";
+import CloudDrive from "../views/CloudDrive.vue";
 
 const router = createRouter({
   // 使用 HTML5 的 History 模式
@@ -23,6 +24,10 @@ const router = createRouter({
     {
       path: "/whiteboard",
       component: WhiteBoard,
+    },
+    {
+      path: "/clouddrive",
+      component: CloudDrive,
     },
     {
       path: "/codespace",

@@ -41,7 +41,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/prod.d:/etc/nginx/conf.d:ro
-      - ./data/templates:/usr/share/nginx/html:ro
+      - ./data/templates/web:/usr/share/nginx/html:ro
     restart: unless-stopped
 
 # 虚拟网络配置

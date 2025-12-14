@@ -1,14 +1,11 @@
 #!/bin/bash
 set -e
 
-# 要启动的命令列表（可随意扩展）
+# 要启动的命令列表
 COMMANDS=(
-    "python3 data/templates/sse-markdown/main.py"
-    "sleep 3 python3 data/templates/chat-playground-v1/main.py"
-    "sleep 3 && python3 server/main.py",
-    "sleep 3 && python3 -m http.server data/templates/vue3-static-blog-template-a 20008",
-    "sleep 3 && python3 -m http.server data/templates/vue3-static-blog-template-b 20010"
-    # 添加更多
+    "python data/templates/sse-markdown/main.py"
+    "sleep 3 && python data/templates/chat-playground-v1/main.py"
+    "sleep 5 && python server/main.py"
 )
 
 PIDS=()

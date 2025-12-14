@@ -8,8 +8,12 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua
 
 
 # --------- 2：安装 git ----------
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+RUN rm -f /etc/apt/sources.list.d/debian.sources \
+ && echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie main contrib non-free non-free-firmware\n\
+deb https://mirrors.tuna.tsinghua.edu.cn/debian-security trixie-security main contrib non-free non-free-firmware\n\
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie-updates main contrib non-free non-free-firmware" > /etc/apt/sources.list \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git ca-certificates -o Dpkg::Progress-Fancy=1 \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY .gitconfig /root/.gitconfig

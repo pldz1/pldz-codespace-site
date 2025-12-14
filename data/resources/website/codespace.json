@@ -25,7 +25,7 @@
         {
             "title": "Vue3 static blog template(A)",
             "folder": "vue3-static-blog-template-a",
-            "url": "/io/vue3-static-blog-template-a",
+            "url": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-a",
             "thumbnail": "/api/v1/website/image/code-space/v3_sbw_static_website_thumbnail.png",
             "previewgif": "/api/v1/website/image/code-space/v3_sbw_preview_blog.gif",
             "sourcelink": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-a",
@@ -35,7 +35,7 @@
         {
             "title": "Vue3 static blog template(B)",
             "folder": "vue3-static-blog-template-b",
-            "url": "/io/vue3-static-blog-template-b",
+            "url": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-b",
             "thumbnail": "/api/v1/website/image/code-space/vue3-static-blog-template-b-thumbnail.png",
             "previewgif": "/api/v1/website/image/code-space/vue3-static-blog-template-b-preview.gif",
             "sourcelink": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-b",

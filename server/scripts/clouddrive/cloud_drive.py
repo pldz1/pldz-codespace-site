@@ -57,7 +57,7 @@ class CloudDriveTokenHandler:
     def _generate_token(cls) -> str:
         alphabet = string.ascii_uppercase + string.digits
         while True:
-            candidate = "".join(secrets.choice(alphabet) for _ in range(12))
+            candidate = "".join(secrets.choice(alphabet) for _ in range(4))
             if all(item["token"] != candidate for item in cls._tokens):
                 return candidate
 

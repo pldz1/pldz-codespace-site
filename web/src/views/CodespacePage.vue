@@ -144,6 +144,8 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 /* 卡片 */
@@ -155,7 +157,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   transition: transform 160ms ease, box-shadow 160ms ease;
-  max-width: 440px;
+  max-width: 340px;
+  height: fit-content;
 }
 
 .code-space-card:hover {
@@ -214,16 +217,19 @@ onMounted(async () => {
   margin-top: 10px;
   color: var(--muted);
   text-align: left;
-  line-height: 1.55;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  -webkit-line-clamp: 3;
+  line-height: 1.5em;
+  max-height: calc(1.5em * 3);
+  height: 72px;
 }
 
 /* 操作区 */
 .actions {
-  margin-top: auto;
+  margin-top: 16px;
   display: flex;
   gap: 10px;
   align-items: center;

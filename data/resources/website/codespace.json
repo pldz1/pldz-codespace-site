@@ -15,7 +15,7 @@
         {
             "title": "chat plaground v1 体验",
             "folder": "chat-playground-v1",
-            "url": "/io/chat-playground-v1",
+            "url": "https://github.com/pldz1/chat-playground",
             "thumbnail": "/api/v1/website/image/chat-playground/4_chat-playground_v1_thumbnail.png",
             "previewgif": "/api/v1/website/image/code-space/chat-playground_v1_preview.gif",
             "sourcelink": "https://github.com/pldz1/chat-playground",

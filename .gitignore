@@ -20,6 +20,7 @@ pip-delete-this-directory.txt
 data/images/avatar/*
 data/templates/**/*.db
 data/cache/**
+data/db
 
 # Python REPL 历史记录
 .python_history

@@ -7,7 +7,7 @@ import time
 import datetime
 import random
 
-from scripts.mongodb import AuthorizedHandler, SECRET_KEY, ALGORITHM
+from scripts.db import AuthorizedHandler, SECRET_KEY, ALGORITHM
 
 AUTH_ROUTER = APIRouter(prefix="/authorization", tags=["authorization"])
 ACCESS_EXPIRE = datetime.timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)))

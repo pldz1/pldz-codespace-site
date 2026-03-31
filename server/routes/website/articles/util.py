@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 from typedef import T_ArticleData, T_ArticleInfo
 
 

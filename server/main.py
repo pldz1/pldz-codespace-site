@@ -12,7 +12,7 @@ if __name__ == '__main__':
     threading.Thread(target=start_watch, args=(True,), daemon=True).start()
 
     # 创建管理员账户
-    from scripts.mongodb import AuthorizedHandler
+    from scripts.db import AuthorizedHandler
     AuthorizedHandler.init_admin()
 
     # 启动 fastapi 应用

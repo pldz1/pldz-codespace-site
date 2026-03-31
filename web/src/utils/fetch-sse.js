@@ -55,19 +55,3 @@ async function fetchSSE(url, refLog, controller, payload = {}) {
 export async function syncAllArticles(refLog, controller) {
   await fetchSSE("/api/v1/website/article/file/syncall", refLog, controller);
 }
-
-/**
- * Git 拉取到本地
- * @param {Ref} refLog - 用于存储日志的响应式引用
- */
-export async function syncGitPull(refLog, controller) {
-  await fetchSSE("/api/v1/website/article/plugin/gitpull", refLog, controller);
-}
-
-/**
- * Git 同步函数
- * @param {Ref} refLog - 用于存储日志的响应式引用
- */
-export async function syncGitRepo(refLog, controller, commit = "✨ Sync articles") {
-  await fetchSSE("/api/v1/website/article/plugin/gitsync", refLog, controller, { commit });
-}

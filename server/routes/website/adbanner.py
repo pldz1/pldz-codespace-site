@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from fastapi import Depends, HTTPException, status
 from fastapi.routing import APIRouter
 from scripts.filesystem import AdBannerHandler
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 
 AD_BANNER_ROUTER = APIRouter(prefix="/website/adbanner", tags=["website-adbanner"])
 

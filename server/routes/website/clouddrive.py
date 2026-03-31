@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from core import Logger
 from scripts.filesystem import CloudDriveStorage
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 from scripts.clouddrive import CloudDriveTokenHandler
 
 

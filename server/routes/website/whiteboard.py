@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import HTTPException, Request, status
 from fastapi.routing import APIRouter
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 from scripts.whiteboard import WhiteBoardHandler
 
 WHITEBOARD_ROUTE = APIRouter(prefix="/website/whiteboard", tags=["website-whiteboard"])

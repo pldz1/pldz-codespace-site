@@ -90,14 +90,6 @@ class ProjectConfig:
         return os.path.join(resource_path, 'website/navigation.json')
 
     @classmethod
-    def get_git_repo_path(cls) -> str:
-        """
-        获取Git仓库的路径
-        """
-        git_repo_path = os.environ.get('GIT_REPO_PATH', './git-repo')
-        return cls.get_abs_path(git_repo_path)
-
-    @classmethod
     def get_cache_path(cls) -> str:
         """
         获取缓存目录的路径
@@ -120,3 +112,11 @@ class ProjectConfig:
         """
         resource_path = cls.get_resource_path()
         return os.path.join(resource_path, 'website/codespace.json')
+
+    @classmethod
+    def get_db_path(cls) -> str:
+        """
+        获取 JSON 数据库文件目录的绝对路径
+        """
+        db_path = os.environ.get('DB_PATH', 'data/db')
+        return cls.get_abs_path(db_path)

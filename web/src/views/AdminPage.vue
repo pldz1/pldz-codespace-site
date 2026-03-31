@@ -55,7 +55,6 @@
           <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
           <NavMgt v-if="activeMenuKey === 'navmgt'"></NavMgt>
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
-          <GitPlugin v-if="activeMenuKey === 'gitplugin'"></GitPlugin>
         </section>
       </main>
     </div>
@@ -74,7 +73,6 @@ import CategoryMgt from "../components/admin-page/CategoryMgt.vue";
 import ImageMgt from "../components/admin-page/ImageMgt.vue";
 import NavMgt from "../components/admin-page/NavMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
-import GitPlugin from "../components/admin-page/GitPlugin.vue";
 
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -138,14 +136,6 @@ const menuItems = [
     icon: "💾",
     caption: "维护静态缓存与资源文件",
     gradient: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
-    requiresCategories: false,
-  },
-  {
-    key: "gitplugin",
-    name: "Git插件",
-    icon: "🔁",
-    caption: "同步内容到 Git 仓库",
-    gradient: "linear-gradient(135deg, #f472b6 0%, #f43f5e 100%)",
     requiresCategories: false,
   },
 ];

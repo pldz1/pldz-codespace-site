@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from core import Logger
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 from scripts.filesystem import ImageCrudHandler
 
 IMAGES_ROUTE = APIRouter(prefix="/website/image", tags=["website-image"])

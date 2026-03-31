@@ -1,10 +1,9 @@
 import fastapi
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 from .articles.all import all_articles, all_categories, all_tags
 from .articles.article import T_Article_Exist_Request, get_articles_by_id, article_exist
 from .articles.tag import get_articles_by_tag
 from .articles.category import get_articles_by_category
-from .articles.git import T_GitSync_Request, git_sync, git_pull
 from .articles.file import \
     T_Add_Article_Request, \
     T_Article_File_Request, \
@@ -119,12 +118,3 @@ async def api_set_article_filename(article: T_Set_Article_Filename_Request, user
 async def api_add_category(category_data: T_Add_Category_Request, user: dict = fastapi.Depends(AuthorizedHandler.get_current_user)):
     return await add_category(category_data, user)
 
-
-@ARTICLES_ROUTE.post("/plugin/gitsync")
-async def api_git_sync(git_data: T_GitSync_Request, user: dict = fastapi.Depends(AuthorizedHandler.get_current_user)):
-    return await git_sync(git_data, user)
-
-
-@ARTICLES_ROUTE.post("/plugin/gitpull")
-async def api_git_pull(user: dict = fastapi.Depends(AuthorizedHandler.get_current_user)):
-    return await git_pull(user)

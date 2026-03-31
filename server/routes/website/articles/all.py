@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
-from scripts.mongodb.website import ArticleHandler
+from scripts.db.website import ArticleHandler
 from .util import build_all_article_format
 
 

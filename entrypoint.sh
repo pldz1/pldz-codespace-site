@@ -4,7 +4,6 @@ set -e
 # 要启动的命令列表
 COMMANDS=(
     "python data/templates/sse-markdown/main.py"
-    "sleep 3 && python data/templates/chat-playground-v1/main.py"
     "sleep 5 && python server/main.py"
 )
 

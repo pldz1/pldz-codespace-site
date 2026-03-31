@@ -3,7 +3,7 @@ from typing import TypedDict, List
 
 class T_ArticleMeta(TypedDict):
     """
-    文章完整元数据结构(MongoDB 数据库存储)
+    文章完整元数据结构(JSON File 数据库存储)
     - title: 文章标题
     - author: 文章作者
     - category: 文章分类

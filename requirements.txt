@@ -1,6 +1,5 @@
 fastapi
 uvicorn[standard]
-pymongo
 aiofiles
 python-frontmatter
 watchdog
@@ -8,9 +7,6 @@ python-multipart
 Jinja2
 PyJWT
 python-dotenv
-python-multipart
 passlib
 bcrypt<4.1.0
 autopep8
-aiohttp
-aiosqlite

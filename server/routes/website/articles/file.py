@@ -1,6 +1,6 @@
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from scripts.mongodb.website import ArticleHandler
+from scripts.db.website import ArticleHandler
 from .util import check_user_permission
 
 # =========================================================================

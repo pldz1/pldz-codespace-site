@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 
 from core import ProjectConfig, Logger
 from scripts.filesystem import CacheCurdHandle
-from scripts.mongodb import AuthorizedHandler
+from scripts.db import AuthorizedHandler
 
 
 RESOURCE_ROUTE = APIRouter(prefix="/resource", tags=["resource"])

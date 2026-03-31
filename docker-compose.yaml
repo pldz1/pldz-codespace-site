@@ -1,28 +1,15 @@
 services:
-  mongodb:
-    image: mongo:7
-    container_name: pldz-mongodb
-    restart: always
-    volumes:
-      - ./.dbpath:/data/db
-    # 主机通过 57017 访问
-    ports:
-      - "57017:27017"
-
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: backend
     container_name: pldz-backend
-    depends_on:
-      - mongodb
     env_file:
       - .env
     environment:
       SITE_HOST: "0.0.0.0"
       SITE_PORT: "10057"
-      MONGODB_URI: "mongodb://mongodb:27017"
     volumes:
       - ./:/usr/src/app:delegated
       - ./.env:/usr/src/app/.env:ro

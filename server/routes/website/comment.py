@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException, status
 from fastapi.routing import APIRouter
-from scripts.mongodb import AuthorizedHandler
-from scripts.mongodb import CommentHandler
+from scripts.db import AuthorizedHandler
+from scripts.db import CommentHandler
 
 COMMENTS_ROUTE = APIRouter(prefix="/website/comment", tags=["website-comments"])
 

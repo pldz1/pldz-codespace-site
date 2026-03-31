@@ -40,7 +40,7 @@ class ArticleCrudHandler:
 
     @classmethod
     def get_file_doc(cls, file_path) -> ArticleDocument:
-        """将单个 Markdown 文件转换为 MongoDB 文档格式"""
+        """将单个 Markdown 文件转换为 json file db 文档格式"""
         try:
             post = frontmatter.load(file_path)
         except Exception as e:
@@ -53,7 +53,7 @@ class ArticleCrudHandler:
         # 处理 metadata，确保日期格式正确
         meta = cls.normalize_meta(post.metadata)
 
-        # 写入mongodb的文档格式
+        # 写入db的文档格式
         # 这里的 id 是基于文件相对路径生成的 UUID，确保唯一性
         doc: ArticleDocument = {'id': pid, 'path': rel, 'meta': meta, 'content': post.content}
         return doc

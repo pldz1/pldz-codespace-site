@@ -1,12 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "../views/HomePage.vue";
 import ArticlePage from "../views/ArticlePage.vue";
-import EditorPage from "../views/EditorPage.vue";
 import NotFound from "../views/NotFound.vue";
 import AdminPage from "../views/AdminPage.vue";
 import WhiteBoard from "../views/WhiteBoard.vue";
 import CodespacePage from "../views/CodespacePage.vue";
-import CloudDrive from "../views/CloudDrive.vue";
 
 const router = createRouter({
   // 使用 HTML5 的 History 模式
@@ -26,10 +24,6 @@ const router = createRouter({
       component: WhiteBoard,
     },
     {
-      path: "/clouddrive",
-      component: CloudDrive,
-    },
-    {
       path: "/codespace",
       component: CodespacePage,
     },
@@ -38,11 +32,6 @@ const router = createRouter({
       path: "/article/:id",
       component: ArticlePage,
       // 将路由参数作为 props 传入组件
-      props: true,
-    },
-    {
-      path: "/edit/:id",
-      component: EditorPage,
       props: true,
     },
     {

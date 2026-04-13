@@ -23,7 +23,7 @@ def get_html_template(html_content: str) -> str:
     <head>
         <meta charset=\"UTF-8\" />
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
-        <title>爬楼的猪 CodeSpace 条款</title>
+        <title>爬楼的猪 Dev 条款</title>
         <style>
             body {{ font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; }}
             pre {{ white-space: pre-wrap; }}

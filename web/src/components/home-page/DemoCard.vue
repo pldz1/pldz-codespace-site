@@ -1,7 +1,10 @@
 <template>
   <article class="demo-card">
     <div class="demo-main">
-      <div class="demo-thumb" aria-hidden="true">{{ demo.title.slice(0, 2).toUpperCase() }}</div>
+      <div v-if="demo.thumbnail || demo.previewgif" class="demo-thumb demo-thumb--image" aria-hidden="true">
+        <img :src="demo.thumbnail || demo.previewgif" :alt="demo.title" loading="lazy" decoding="async" />
+      </div>
+      <div v-else class="demo-thumb" aria-hidden="true">{{ demo.title.slice(0, 2).toUpperCase() }}</div>
 
       <div class="demo-copy">
         <div class="demo-title-row">
@@ -78,6 +81,19 @@ const statusText = computed(() => statusTextMap[props.demo.status] || props.demo
   color: #2563eb;
   font-size: 13px;
   font-weight: 700;
+  overflow: hidden;
+}
+
+.demo-thumb--image {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.demo-thumb--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .demo-copy {

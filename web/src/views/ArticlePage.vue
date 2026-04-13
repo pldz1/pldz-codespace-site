@@ -3,7 +3,7 @@
   <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
   <div v-show="isMobileMenuOpen" class="mobile-sidebar">
     <div class="mobile-sidebar-header">
-      <div class="logo">爬楼的猪 CodeSpace</div>
+      <div class="logo">爬楼的猪 Dev</div>
       <button class="close-btn" @click="closeMobileMenu">×</button>
     </div>
     <div class="nav-placeholder"></div>
@@ -14,47 +14,36 @@
   <HeaderBar @toggle-mobile-menu="toggleMobileMenu"></HeaderBar>
 
   <!-- 主体内容 -->
-  <div class="main-container" id="article-main-container">
+  <div class="main-container article-layout" id="article-main-container">
     <!-- 左侧边栏 -->
     <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
-      <div class="sidebar-item sidebar-article-chapter" ref="articleChapterRef">
-        <ChapterBlock :editor-id="state.id" :theme="state.theme"></ChapterBlock>
-      </div>
-
-      <div class="sidebar-item sidebar-article-related">
-        <RelatedRecom :article="article"></RelatedRecom>
+      <div class="sidebar-item sidebar-card sidebar-article-chapter" ref="articleChapterRef">
+        <ChapterBlock :headings="headings"></ChapterBlock>
       </div>
     </aside>
     <!-- 中间内容区 -->
-    <main class="content">
-      <div class="article-header">
+    <main class="content article-shell">
+      <div class="article-header card-surface">
         <h1 class="article-title">{{ article.meta.title }}</h1>
         <div class="article-meta">
           <span class="article-meta-item"> 最新日期: {{ article.meta.date }}</span>
           <span>👀 {{ article.views }} 次</span>
           <span>🏷️ 专栏：{{ article.meta.category }}</span>
-          <span v-if="isadmin" class="article-edit" @click="onEditArticle"> 重新编辑 </span>
-          <span v-if="isadmin" class="article-delete" @click="onDeleteArticle"> 删除 </span>
         </div>
       </div>
 
-      <div class="article-content">
-        <MdPreview :id="state.id" :theme="state.theme" :codeFoldable="false" v-model="article.content" />
+      <div class="article-content card-surface">
+        <article class="markdown-body" v-html="renderedHtml"></article>
       </div>
-      <div class="next-previous-article">
+      <div class="next-previous-article card-surface">
         <span>其他文章</span>
         <PrevNext :id="article.id" :category="article.meta.category"></PrevNext>
       </div>
-      <div class="comments-content">
+      <div class="comments-content card-surface">
         <span> 评论留言 </span>
         <CommentForm :article-id="article.id"></CommentForm>
       </div>
     </main>
-
-    <!-- 右侧边栏 -->
-    <aside class="right-sidebar sidebar-sticky">
-      <AdBanner></AdBanner>
-    </aside>
   </div>
 
   <!-- 反馈按钮 -->
@@ -65,22 +54,15 @@
   <div v-show="article.meta.github" class="to-github github-icon" id="to-github" @click="onGotoLink(article.meta.github)"></div>
   <div v-show="article.meta.gitee" class="to-gitee gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)"></div>
 
-  <!-- 浮动展开菜单（FAB）：所有屏幕均使用 -->
-  <transition name="overlay">
-    <div class="fab-overlay" v-if="isFabOpen" @click="closeFab"></div>
-  </transition>
   <div class="fab-container">
-    <div class="fab-toggle" :class="{ open: isFabOpen }" @click="toggleFab" aria-expanded="isFabOpen"></div>
-    <transition name="fab">
-      <div class="fab-actions" v-if="isFabOpen">
-        <div class="fab-item message-icon" @click="onToBottom" id="to-bottom" title="到底部"></div>
-        <div class="fab-item top-icon" @click="onToTop" id="to-top" title="到顶部"></div>
-        <div v-show="article.meta.csdn" class="fab-item csdn-icon" id="to-csdn" @click="onGotoLink(article.meta.csdn)" title="CSDN"></div>
-        <div v-show="article.meta.juejin" class="fab-item juejin-icon" id="to-juejin" @click="onGotoLink(article.meta.juejin)" title="掘金"></div>
-        <div v-show="article.meta.github" class="fab-item github-icon" id="to-github" @click="onGotoLink(article.meta.github)" title="GitHub"></div>
-        <div v-show="article.meta.gitee" class="fab-item gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)" title="Gitee"></div>
-      </div>
-    </transition>
+    <div class="fab-actions">
+      <div class="fab-item message-icon" @click="onToBottom" id="to-bottom" title="到底部"></div>
+      <div class="fab-item top-icon" @click="onToTop" id="to-top" title="到顶部"></div>
+      <div v-show="article.meta.csdn" class="fab-item csdn-icon" id="to-csdn" @click="onGotoLink(article.meta.csdn)" title="CSDN"></div>
+      <div v-show="article.meta.juejin" class="fab-item juejin-icon" id="to-juejin" @click="onGotoLink(article.meta.juejin)" title="掘金"></div>
+      <div v-show="article.meta.github" class="fab-item github-icon" id="to-github" @click="onGotoLink(article.meta.github)" title="GitHub"></div>
+      <div v-show="article.meta.gitee" class="fab-item gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)" title="Gitee"></div>
+    </div>
   </div>
 
   <!-- 底部的信息栏 -->
@@ -90,21 +72,14 @@
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
-import AdBanner from "../components/AdBanner.vue";
 
 import ChapterBlock from "../components/article-page/ChapterBlock.vue";
 import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
-import RelatedRecom from "../components/article-page/RelatedRecom.vue";
 
-
-import { ref, onActivated, watch, computed, reactive } from "vue";
-import { useRouter } from "vue-router";
-import { getArticle, deleteArticle } from "../utils/apis";
-import { useStore } from "vuex";
-
-import { MdPreview } from "md-editor-v3";
-import Toast from "../utils/toast.js";
+import { ref, onActivated, watch } from "vue";
+import { getArticle } from "../utils/apis";
+import { renderMarkdown } from "../utils/markdown.js";
 
 const props = defineProps({
   id: {
@@ -114,33 +89,14 @@ const props = defineProps({
   },
 });
 
-const router = useRouter();
-
-const state = reactive({
-  theme: "light",
-  id: "my-editor",
-});
-
 const isMobileMenuOpen = ref(false);
 const mainSidebarContainerRef = ref(null);
 const mobileSidebarContainerRef = ref(null);
 const articleChapterRef = ref(null);
 
-// 引入 Vuex store
-const store = useStore();
-const isadmin = computed(() => store.state.authState.isadmin);
-
-const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
-// 小屏幕浮动菜单展开状态
-const isFabOpen = ref(false);
-
-function toggleFab() {
-  isFabOpen.value = !isFabOpen.value;
-}
-
-function closeFab() {
-  isFabOpen.value = false;
-}
+const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", tags: [], csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
+const renderedHtml = ref("");
+const headings = ref([]);
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
@@ -153,22 +109,6 @@ function toggleMobileMenu() {
   isMobileMenuOpen.value = true;
   if (mobileSidebarContainerRef.value && articleChapterRef.value) {
     mobileSidebarContainerRef.value.appendChild(articleChapterRef.value);
-  }
-}
-
-function onEditArticle() {
-  router.push({ path: `/edit/${article.value.id}` });
-}
-
-async function onDeleteArticle() {
-  if (!confirm("确定要删除这篇文章吗？")) return;
-
-  const res = await deleteArticle(article.value.id);
-  if (res) {
-    Toast.success("文章删除成功");
-    router.push({ path: "/" });
-  } else {
-    Toast.error("文章删除失败");
   }
 }
 
@@ -192,6 +132,12 @@ function onGotoLink(url) {
   window.open(url, "_blank");
 }
 
+function updateRenderedContent() {
+  const result = renderMarkdown(article.value.content || "");
+  renderedHtml.value = result.html;
+  headings.value = result.headings;
+}
+
 /**
  * 组件激活时获取文章内容
  */
@@ -200,6 +146,7 @@ onActivated(async () => {
   if (!res) return;
 
   article.value = res;
+  updateRenderedContent();
 });
 
 /**
@@ -210,9 +157,14 @@ watch(
   (newWidth) => {
     if (newWidth > 768) {
       closeMobileMenu();
-      // 退出小屏菜单展开
-      closeFab();
     }
+  }
+);
+
+watch(
+  () => article.value.content,
+  () => {
+    updateRenderedContent();
   }
 );
 </script>
@@ -221,79 +173,294 @@ watch(
 @import url("../assets/views/main-container.css");
 @import url("../assets/views/mobile-overlay.css");
 
+:global(body) {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.article-layout {
+  max-width: 1240px;
+  padding-top: 88px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 40px;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.card-surface,
+.sidebar-card,
+.article-shell {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.sidebar {
+  width: 232px;
+  box-sizing: border-box;
+  background: transparent;
+  border-radius: 0;
+  padding: 8px 28px 0 0;
+  border-right: 1px solid #e2e8f0;
+}
+
 .sidebar-sticky {
   position: sticky;
-  top: 80px;
-  height: calc(100vh - 80px);
+  top: 92px;
+  height: calc(100vh - 92px);
 }
 
 .sidebar-article-chapter {
-  max-height: calc(100vh - 386px);
+  max-height: calc(100vh - 120px);
 }
 
-.sidebar-article-related {
-  margin-top: 24px;
+.article-shell {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: grid;
+  gap: 24px;
+  max-width: none;
+  min-width: 0;
+  padding-left: 4px;
+}
+
+.content.article-shell {
+  max-width: 880px;
 }
 
 .article-header {
-  margin-bottom: 20px;
+  padding: 8px 0 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: 780px;
 }
 
 .article-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #252933;
-  margin-bottom: 16px;
-  line-height: 1.2;
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px;
+  line-height: 1.04;
+  letter-spacing: -0.05em;
 }
 
 .article-meta {
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: #86909c;
-  font-size: 14px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #5b687c;
+  font-size: 13px;
+}
+
+.article-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .article-meta-item {
-  color: #515767;
-}
-
-.article-edit {
-  color: #1e80ff;
-  cursor: pointer;
-}
-
-.article-delete {
-  color: #ff4d4f;
-  cursor: pointer;
+  color: #334155;
 }
 
 .article-content {
+  padding: 0;
   line-height: 1.8;
   font-size: 16px;
+  max-width: 780px;
 }
 
 .next-previous-article {
-  margin-top: 16px;
-  margin-bottom: 16px;
+  padding: 22px 0 0;
+  background: transparent;
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0;
+  max-width: 780px;
 }
 
 .comments-content {
+  padding: 22px 0 0;
   min-height: 600px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0;
+  max-width: 780px;
 }
 
 .comments-content span,
 .next-previous-article span {
-  font-size: 18px;
-  font-weight: 900;
+  display: inline-block;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f172a;
 }
 
-.sidebar-card-right {
-  background-color: transparent;
-  display: flex;
-  justify-content: flex-end;
+.sidebar-card {
+  overflow: hidden;
+}
+
+.markdown-body {
+  color: #334155;
+  font-size: 18px;
+  line-height: 1.95;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.markdown-body :deep(*) {
+  box-sizing: border-box;
+}
+
+.markdown-body :deep(> *:first-child) {
+  margin-top: 0;
+}
+
+.markdown-body :deep(> *:last-child) {
+  margin-bottom: 0;
+}
+
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4),
+.markdown-body :deep(h5),
+.markdown-body :deep(h6) {
+  color: #0f172a;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  margin-top: 2.1em;
+  margin-bottom: 0.9em;
+  scroll-margin-top: 96px;
+}
+
+.markdown-body :deep(h1) {
+  font-size: 2.4rem;
+}
+
+.markdown-body :deep(h2) {
+  font-size: 1.9rem;
+  padding-bottom: 0.42em;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.markdown-body :deep(h3) {
+  font-size: 1.5rem;
+}
+
+.markdown-body :deep(h4) {
+  font-size: 1.22rem;
+}
+
+.markdown-body :deep(p),
+.markdown-body :deep(ul),
+.markdown-body :deep(ol),
+.markdown-body :deep(blockquote),
+.markdown-body :deep(table),
+.markdown-body :deep(pre) {
+  margin: 1em 0;
+}
+
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  padding-left: 1.4em;
+}
+
+.markdown-body :deep(li + li) {
+  margin-top: 0.4em;
+}
+
+.markdown-body :deep(a) {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.markdown-body :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.markdown-body :deep(code) {
+  padding: 0.16em 0.42em;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #3347c7;
+  font-size: 0.92em;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.markdown-body :deep(pre) {
+  padding: 22px 24px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  color: #e2e8f0;
+  overflow-x: auto;
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+.markdown-body :deep(pre code) {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.markdown-body :deep(blockquote) {
+  padding: 16px 18px;
+  border-left: 3px solid #60a5fa;
+  border-radius: 0 18px 18px 0;
+  background: linear-gradient(90deg, rgba(241, 245, 249, 0.92), rgba(248, 250, 252, 0.98));
+  color: #475569;
+}
+
+.markdown-body :deep(hr) {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0), rgba(148, 163, 184, 0.7), rgba(148, 163, 184, 0));
+  margin: 2em 0;
+}
+
+.markdown-body :deep(img) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.6em auto;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.markdown-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.markdown-body :deep(thead) {
+  background: #f8fafc;
+}
+
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.markdown-body :deep(tr:last-child td) {
+  border-bottom: none;
 }
 
 .to-top,
@@ -385,54 +552,23 @@ watch(
   display: none !important;
 }
 
-/* 小屏幕浮动菜单（FAB）样式 */
-.fab-overlay {
-  position: fixed;
-  inset: 0;
-  background: transparent; /* 透明遮罩，仅用于点击关闭 */
-  z-index: 40;
-}
-
 .fab-container {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 50;
-  display: block;
-}
-
-.fab-toggle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #4e5969;
-  font-size: 24px;
-  line-height: 52px;
-  text-align: center;
-  border: 1px solid #e5e6eb;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-  background: url("../assets/svgs/option-32.svg") no-repeat center center;
-}
-
-.fab-toggle:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-}
-
-.fab-toggle.open {
-  transform: rotate(90deg);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .fab-actions {
-  position: absolute;
-  right: 0;
-  bottom: 64px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  align-items: center;
 }
 
 .fab-item {
@@ -446,54 +582,6 @@ watch(
   background-repeat: no-repeat !important;
 }
 
-/* 动画：展开/收起 */
-.fab-enter-active,
-.fab-leave-active {
-  transition: all 0.25s ease;
-}
-.fab-enter-from,
-.fab-leave-to {
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
-}
-
-/* 子项轻微级联动画 */
-.fab-enter-active > .fab-item {
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
-.fab-enter-from > .fab-item {
-  opacity: 0;
-  transform: translateY(8px) scale(0.96);
-}
-.fab-enter-active > .fab-item:nth-child(1) {
-  transition-delay: 0ms;
-}
-.fab-enter-active > .fab-item:nth-child(2) {
-  transition-delay: 40ms;
-}
-.fab-enter-active > .fab-item:nth-child(3) {
-  transition-delay: 80ms;
-}
-.fab-enter-active > .fab-item:nth-child(4) {
-  transition-delay: 120ms;
-}
-.fab-enter-active > .fab-item:nth-child(5) {
-  transition-delay: 160ms;
-}
-.fab-enter-active > .fab-item:nth-child(6) {
-  transition-delay: 200ms;
-}
-
-/* 遮罩淡入淡出 */
-.overlay-enter-active,
-.overlay-leave-active {
-  transition: opacity 0.2s ease;
-}
-.overlay-enter-from,
-.overlay-leave-to {
-  opacity: 0;
-}
-
 /* 响应式设计 */
 @media (max-width: 1200px) {
 }
@@ -502,6 +590,39 @@ watch(
 }
 
 @media (max-width: 768px) {
+  .article-layout {
+    padding-top: 78px;
+    padding-left: 14px;
+    padding-right: 14px;
+    gap: 16px;
+    max-width: 100%;
+  }
+
+  .sidebar-sticky {
+    position: static;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 0 0 12px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .article-title {
+    font-size: 34px;
+  }
+
+  .article-header,
+  .article-content,
+  .next-previous-article,
+  .comments-content {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: none;
+  }
+
   .to-bottom,
   .to-top {
     width: 45px;
@@ -520,8 +641,8 @@ watch(
 }
 
 @media (max-width: 480px) {
-  .article-meta {
-    flex-wrap: wrap;
+  .article-title {
+    font-size: 28px;
   }
 }
 
@@ -529,3 +650,6 @@ watch(
 @media (max-width: 768px) and (orientation: landscape) {
 }
 </style>
+  .fab-container {
+    right: 14px;
+  }

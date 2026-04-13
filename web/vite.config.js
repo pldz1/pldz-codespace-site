@@ -24,7 +24,8 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../data/templates/web",
     emptyOutDir: true,
+    sourcemap: false,
+    reportCompressedSize: false,
   },
 });

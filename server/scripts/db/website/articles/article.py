@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from core import Logger, ProjectConfig
+from core import ProjectConfig
 from scripts.db.connection import _lock, _read_json, _write_json, get_articles_db_path
 from typedef.db.article import T_ArticleData
 
@@ -38,43 +38,3 @@ def find_article_by_id(id: str) -> Optional[T_ArticleData]:
     result = dict(doc)
     result['content'] = _read_content(doc['path'])
     return result
-
-
-def delete_article_by_id(article_id: str) -> bool:
-    db = get_articles_db_path()
-    with _lock:
-        data = _read_json(db)
-        article = data.get(article_id)
-        if not article:
-            Logger.warning(f"没有找到文章 ID: {article_id}")
-            return False
-        del data[article_id]
-        _write_json(db, data)
-
-    path = article.get('path', '')
-    full_path = os.path.join(ARTICLES_DIR, path)
-    if os.path.exists(full_path):
-        os.remove(full_path)
-        Logger.info(f"✔ 已删除文章文件: {full_path}")
-    else:
-        Logger.warning(f"没有找到文章文件: {full_path}")
-    return True
-
-
-def get_article_text_by_id(article_id: str) -> str:
-    with _lock:
-        data = _read_json(get_articles_db_path())
-    article = data.get(article_id)
-    if not article:
-        Logger.warning(f"没有找到文章 ID: {article_id}")
-        return "没有找到文章"
-    try:
-        from scripts.filesystem import ArticleCrudHandler
-        full_path = os.path.join(ARTICLES_DIR, article['path'])
-        file_doc = ArticleCrudHandler.get_file_doc(full_path)
-        if not file_doc:
-            return "没有找到文章"
-        return ArticleCrudHandler.get_md_file(file_doc['meta'], file_doc['content'], True)
-    except Exception as e:
-        Logger.error(f"✖ 获取文章内容失败: {e}")
-        return "获取文章内容失败"

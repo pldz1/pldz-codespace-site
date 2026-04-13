@@ -9,7 +9,7 @@
         <div class="mobile-sidebar-header">
           <div class="logo">
             <div class="logo-icon"></div>
-            <span>爬楼的猪 CodeSpace</span>
+            <span>爬楼的猪 Dev</span>
           </div>
           <button class="close-btn" @click="onCloseMobileMenu()">×</button>
         </div>
@@ -45,13 +45,6 @@
           </transition>
 
           <UserMgt v-if="activeMenuKey === 'usermgt'"></UserMgt>
-          <ArticleMgt v-if="activeMenuKey === 'articlemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ArticleMgt>
-          <CategoryMgt
-            v-if="activeMenuKey === 'categorymgt'"
-            :all-categories="allCategories"
-            :is-loading="isCategoriesLoading"
-            @on-update-categories="onOnUpdateCategories"
-          ></CategoryMgt>
           <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
           <NavMgt v-if="activeMenuKey === 'navmgt'"></NavMgt>
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
@@ -68,8 +61,6 @@ import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
 
 import UserMgt from "../components/admin-page/UserMgt.vue";
-import ArticleMgt from "../components/admin-page/ArticleMgt.vue";
-import CategoryMgt from "../components/admin-page/CategoryMgt.vue";
 import ImageMgt from "../components/admin-page/ImageMgt.vue";
 import NavMgt from "../components/admin-page/NavMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
@@ -97,22 +88,6 @@ const menuItems = [
     caption: "管理后台用户权限与基础资料",
     gradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
     requiresCategories: false,
-  },
-  {
-    key: "articlemgt",
-    name: "新增文章",
-    icon: "➕",
-    caption: "快速创建新的文章草稿",
-    gradient: "linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%)",
-    requiresCategories: true,
-  },
-  {
-    key: "categorymgt",
-    name: "专栏管理",
-    icon: "📙",
-    caption: "组织与排序内容专栏",
-    gradient: "linear-gradient(135deg, #f97316 0%, #facc15 100%)",
-    requiresCategories: true,
   },
   {
     key: "imagemgt",
@@ -219,10 +194,6 @@ async function fetchCategories({ showSuccessToast = false } = {}) {
   } finally {
     stopCategoriesLoading();
   }
-}
-
-async function onOnUpdateCategories() {
-  await fetchCategories({ showSuccessToast: true });
 }
 
 function syncActiveFromRoute(id) {

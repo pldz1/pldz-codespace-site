@@ -28,26 +28,3 @@ def build_all_article_format(art: T_ArticleData) -> T_ArticleInfo:
         github=meta.get('github', ''),
         gitee=meta.get('gitee', '')
     )
-
-
-def check_user_permission(user: dict):
-    """
-    检查用户是否有权限编辑文章
-    Args:
-        user (dict): 用户信息
-    Raises:
-        HTTPException: 如果用户未登录或没有权限
-    """
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You must be logged in to handle articles."
-        )
-
-    username = user.get('username')
-    isadmin = AuthorizedHandler.check_admin(username)
-    if not isadmin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to handle articles."
-        )

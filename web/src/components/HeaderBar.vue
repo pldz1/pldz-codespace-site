@@ -96,10 +96,9 @@ const githubLink = computed(() => {
 
 const navItems = [
   { label: "首页", href: "/", anchor: "" },
-  { label: "Projects", href: "/#projects", anchor: "#projects" },
-  { label: "Tutorials", href: "/#tutorials", anchor: "#tutorials" },
-  { label: "Demo", href: "/#demo", anchor: "#demo" },
-  { label: "About", href: "/#about", anchor: "#about" },
+  { label: "教程", href: "/404", anchor: "/404" },
+  { label: "白板", href: "/whiteboard", anchor: "/whiteboard" },
+  { label: "Demos", href: "/Demos", anchor: "/Demos" },
 ];
 
 let lastScrollY = 0;
@@ -126,7 +125,6 @@ const routeNameToNavLabel = {
   首页: "首页",
   "Code Space": "Projects",
   白板: "Demo",
-  共享: "Projects",
 };
 
 function handleScroll() {

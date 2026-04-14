@@ -1,24 +1,8 @@
 <template>
-  <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="onCloseMobileMenu()"></div>
-  <div v-show="isMobileMenuOpen" class="mobile-sidebar">
-    <div class="mobile-sidebar-header">
-      <div class="mobile-sidebar-brand">
-        <span class="mobile-sidebar-logo"></span>
-        <div>
-          <div class="mobile-sidebar-title">爬楼的猪 Dev</div>
-          <div class="mobile-sidebar-subtitle">项目、教程、仓库与 Demo</div>
-        </div>
-      </div>
-      <button class="close-btn" @click="onCloseMobileMenu()">×</button>
-    </div>
-    <div class="mobile-sidebar-body">
-      <div class="nav-placeholder"></div>
-      <div class="mobile-sidebar-note">
-        <p>这里整理我做过的项目和实现过程。</p>
-        <p>有些项目附了教程，有些可以直接在线体验。</p>
-      </div>
-    </div>
-  </div>
+  <MobileDrawer v-model="isMobileMenuOpen" subtitle="项目、教程、仓库和 Live Demo">
+    <p>欢迎来到「爬楼的猪 Dev」</p>
+    <p>这里放项目、教程、仓库、Live Demo 和一些零散记录。</p>
+  </MobileDrawer>
 
   <HeaderBar :route-name="'首页'" @toggle-mobile-menu="onToggleMobileMenu" />
 
@@ -26,19 +10,20 @@
     <main class="home-main">
       <section class="hero-section">
         <div class="hero-copy card-surface">
-          <p class="hero-kicker">Personal project archive</p>
-          <h1>项目、教程、仓库与 Demo</h1>
+          <p class="hero-kicker">Dev Space</p>
+          <h1>🎉 欢迎来到 <span class="hero-brand-pixel">爬楼的猪 Dev</span></h1>
           <p class="hero-description">
-            记录我做过的项目，以及它们的实现过程。<br />
-            每个项目尽量附上教程、源码和可运行示例。
+            项目教程 & Live Demo<br />
+            分享和记录一些我个人在做的, 感兴趣的工具和内容 😁
           </p>
           <div class="hero-actions">
-            <a class="button-primary" href="#tutorials">查看项目教程</a>
-            <a class="button-secondary" href="#demo">查看 Demo / GitHub</a>
+            <a class="button-primary" href="/codespace">查看项目教程</a>
+            <a class="button-secondary" href="/codespace">查看 Demo / GitHub</a>
           </div>
+          <!-- TODO 后续用接口换成热点内容... -->
           <ul class="hero-points">
-            <li>从想法到实现，尽量把过程留下来</li>
-            <li>优先展示能复用、能运行、能讲清楚的项目</li>
+            <li>开发里的零散内容，慢慢放到这里</li>
+            <li>能复用的、能跑的、顺手能查的，会优先留下来</li>
           </ul>
         </div>
 
@@ -80,30 +65,30 @@
         </div>
       </section>
 
-      <section id="projects" class="content-section">
+      <section class="content-section">
         <div class="section-heading">
           <div>
-            <p class="section-kicker">Projects</p>
-            <h2>Projects / 项目教程</h2>
+            <p class="section-kicker">Articles / Notes</p>
+            <h2>项目教程 / 开发记录</h2>
           </div>
           <div class="section-heading-side">
-            <p class="section-intro">挑几篇最值得展开讲的项目。重点不是归档，而是把做法和取舍写清楚。</p>
-            <a class="section-link" href="/codespace#projects">查看全部项目</a>
+            <p class="section-intro">主要是一些项目过程、配置折腾、工具记录，还有少量偏实验性的内容。</p>
+            <a class="section-link" href="/codespace">查看全部项目</a>
           </div>
         </div>
 
-        <div id="tutorials" class="projects-grid">
+        <div class="projects-grid">
           <ProjectCard v-for="project in projects" :key="project.id" :project="project" />
         </div>
       </section>
 
-      <section id="demo" class="content-section demo-section">
+      <section class="content-section demo-section">
         <div class="section-heading">
           <div>
             <p class="section-kicker">Demo / Repo</p>
-            <h2>可体验的项目入口</h2>
+            <h2>一些可直接打开的内容</h2>
           </div>
-          <p class="section-intro">这里是更直接的入口。先点开用，再决定要不要继续看实现。</p>
+          <p class="section-intro">偏轻一点，适合先点开看看。源码、预览和相关文章都尽量放在一起。</p>
         </div>
 
         <div class="demo-grid">
@@ -115,10 +100,10 @@
         <div class="updates-panel">
           <div class="section-heading section-heading--compact">
             <div>
-              <p class="section-kicker">Blog / Timeline</p>
+              <p class="section-kicker">Updates / Timeline</p>
               <h2>最近更新</h2>
             </div>
-            <a class="section-link" href="/codespace#updates">阅读更新</a>
+            <a class="section-link" href="/codespace">阅读更新</a>
           </div>
 
           <ul class="updates-list">
@@ -126,15 +111,15 @@
           </ul>
         </div>
 
-        <section id="about" class="about-panel card-surface">
+        <section class="about-panel card-surface">
           <div class="about-avatar">
-            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=320&q=80" alt="about avatar" />
+            <img :src="'/api/v1/website/image/avatar/avatar.jpg'" alt="about avatar" />
           </div>
           <div class="about-copy">
             <p class="section-kicker">About</p>
-            <h2>一个长期维护的小站</h2>
-            <p>平时会写项目实现、部署过程和一些能复用的小工具。更新不追求频率，尽量让每一篇都能回头再用。</p>
-            <a class="button-ghost button-small" href="/#about">About me / 了解更多</a>
+            <h2>一个长期维护的小空间</h2>
+            <p>平时写点项目实现、工具脚本、页面实验和部署记录。没有特别严格的边界，想到什么就慢慢补进来。</p>
+            <a class="button-ghost button-small" href="/">About me / 了解更多</a>
           </div>
         </section>
       </section>
@@ -149,6 +134,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 import FooterBar from "../components/FooterBar.vue";
 import HeaderBar from "../components/HeaderBar.vue";
+import MobileDrawer from "../components/MobileDrawer.vue";
 import DemoCard from "../components/home-page/DemoCard.vue";
 import ProjectCard from "../components/home-page/ProjectCard.vue";
 import TimelineItem from "../components/home-page/TimelineItem.vue";
@@ -181,7 +167,7 @@ const fallbackProjects = [
     description: "把一台局域网服务暴露到公网，顺手整理配置、权限和常见故障排查。",
     cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=960&q=80",
     tags: ["frp", "Server", "Network"],
-    tutorialLink: "/codespace#projects",
+    tutorialLink: "/codespace",
     repoLink: "https://github.com/example/frp-notes",
   },
 ];
@@ -337,13 +323,11 @@ async function loadHomeData() {
 }
 
 function onToggleMobileMenu() {
-  isMobileMenuOpen.value = true;
-  document.body.style.overflow = "hidden";
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
 }
 
 function onCloseMobileMenu() {
   isMobileMenuOpen.value = false;
-  document.body.style.overflow = "";
 }
 
 function onResize() {
@@ -358,14 +342,11 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  document.body.style.overflow = "";
   window.removeEventListener("resize", onResize);
 });
 </script>
 
 <style scoped>
-@import url("../assets/views/mobile-overlay.css");
-
 :global(body) {
   background: #f8fafc;
   color: #0f172a;
@@ -382,17 +363,33 @@ onBeforeUnmount(() => {
 }
 
 .card-surface {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #edf2f7;
   border-radius: 24px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.025);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .card-surface:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
-  border-color: #d7dfe8;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+  border-color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.hero-copy.card-surface,
+.about-panel.card-surface {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.hero-copy.card-surface:hover,
+.about-panel.card-surface:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+  background: transparent;
 }
 
 .hero-section {
@@ -400,10 +397,11 @@ onBeforeUnmount(() => {
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
   gap: 24px;
   margin-bottom: 72px;
+  align-items: start;
 }
 
 .hero-copy {
-  padding: 40px;
+  padding: 28px 12px 28px 0;
 }
 
 .hero-kicker,
@@ -420,6 +418,22 @@ onBeforeUnmount(() => {
   font-size: clamp(32px, 4vw, 46px);
   line-height: 1.1;
   letter-spacing: -0.03em;
+}
+
+.hero-brand-pixel {
+  display: inline-block;
+  margin-left: 0.12em;
+  padding: 0.08em 0.26em 0.14em;
+  border: 2px solid #0f172a;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fefefe 0%, #eef5ff 100%);
+  box-shadow: 4px 4px 0 #93c5fd;
+  font-family: "Press Start 2P", "Microsoft YaHei", monospace;
+  font-size: 0.92em;
+  letter-spacing: 0.02em;
+  text-shadow: 1px 0 0 currentColor, 0 1px 0 currentColor;
+  vertical-align: 0.06em;
+  white-space: nowrap;
 }
 
 .hero-description {
@@ -473,10 +487,22 @@ onBeforeUnmount(() => {
 
 .preview-card {
   padding: 24px;
+  border: 1px solid #e7edf5;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
 }
 
 .preview-card--feature {
-  padding: 28px;
+  padding: 30px 30px 28px;
+}
+
+.preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.09);
+  border-color: #d7e3f1;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
 }
 
 .preview-card__header {
@@ -490,6 +516,8 @@ onBeforeUnmount(() => {
 .preview-card__eyebrow {
   font-size: 12px;
   color: #64748b;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .preview-inline-meta {
@@ -503,14 +531,16 @@ onBeforeUnmount(() => {
 .preview-status {
   padding: 6px 10px;
   border-radius: 999px;
-  background: #eff6ff;
+  background: #f4f8ff;
   color: #2563eb;
+  border: 1px solid #d8e7ff;
   font-size: 12px;
 }
 
 .preview-status--muted {
-  background: #f8fafc;
+  background: #fbfcfd;
   color: #475569;
+  border-color: #e8edf3;
 }
 
 .preview-card h2,
@@ -562,10 +592,15 @@ onBeforeUnmount(() => {
   height: 30px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid #dbe3ef;
-  background: #f8fafc;
+  border: 1px solid #e6edf5;
+  background: #fbfcfd;
   color: #475569;
   font-size: 12px;
+}
+
+.preview-tags span {
+  background: #ffffff;
+  border-color: #dbe3ef;
 }
 
 .tag-chip--muted {
@@ -667,10 +702,10 @@ onBeforeUnmount(() => {
 }
 
 .demo-section {
-  padding: 26px;
-  border-radius: 28px;
-  background: #f8fafc;
-  border: 1px solid #eef2f7;
+  padding: 12px 0 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
 }
 
 .demo-grid {
@@ -690,18 +725,9 @@ onBeforeUnmount(() => {
 }
 
 .about-panel {
-  padding: 28px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 24px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.about-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
-  border-color: #d7dfe8;
+  padding: 12px 0 0 24px;
+  border-left: 1px solid #e9eef5;
+  border-radius: 0;
 }
 
 .updates-panel,
@@ -788,44 +814,6 @@ onBeforeUnmount(() => {
 .button-ghost:hover {
   background: #f8fafc;
   transform: translateY(-1px);
-}
-
-.mobile-sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.mobile-sidebar-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: #ffffff url("../assets/svgs/logo-32.svg") no-repeat center / 22px;
-  border: 1px solid #dbe3ef;
-}
-
-.mobile-sidebar-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.mobile-sidebar-subtitle {
-  margin-top: 2px;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.mobile-sidebar-body {
-  padding: 14px 18px 24px;
-}
-
-.mobile-sidebar-note {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid #e5e7eb;
-  color: #64748b;
-  line-height: 1.7;
 }
 
 @media (max-width: 1080px) {

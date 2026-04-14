@@ -4,7 +4,7 @@
       <div class="footer-copy">
         <span>{{ privacyData.copyright }}</span>
         <span class="footer-divider"></span>
-        <span>CodeSpace</span>
+        <span>爬楼的猪 Dev</span>
       </div>
 
       <div class="footer-links">

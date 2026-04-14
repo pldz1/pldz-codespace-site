@@ -126,7 +126,6 @@ onMounted(async () => {
 
 <style scoped>
 @import url("../assets/views/main-container.css");
-@import url("../assets/views/mobile-overlay.css");
 
 :root {
   --bg: #f7f9fa;
@@ -146,6 +145,8 @@ onMounted(async () => {
   flex-direction: row;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* 卡片 */
@@ -157,6 +158,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   transition: transform 160ms ease, box-shadow 160ms ease;
+  width: min(100%, 340px);
   max-width: 340px;
   height: fit-content;
 }
@@ -294,6 +296,22 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
+  .main-container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .home-content {
+    gap: 12px;
+    justify-content: stretch;
+  }
+
+  .code-space-card {
+    width: 100%;
+    max-width: none;
+    padding: 14px;
+  }
+
   .preview-title {
     font-size: 16px;
   }
@@ -305,26 +323,29 @@ onMounted(async () => {
   .preview-gif {
     aspect-ratio: 4 / 3;
   }
-
-  .to-bottom,
-  .to-top {
-    width: 45px;
-    height: 45px;
-  }
-  .to-top {
-    right: 15px;
-    bottom: 15px;
-  }
-  .to-bottom {
-    right: 15px;
-    bottom: 80px;
-  }
 }
 
 @media (max-width: 480px) {
-  .article-meta {
-    flex-wrap: wrap;
-    row-gap: 6px;
+  .main-container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .code-space-card {
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .preview-title {
+    font-size: 15px;
+  }
+
+  .preview-description {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45em;
+    max-height: calc(1.45em * 3);
+    height: auto;
   }
 }
 

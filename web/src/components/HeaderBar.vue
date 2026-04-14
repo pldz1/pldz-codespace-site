@@ -6,7 +6,7 @@
         <a class="brand-link" href="/">
           <span class="app-logo"></span>
           <span class="brand-copy">
-            <span class="brand-name">CodeSpace</span>
+            <span class="brand-name">爬楼的猪 Dev</span>
             <span class="brand-subtitle">Projects, tutorials, demos</span>
           </span>
         </a>
@@ -30,12 +30,7 @@
         <button class="search-trigger" type="button" aria-label="打开搜索" title="搜索" @click="onOpenSearch">
           <span class="search-trigger__icon"></span>
           <span class="search-trigger__text">搜索</span>
-          <span class="search-trigger__key">/</span>
         </button>
-
-        <a class="github-link" :href="githubLink" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-          <span class="github-icon"></span>
-        </a>
 
         <div v-if="avatar" class="user-avatar" @click="onToggleLoginForm">
           <img :src="avatar" alt="avatar" />
@@ -89,16 +84,11 @@ const searchOpen = ref(false);
 const isHeaderVisible = ref(true);
 const activeAnchor = ref("");
 
-const githubLink = computed(() => {
-  const githubNav = navs.value.find((item) => /github/i.test(item.title || "") || /github\.com/i.test(item.url || ""));
-  return githubNav?.url || "https://github.com";
-});
-
 const navItems = [
   { label: "首页", href: "/", anchor: "" },
-  { label: "教程", href: "/404", anchor: "/404" },
+  { label: "教程", href: "/tutorials", anchor: "/tutorials" },
   { label: "白板", href: "/whiteboard", anchor: "/whiteboard" },
-  { label: "Demos", href: "/Demos", anchor: "/Demos" },
+  { label: "Demos", href: "/codespace", anchor: "/codespace" },
 ];
 
 let lastScrollY = 0;
@@ -106,7 +96,6 @@ let ticking = false;
 let accumulatedUp = 0;
 let accumulatedDown = 0;
 let scrollListenerActive = false;
-let keydownHandler = null;
 let hashchangeHandler = null;
 
 function isActive(item) {
@@ -123,8 +112,9 @@ function isActive(item) {
 
 const routeNameToNavLabel = {
   首页: "首页",
-  "Code Space": "Projects",
-  白板: "Demo",
+  教程: "教程",
+  "Code Space": "Demos",
+  白板: "白板",
 };
 
 function handleScroll() {
@@ -229,16 +219,6 @@ onMounted(async () => {
       }
     }
   );
-
-  keydownHandler = (e) => {
-    if (e.key !== "/" || searchOpen.value) return;
-    const tag = e.target && e.target.tagName;
-    const isTyping = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable);
-    if (isTyping) return;
-    e.preventDefault();
-    searchOpen.value = true;
-  };
-  window.addEventListener("keydown", keydownHandler);
   hashchangeHandler = () => syncActiveAnchor();
   window.addEventListener("hashchange", hashchangeHandler);
   syncActiveAnchor();
@@ -249,9 +229,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   disableScrollHide();
-  if (keydownHandler) {
-    window.removeEventListener("keydown", keydownHandler);
-  }
   if (hashchangeHandler) {
     window.removeEventListener("hashchange", hashchangeHandler);
   }
@@ -265,9 +242,8 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   z-index: 10005;
-  background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid rgba(229, 231, 235, 0.85);
-  backdrop-filter: blur(12px);
+  background: #f8fafc;
+  border-bottom: 1px solid #e9eef5;
   transition: transform 0.25s ease, opacity 0.25s ease, border-color 0.25s ease;
 }
 
@@ -423,36 +399,6 @@ onBeforeUnmount(() => {
 
 .search-trigger__text {
   font-size: 14px;
-}
-
-.search-trigger__key {
-  font-size: 12px;
-  color: #94a3b8;
-  padding-left: 4px;
-}
-
-.github-link {
-  width: 38px;
-  height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.github-link:hover {
-  border-color: #cbd5e1;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-}
-
-.github-icon {
-  width: 18px;
-  height: 18px;
-  background: url("../assets/svgs/github-48.svg") no-repeat center / contain;
 }
 
 .login-register-btn {

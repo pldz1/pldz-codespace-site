@@ -48,17 +48,18 @@ const statusText = computed(() => statusTextMap[props.demo.status] || props.demo
   justify-content: space-between;
   gap: 20px;
   padding: 16px 18px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid #eef3f8;
   border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.03);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.016);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .demo-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
-  border-color: #d7dfe8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.026);
+  border-color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .demo-main {
@@ -76,8 +77,8 @@ const statusText = computed(() => statusTextMap[props.demo.status] || props.demo
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  background: linear-gradient(135deg, #eff6ff, #f8fafc);
-  border: 1px solid #dbe3ef;
+  background: linear-gradient(135deg, #f5f9ff, #fbfcfd);
+  border: 1px solid #e6edf5;
   color: #2563eb;
   font-size: 13px;
   font-weight: 700;

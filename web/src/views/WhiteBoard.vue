@@ -236,6 +236,8 @@ onBeforeUnmount(() => {
   padding: 68px 16px 16px 16px;
   background-color: #f9fafb;
   min-height: calc(100vh - 64px);
+  width: 100%;
+  min-width: 0;
 }
 .whiteboard-wrapper {
   width: 100%;
@@ -523,9 +525,14 @@ onBeforeUnmount(() => {
   background-color: #1f2937;
 }
 @media (max-width: 640px) {
+  .main-container {
+    padding: 74px 10px 12px;
+  }
+
   .whiteboard-wrapper {
-    padding: 16px;
-    gap: 20px;
+    padding: 14px;
+    gap: 16px;
+    border-radius: 10px;
   }
   .input-area {
     flex-direction: column;
@@ -546,6 +553,18 @@ onBeforeUnmount(() => {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+  }
+  .card {
+    border-radius: 10px;
+  }
+  .card textarea {
+    min-height: 320px;
+    padding: 14px;
+    font-size: 14px;
+  }
+  .timestamp {
+    padding: 8px 14px;
+    font-size: 12px;
   }
   .card-actions {
     flex-direction: column;

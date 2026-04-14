@@ -345,13 +345,13 @@ function formatFileSize(bytes) {
 .progress-toast {
   min-width: 220px;
   max-width: 280px;
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.82);
   color: #f8fafc;
-  box-shadow: 0 14px 40px -20px rgba(15, 23, 42, 0.6);
-  border-radius: 12px;
+  box-shadow: 0 16px 34px -18px rgba(15, 23, 42, 0.5);
+  border-radius: 16px;
   padding: 14px 16px;
   border: 1px solid rgba(148, 163, 184, 0.24);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(10px);
 }
 
 .progress-toast-title {

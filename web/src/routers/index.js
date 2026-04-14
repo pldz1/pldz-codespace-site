@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "../views/HomePage.vue";
 import ArticlePage from "../views/ArticlePage.vue";
+import TutorialsPage from "../views/TutorialsPage.vue";
 import NotFound from "../views/NotFound.vue";
 import AdminPage from "../views/AdminPage.vue";
 import WhiteBoard from "../views/WhiteBoard.vue";
@@ -13,6 +14,10 @@ const router = createRouter({
     {
       path: "/",
       component: HomePage,
+    },
+    {
+      path: "/tutorials",
+      component: TutorialsPage,
     },
     {
       path: "/admin/:id?",

@@ -1,33 +1,31 @@
 <template>
   <div class="admin-page">
-    <transition name="fade">
-      <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="onCloseMobileMenu()"></div>
-    </transition>
-
-    <transition name="slide-in">
-      <div v-show="isMobileMenuOpen" class="mobile-sidebar modern-mobile-sidebar">
-        <div class="mobile-sidebar-header">
-          <div class="logo">
-            <div class="logo-icon"></div>
-            <span>爬楼的猪 Dev</span>
-          </div>
-          <button class="close-btn" @click="onCloseMobileMenu()">×</button>
-        </div>
-        <div class="nav-placeholder"></div>
-        <div class="mobile-sidebar-container" ref="mobileSidebarContainerRef"></div>
-      </div>
-    </transition>
+    <MobileDrawer v-model="isMobileMenuOpen" subtitle="Admin, assets, navigation" :show-nav-placeholder="false">
+      <nav class="sidebar-nav admin-sidebar-card admin-sidebar-card--mobile">
+        <button
+          v-for="item in menuItems"
+          :key="item.key"
+          class="sidebar-link"
+          :class="{ active: activeMenuKey === item.key }"
+          type="button"
+          @click="onActiveCard(item.key)"
+        >
+          <span class="sidebar-link-label">{{ item.name }}</span>
+        </button>
+      </nav>
+    </MobileDrawer>
 
     <HeaderBar @toggle-mobile-menu="onToggleMobileMenu"></HeaderBar>
 
     <div class="main-container admin-main" :class="{ 'mobile-menu-open': isMobileMenuOpen }">
-      <aside class="sidebar sidebar-sticky admin-sidebar" ref="mainSidebarContainerRef">
-        <nav class="sidebar-nav admin-sidebar-card" ref="sidebarContentRef">
+      <aside class="sidebar sidebar-sticky admin-sidebar">
+        <nav class="sidebar-nav admin-sidebar-card">
           <button
             v-for="item in menuItems"
             :key="item.key"
             class="sidebar-link"
             :class="{ active: activeMenuKey === item.key }"
+            type="button"
             @click="onActiveCard(item.key)"
           >
             <span class="sidebar-link-label">{{ item.name }}</span>
@@ -59,6 +57,7 @@
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
+import MobileDrawer from "../components/MobileDrawer.vue";
 
 import UserMgt from "../components/admin-page/UserMgt.vue";
 import ImageMgt from "../components/admin-page/ImageMgt.vue";
@@ -67,7 +66,7 @@ import CacheMgt from "../components/admin-page/CacheMgt.vue";
 
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { getAllCategories } from "../utils/apis";
 import Toast from "../utils/toast.js";
 import { useLoading } from "../utils/use-loading";
@@ -132,9 +131,6 @@ const allCategories = ref([]);
 const activeMenuKey = ref(defaultMenuKey);
 
 const isMobileMenuOpen = ref(false);
-const mobileSidebarContainerRef = ref(null);
-const mainSidebarContainerRef = ref(null);
-const sidebarContentRef = ref(null);
 
 const { isLoading: isCategoriesLoading, start: startCategoriesLoading, stop: stopCategoriesLoading } = useLoading("admin.categories");
 
@@ -142,36 +138,23 @@ const activeMenu = computed(() => routeMap[activeMenuKey.value] || routeMap[defa
 const showLoadingOverlay = computed(() => isCategoriesLoading.value && categoriesDependentMenu.has(activeMenuKey.value));
 
 function onActiveCard(key) {
-  if (activeMenuKey.value === key) return;
+  if (activeMenuKey.value === key) {
+    onCloseMobileMenu();
+    return;
+  }
   activeMenuKey.value = key;
+  onCloseMobileMenu();
   if (route.params.id !== key) {
     router.push(`/admin/${key}`);
   }
 }
 
 function onToggleMobileMenu() {
-  if (isMobileMenuOpen.value) {
-    onCloseMobileMenu();
-    return;
-  }
-
-  if (mobileSidebarContainerRef.value && sidebarContentRef.value) {
-    mobileSidebarContainerRef.value.appendChild(sidebarContentRef.value);
-  }
-  isMobileMenuOpen.value = true;
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
 }
 
 function onCloseMobileMenu() {
   isMobileMenuOpen.value = false;
-  if (mainSidebarContainerRef.value && sidebarContentRef.value && !mainSidebarContainerRef.value.contains(sidebarContentRef.value)) {
-    mainSidebarContainerRef.value.appendChild(sidebarContentRef.value);
-  }
-}
-
-function handleResize() {
-  if (window.innerWidth > 768 && isMobileMenuOpen.value) {
-    onCloseMobileMenu();
-  }
 }
 
 async function fetchCategories({ showSuccessToast = false } = {}) {
@@ -215,8 +198,6 @@ function syncActiveFromRoute(id) {
 }
 
 onMounted(async () => {
-  window.addEventListener("resize", handleResize);
-
   const isadmin = store.state.authState.isadmin;
   if (!isadmin) {
     router.push({ path: "/" });
@@ -225,10 +206,6 @@ onMounted(async () => {
 
   await fetchCategories();
   syncActiveFromRoute(props.id || route.params.id);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
 });
 
 watch(
@@ -250,69 +227,92 @@ watch(
 
 <style scoped>
 @import url("../assets/views/main-container.css");
-@import url("../assets/views/mobile-overlay.css");
 
 .admin-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
+  background: #f8fafc;
 }
 
 .admin-main {
   flex: 1;
   display: flex;
-  gap: 24px;
-  padding: 88px 24px 32px;
+  gap: 28px;
+  padding: 92px 28px 40px;
   min-height: calc(100vh - 112px);
   width: 100%;
-  max-width: none;
+  max-width: 1280px;
+  margin: 0 auto;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   transition: filter 0.3s ease, transform 0.3s ease;
 }
 
 .admin-sidebar {
-  width: 240px;
-  flex: 0 0 240px;
+  width: 224px;
+  flex: 0 0 224px;
   display: flex;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
 }
 
 .admin-sidebar-card {
+  width: 100%;
+  padding: 4px 0;
+  border-radius: 0;
   background: transparent;
   border: none;
   box-shadow: none;
-  padding: 0;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   width: 100%;
-  padding: 8px;
+  padding: 0;
 }
 
 .sidebar-link {
   text-align: left;
-  padding: 10px 4px;
+  position: relative;
+  padding: 14px 4px 14px 18px;
   border: none;
-  background: none;
+  border-radius: 0;
+  background: transparent;
   font-size: 15px;
-  color: #1f2937;
-  border-bottom: 1px solid transparent;
+  color: #475569;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar-link:hover {
-  color: #2563eb;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.35);
+  transform: none;
+}
+
+.sidebar-link.active {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0));
+}
+
+.sidebar-link.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 24px;
+  border-radius: 999px;
+  background: #2563eb;
+  transform: translateY(-50%);
 }
 
 .sidebar-link.active > span {
-  color: #1d4ed8;
-  border-bottom: 2px solid currentColor;
-  font-weight: 600;
+  color: #2563eb;
+  font-weight: 700;
 }
 
 .admin-content {
@@ -325,7 +325,9 @@ watch(
   max-width: none;
   width: 100%;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+  background: transparent;
+  border-radius: 0;
 }
 
 .admin-content-body {
@@ -333,7 +335,7 @@ watch(
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 8px 32px;
+  padding: 0 0 32px;
   transition: filter 0.25s ease, opacity 0.25s ease;
 }
 
@@ -346,7 +348,7 @@ watch(
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(248, 250, 252, 0.82);
   z-index: 4;
   display: flex;
   flex-direction: column;
@@ -372,48 +374,13 @@ watch(
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.slide-in-enter-active,
-.slide-in-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.slide-in-enter-from,
-.slide-in-leave-to {
-  opacity: 0;
-  transform: translateX(-24px);
-}
-
-.modern-mobile-sidebar {
-  color: #fff;
-}
-
-.mobile-sidebar-header .logo {
-  color: black;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
-}
-
-.mobile-sidebar-header .logo .logo-icon {
-  width: 32px;
-  height: 32px;
-  background: url("../assets/svgs/logo-32.svg") center;
+.admin-sidebar-card--mobile {
+  padding: 0;
 }
 
 @media (max-width: 1024px) {
   .admin-main {
-    padding: 80px 20px 28px;
+    padding: 84px 20px 28px;
     gap: 20px;
   }
 
@@ -439,10 +406,9 @@ watch(
   }
 
   .admin-content {
-    padding: 24px 20px;
-    backdrop-filter: none;
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.25);
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .sidebar-nav {
@@ -450,8 +416,10 @@ watch(
   }
 
   .admin-sidebar-card {
-    backdrop-filter: none;
-    background: rgba(255, 255, 255, 0.95);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
   }
 
   .admin-content-header h1 {
@@ -466,10 +434,6 @@ watch(
 }
 
 @media (max-width: 480px) {
-  .admin-content {
-    padding: 20px 16px;
-  }
-
   .admin-content-header {
     margin-bottom: 20px;
   }

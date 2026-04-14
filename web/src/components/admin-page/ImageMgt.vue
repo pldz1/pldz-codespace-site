@@ -206,9 +206,10 @@ async function onUploadImageSuccess() {
 .thumbnail {
   width: 72px;
   height: 72px;
-  border-radius: 6px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #e2e8f0;
+  background: #eef2f7;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;

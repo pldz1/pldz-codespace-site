@@ -324,11 +324,12 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+  padding: 18px 0;
+  border: none;
+  border-bottom: 1px solid #e8eef5;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .item-card__header {
@@ -350,9 +351,10 @@ onMounted(async () => {
   font-size: 13px;
   font-weight: 600;
   color: #0f172a;
-  background: #e0f2fe;
+  background: #eef6ff;
   border-radius: 999px;
   padding: 4px 10px;
+  border: 1px solid #dbe7f4;
 }
 
 .item-card__hint {

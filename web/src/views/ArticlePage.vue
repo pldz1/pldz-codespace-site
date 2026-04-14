@@ -1,14 +1,7 @@
 <template>
-  <!-- 移动端侧边栏 -->
-  <div v-show="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
-  <div v-show="isMobileMenuOpen" class="mobile-sidebar">
-    <div class="mobile-sidebar-header">
-      <div class="logo">爬楼的猪 Dev</div>
-      <button class="close-btn" @click="closeMobileMenu">×</button>
-    </div>
-    <div class="nav-placeholder"></div>
-    <div class="mobile-sidebar-container" ref="mobileSidebarContainerRef"></div>
-  </div>
+  <MobileDrawer v-model="isMobileMenuOpen" subtitle="Article, chapters" :show-nav-placeholder="false">
+    <ChapterBlock :headings="headings"></ChapterBlock>
+  </MobileDrawer>
 
   <!-- 顶部导航栏 -->
   <HeaderBar @toggle-mobile-menu="toggleMobileMenu"></HeaderBar>
@@ -16,8 +9,8 @@
   <!-- 主体内容 -->
   <div class="main-container article-layout" id="article-main-container">
     <!-- 左侧边栏 -->
-    <aside class="sidebar sidebar-sticky" ref="mainSidebarContainerRef">
-      <div class="sidebar-item sidebar-card sidebar-article-chapter" ref="articleChapterRef">
+    <aside class="sidebar sidebar-sticky">
+      <div class="sidebar-item sidebar-card sidebar-article-chapter">
         <ChapterBlock :headings="headings"></ChapterBlock>
       </div>
     </aside>
@@ -32,7 +25,7 @@
         </div>
       </div>
 
-      <div class="article-content card-surface">
+      <div class="article-content card-surface" @click="onArticleContentClick">
         <article class="markdown-body" v-html="renderedHtml"></article>
       </div>
       <div class="next-previous-article card-surface">
@@ -45,14 +38,6 @@
       </div>
     </main>
   </div>
-
-  <!-- 反馈按钮 -->
-  <div class="to-top top-icon" id="to-top" @click="onToTop"></div>
-  <div class="to-bottom message-icon" id="to-bottom" @click="onToBottom"></div>
-  <div v-show="article.meta.csdn" class="to-csdn csdn-icon" id="to-csdn" @click="onGotoLink(article.meta.csdn)"></div>
-  <div v-show="article.meta.juejin" class="to-juejin juejin-icon" id="to-juejin" @click="onGotoLink(article.meta.juejin)"></div>
-  <div v-show="article.meta.github" class="to-github github-icon" id="to-github" @click="onGotoLink(article.meta.github)"></div>
-  <div v-show="article.meta.gitee" class="to-gitee gitee-icon" id="to-gitee" @click="onGotoLink(article.meta.gitee)"></div>
 
   <div class="fab-container">
     <div class="fab-actions">
@@ -70,14 +55,17 @@
 </template>
 
 <script setup>
+import "highlight.js/styles/github-dark.css";
+
 import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
+import MobileDrawer from "../components/MobileDrawer.vue";
 
 import ChapterBlock from "../components/article-page/ChapterBlock.vue";
 import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
 
-import { ref, onActivated, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getArticle } from "../utils/apis";
 import { renderMarkdown } from "../utils/markdown.js";
 
@@ -90,9 +78,6 @@ const props = defineProps({
 });
 
 const isMobileMenuOpen = ref(false);
-const mainSidebarContainerRef = ref(null);
-const mobileSidebarContainerRef = ref(null);
-const articleChapterRef = ref(null);
 
 const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", tags: [], csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
 const renderedHtml = ref("");
@@ -100,16 +85,10 @@ const headings = ref([]);
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
-  if (mainSidebarContainerRef.value && articleChapterRef.value) {
-    mainSidebarContainerRef.value.appendChild(articleChapterRef.value);
-  }
 }
 
 function toggleMobileMenu() {
-  isMobileMenuOpen.value = true;
-  if (mobileSidebarContainerRef.value && articleChapterRef.value) {
-    mobileSidebarContainerRef.value.appendChild(articleChapterRef.value);
-  }
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
 }
 
 /**
@@ -132,32 +111,77 @@ function onGotoLink(url) {
   window.open(url, "_blank");
 }
 
+async function copyCode(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+}
+
+async function onArticleContentClick(event) {
+  const button = event.target?.closest(".code-block__copy");
+  if (!button) return;
+
+  const encodedCode = button.dataset.code || "";
+  const text = decodeURIComponent(encodedCode);
+  const initialText = button.textContent || "复制";
+
+  try {
+    await copyCode(text);
+    button.textContent = "已复制";
+  } catch {
+    button.textContent = "失败";
+  }
+
+  window.setTimeout(() => {
+    button.textContent = initialText;
+  }, 1500);
+}
+
 function updateRenderedContent() {
   const result = renderMarkdown(article.value.content || "");
   renderedHtml.value = result.html;
   headings.value = result.headings;
 }
 
-/**
- * 组件激活时获取文章内容
- */
-onActivated(async () => {
+async function loadArticle() {
   const res = await getArticle(props.id);
   if (!res) return;
 
   article.value = res;
   updateRenderedContent();
+}
+
+function handleResize() {
+  if (window.innerWidth > 768) {
+    closeMobileMenu();
+  }
+}
+
+onMounted(async () => {
+  window.addEventListener("resize", handleResize, { passive: true });
+  await loadArticle();
 });
 
-/**
- * 监听窗口大小变化，自动关闭移动端菜单
- */
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
 watch(
-  () => window.innerWidth,
-  (newWidth) => {
-    if (newWidth > 768) {
-      closeMobileMenu();
-    }
+  () => props.id,
+  async (newId, oldId) => {
+    if (!newId || newId === oldId) return;
+    await loadArticle();
   }
 );
 
@@ -171,7 +195,6 @@ watch(
 
 <style scoped>
 @import url("../assets/views/main-container.css");
-@import url("../assets/views/mobile-overlay.css");
 
 :global(body) {
   background: #f8fafc;
@@ -179,12 +202,12 @@ watch(
 }
 
 .article-layout {
-  max-width: 1240px;
+  max-width: 1280px;
   padding-top: 88px;
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 40px;
-  gap: 28px;
+  gap: 32px;
   align-items: flex-start;
 }
 
@@ -198,11 +221,10 @@ watch(
 }
 
 .sidebar {
-  width: 232px;
   box-sizing: border-box;
   background: transparent;
   border-radius: 0;
-  padding: 8px 28px 0 0;
+  padding: 8px 30px 0 0;
   border-right: 1px solid #e2e8f0;
 }
 
@@ -229,6 +251,7 @@ watch(
 
 .content.article-shell {
   max-width: 880px;
+  width: 100%;
 }
 
 .article-header {
@@ -237,16 +260,16 @@ watch(
   border: none;
   border-radius: 0;
   box-shadow: none;
-  max-width: 780px;
+  max-width: 760px;
 }
 
 .article-title {
-  font-size: clamp(34px, 5vw, 52px);
+  font-size: clamp(30px, 4.2vw, 44px);
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 16px;
-  line-height: 1.04;
-  letter-spacing: -0.05em;
+  margin: 0 0 14px;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 
 .article-meta {
@@ -276,7 +299,7 @@ watch(
   padding: 0;
   line-height: 1.8;
   font-size: 16px;
-  max-width: 780px;
+  max-width: 760px;
 }
 
 .next-previous-article {
@@ -285,7 +308,7 @@ watch(
   border: none;
   border-top: 1px solid #e2e8f0;
   border-radius: 0;
-  max-width: 780px;
+  max-width: 760px;
 }
 
 .comments-content {
@@ -295,7 +318,7 @@ watch(
   border: none;
   border-top: 1px solid #e2e8f0;
   border-radius: 0;
-  max-width: 780px;
+  max-width: 760px;
 }
 
 .comments-content span,
@@ -315,8 +338,8 @@ watch(
 
 .markdown-body {
   color: #334155;
-  font-size: 18px;
-  line-height: 1.95;
+  font-size: 16px;
+  line-height: 1.25;
   word-break: break-word;
   max-width: 100%;
 }
@@ -394,7 +417,6 @@ watch(
 
 .markdown-body :deep(code) {
   padding: 0.16em 0.42em;
-  border-radius: 8px;
   background: #eef2ff;
   color: #3347c7;
   font-size: 0.92em;
@@ -414,6 +436,68 @@ watch(
   padding: 0;
   background: transparent;
   color: inherit;
+}
+
+.markdown-body :deep(.code-block) {
+  margin: 1.2em 0;
+  max-width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+.markdown-body :deep(.code-block__header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.92);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.markdown-body :deep(.code-block__lang) {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
+
+.markdown-body :deep(.code-block__copy) {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.markdown-body :deep(.code-block__copy:hover) {
+  border-color: rgba(147, 197, 253, 0.45);
+  background: rgba(37, 99, 235, 0.18);
+  color: #ffffff;
+}
+
+.markdown-body :deep(.code-block pre) {
+  margin: 0;
+  padding: 18px 20px 20px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.markdown-body :deep(.code-block .hljs) {
+  display: block;
+  overflow-x: auto;
+  padding: 0;
+  background: transparent;
 }
 
 .markdown-body :deep(blockquote) {
@@ -463,38 +547,9 @@ watch(
   border-bottom: none;
 }
 
-.to-top,
-.to-bottom,
-.to-csdn,
-.to-juejin,
-.to-github,
-.to-gitee {
-  position: fixed;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 30;
-}
-
-.to-top {
-  right: 20px;
-  bottom: 20px;
-}
-
 .top-icon {
   background: url("../assets/svgs/top-48.svg") no-repeat center;
   background-size: 60%;
-}
-
-.to-bottom {
-  right: 20px;
-  bottom: 80px;
 }
 
 .message-icon {
@@ -502,19 +557,9 @@ watch(
   background-size: 60%;
 }
 
-.to-csdn {
-  right: 20px;
-  bottom: 140px;
-}
-
 .csdn-icon {
   background: url("../assets/svgs/csdn-48.svg") no-repeat center;
   background-size: 60%;
-}
-
-.to-juejin {
-  right: 20px;
-  bottom: 200px;
 }
 
 .juejin-icon {
@@ -522,34 +567,14 @@ watch(
   background-size: 60%;
 }
 
-.to-github {
-  right: 20px;
-  bottom: 260px;
-}
-
 .github-icon {
   background: url("../assets/svgs/github-48.svg") no-repeat center;
   background-size: 60%;
 }
 
-.to-gitee {
-  right: 20px;
-  bottom: 320px;
-}
-
 .gitee-icon {
   background: url("../assets/svgs/gitee-48.svg") no-repeat center;
   background-size: 60%;
-}
-
-/* 使用 FAB 后，默认隐藏原有固定按钮（所有屏幕尺寸） */
-.to-bottom,
-.to-top,
-.to-csdn,
-.to-juejin,
-.to-github,
-.to-gitee {
-  display: none !important;
 }
 
 .fab-container {
@@ -611,7 +636,7 @@ watch(
   }
 
   .article-title {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .article-header,
@@ -623,26 +648,92 @@ watch(
     max-width: none;
   }
 
-  .to-bottom,
-  .to-top {
-    width: 45px;
-    height: 45px;
+  .article-shell {
+    padding-left: 0;
   }
 
-  .to-top {
-    right: 15px;
-    bottom: 15px;
+  .markdown-body :deep(pre) {
+    padding: 16px 16px 18px;
+    border-radius: 15px;
+    font-size: 13px;
+    line-height: 1.7;
   }
 
-  .to-bottom {
-    right: 15px;
-    bottom: 80px;
+  .markdown-body :deep(.code-block) {
+    border-radius: 16px;
   }
+
+  .markdown-body :deep(.code-block__header) {
+    padding: 9px 12px;
+  }
+
+  .markdown-body :deep(.code-block__lang),
+  .markdown-body :deep(.code-block__copy) {
+    font-size: 11px;
+  }
+
+  .markdown-body :deep(.code-block pre) {
+    padding: 14px 14px 16px;
+  }
+
+  .markdown-body :deep(.code-block .hljs) {
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+
 }
 
 @media (max-width: 480px) {
+  .article-layout {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
   .article-title {
-    font-size: 28px;
+    font-size: 24px;
+  }
+
+  .markdown-body :deep(code) {
+    padding: 0.12em 0.34em;
+    font-size: 0.84em;
+  }
+
+  .markdown-body :deep(pre) {
+    padding: 14px 14px 16px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .markdown-body :deep(.code-block) {
+    margin: 1em 0;
+    border-radius: 14px;
+  }
+
+  .markdown-body :deep(.code-block__header) {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .markdown-body :deep(.code-block__lang) {
+    min-width: 0;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .markdown-body :deep(.code-block__copy) {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .markdown-body :deep(.code-block pre) {
+    padding: 12px 12px 14px;
+  }
+
+  .markdown-body :deep(.code-block .hljs) {
+    font-size: 12px;
+    line-height: 1.65;
   }
 }
 
@@ -650,6 +741,4 @@ watch(
 @media (max-width: 768px) and (orientation: landscape) {
 }
 </style>
-  .fab-container {
-    right: 14px;
-  }
+.fab-container { right: 14px; }

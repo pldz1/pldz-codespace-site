@@ -34,24 +34,25 @@ defineProps({
   display: grid;
   gap: 20px;
   padding: 18px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #eef3f8;
   border-radius: 24px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.018);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .project-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
-  border-color: #d7dfe8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.028);
+  border-color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .project-cover {
   border-radius: 18px;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  background: #f1f5f9;
+  background: #f8fafc;
 }
 
 .project-cover img {
@@ -94,8 +95,8 @@ defineProps({
   height: 30px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid #dbe3ef;
-  background: #f8fafc;
+  border: 1px solid #e6edf5;
+  background: #fbfcfd;
   color: #475569;
   font-size: 12px;
 }

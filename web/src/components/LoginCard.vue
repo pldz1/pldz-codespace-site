@@ -63,7 +63,7 @@
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { login, register, logout, updateAvatar } from "../utils/apis";
 import { uploadAvatar } from "../utils/file-upload.js";
 import Toast from "../utils/toast.js";
@@ -93,6 +93,7 @@ const showRegister = ref(false);
 
 // 显示登陆css
 const showLoginCss = ref(false);
+let previousBodyOverflow = "";
 
 /**
  * 检查用户名是否符合要求
@@ -214,6 +215,15 @@ async function onUploadAvatar(event) {
     error.value = "头像上传失败，请稍后再试";
   }
 }
+
+onMounted(() => {
+  previousBodyOverflow = document.body.style.overflow || "";
+  document.body.style.overflow = "hidden";
+});
+
+onBeforeUnmount(() => {
+  document.body.style.overflow = previousBodyOverflow;
+});
 </script>
 
 <style scoped>
@@ -228,6 +238,8 @@ async function onUploadAvatar(event) {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
+  overflow: auto;
+  padding: 24px;
 }
 
 .auth-container {
@@ -326,16 +338,16 @@ async function onUploadAvatar(event) {
   width: 240px;
   right: 0px;
   top: 48px;
-  background-color: #f9f9f9;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  padding: 16px;
-  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.97);
+  border: 1px solid #e5edf6;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
+  border-radius: 18px;
+  padding: 18px;
+  overflow: clip;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .info-avatar {

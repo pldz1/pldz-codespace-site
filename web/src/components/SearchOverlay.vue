@@ -146,7 +146,7 @@ onMounted(() => {
   padding: 0.25rem 0.5rem;
   cursor: pointer;
   color: #666;
-  background: url("../../assets/svgs/close-24.svg") no-repeat center;
+  background: url("../assets/svgs/close-24.svg") no-repeat center;
 }
 .body {
   padding: 0.5rem 0.75rem 1rem;

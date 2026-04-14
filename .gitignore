@@ -29,3 +29,6 @@ data/db
 # Vim 配置/缓存
 .vim/
 .viminfo
+
+# git diff
+a.diff

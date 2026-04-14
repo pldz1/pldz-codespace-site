@@ -9,7 +9,7 @@
 async function apiRequest(path, options = {}, isBlob = false) {
   const response = await fetch(path, options);
   if (!response.ok) {
-    console.error(`网络响应失败 (${response.status} ${response.statusText})`);
+    console.debug(`Network error (${response.status} ${response.statusText})`);
     return null;
   }
 

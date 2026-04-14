@@ -126,11 +126,11 @@ onUnmounted(() => {
   color: #6b7280;
   border-radius: 0;
   border-left: 1px solid #e2e8f0;
-  padding: 7px 0 7px 14px;
+  padding: 4px 0 8px 8px;
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.25;
 }
 
 .catalog-link:hover {

@@ -270,6 +270,7 @@ watch(
   margin: 0 0 14px;
   line-height: 1.08;
   letter-spacing: -0.04em;
+  display: none;
 }
 
 .article-meta {
@@ -680,7 +681,6 @@ watch(
     font-size: 12.5px;
     line-height: 1.7;
   }
-
 }
 
 @media (max-width: 480px) {

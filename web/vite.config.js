@@ -14,7 +14,7 @@ export default defineConfig({
     host: "127.0.0.1",
     port: 10060,
     proxy: {
-      // 以 /api和/codespace 开头的请求都走同一套配置
+      // 以 /api和/io 开头的请求都走同一套配置
       "^/(api|io)": {
         target: "http://127.0.0.1:10058",
         changeOrigin: true,

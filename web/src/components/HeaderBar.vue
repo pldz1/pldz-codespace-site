@@ -88,7 +88,7 @@ const navItems = [
   { label: "首页", href: "/", anchor: "" },
   { label: "文章/教程", href: "/articles", anchor: "/articles" },
   { label: "白板", href: "/whiteboard", anchor: "/whiteboard" },
-  { label: "Demos", href: "/codespace", anchor: "/codespace" },
+  { label: "Demos", href: "/livedemo", anchor: "/livedemo" },
 ];
 
 let lastScrollY = 0;

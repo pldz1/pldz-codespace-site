@@ -17,8 +17,8 @@
             分享和记录一些我个人在做的, 感兴趣的工具和内容 😁
           </p>
           <div class="hero-actions">
-            <a class="button-primary" href="/codespace">查看项目教程</a>
-            <a class="button-secondary" href="/codespace">查看 Demo / GitHub</a>
+            <a class="button-primary" href="/articles">查看项目教程</a>
+            <a class="button-secondary" href="/livedemo">查看 Demo / GitHub</a>
           </div>
           <!-- TODO 后续用接口换成热点内容... -->
           <ul class="hero-points">
@@ -73,7 +73,7 @@
           </div>
           <div class="section-heading-side">
             <p class="section-intro">主要是一些项目过程、配置折腾、工具记录，还有少量偏实验性的内容。</p>
-            <a class="section-link" href="/codespace">查看全部项目</a>
+            <a class="section-link" href="/livedemo">查看全部项目</a>
           </div>
         </div>
 
@@ -103,7 +103,7 @@
               <p class="section-kicker">Updates / Timeline</p>
               <h2>最近更新</h2>
             </div>
-            <a class="section-link" href="/codespace">阅读更新</a>
+            <a class="section-link" href="/livedemo">阅读更新</a>
           </div>
 
           <ul class="updates-list">
@@ -138,114 +138,17 @@ import MobileDrawer from "../components/MobileDrawer.vue";
 import DemoCard from "../components/home-page/DemoCard.vue";
 import ProjectCard from "../components/home-page/ProjectCard.vue";
 import TimelineItem from "../components/home-page/TimelineItem.vue";
-import { getAllACodeSpace, getAllArticles } from "../utils/apis";
+import { getAllLiveDemos, getAllArticles } from "../utils/apis";
 
 const isMobileMenuOpen = ref(false);
-
-const fallbackProjects = [
-  {
-    id: 1,
-    title: "在线白板项目：从 0 实现实时协作",
-    description: "从房间同步、画布事件到持久化存储，逐步把多人协作白板拆开实现。",
-    cover: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=960&q=80",
-    tags: ["Vue 3", "Canvas", "WebSocket"],
-    tutorialLink: "/whiteboard",
-    repoLink: "https://github.com/example/realtime-whiteboard",
-  },
-  {
-    id: 2,
-    title: "Docker 部署博客系统",
-    description: "把博客拆成镜像、配置、数据卷和反向代理，记录一套能稳定复用的部署流程。",
-    cover: "https://images.unsplash.com/photo-1605745341112-85968b19335b?auto=format&fit=crop&w=960&q=80",
-    tags: ["Docker", "Nginx", "Linux"],
-    tutorialLink: "/codespace",
-    repoLink: "https://github.com/example/docker-blog-stack",
-  },
-  {
-    id: 3,
-    title: "用 frp 打通内网访问",
-    description: "把一台局域网服务暴露到公网，顺手整理配置、权限和常见故障排查。",
-    cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=960&q=80",
-    tags: ["frp", "Server", "Network"],
-    tutorialLink: "/codespace",
-    repoLink: "https://github.com/example/frp-notes",
-  },
-];
-
-const fallbackDemos = [
-  {
-    id: 1,
-    title: "Realtime Whiteboard",
-    description: "支持多房间协作、基础绘图和状态同步的在线白板 Demo。",
-    status: "done",
-    demoLink: "/whiteboard",
-    repoLink: "https://github.com/example/realtime-whiteboard",
-    thumbnail: "",
-    previewgif: "",
-  },
-  {
-    id: 2,
-    title: "CodeSpace Playground",
-    description: "放一些小型实验和过程性页面，用来验证交互和布局想法。",
-    status: "building",
-    demoLink: "/codespace",
-    repoLink: "https://github.com/example/codespace-playground",
-    thumbnail: "",
-    previewgif: "",
-  },
-  {
-    id: 3,
-    title: "Prompt Lab",
-    description: "整理一些实验性工具和脚手架，边做边记录可行的交互方式。",
-    status: "done",
-    demoLink: "https://example.com/demo/prompt-lab",
-    repoLink: "https://github.com/example/prompt-lab",
-    thumbnail: "",
-    previewgif: "",
-  },
-  {
-    id: 4,
-    title: "CodeSpace Notes",
-    description: "把一些实验项目、教程页面和可复用思路汇总成轻量入口。",
-    status: "experimental",
-    demoLink: "/codespace",
-    repoLink: "https://github.com/example/codespace-notes",
-    thumbnail: "",
-    previewgif: "",
-  },
-];
-
-const fallbackUpdates = [
-  {
-    id: 1,
-    title: "补完白板房间同步和重连处理",
-    date: "2026-04-08",
-    type: "教程",
-    link: "/whiteboard",
-  },
-  {
-    id: 2,
-    title: "Codespace Playground 增加一版新的预览页",
-    date: "2026-04-05",
-    type: "demo",
-    link: "/codespace",
-  },
-  {
-    id: 3,
-    title: "整理 Docker 部署博客系统的仓库结构",
-    date: "2026-04-01",
-    type: "repo",
-    link: "https://github.com/example/docker-blog-stack",
-  },
-];
 
 const projects = ref([]);
 const demos = ref([]);
 const updates = ref([]);
 
-const featuredProject = computed(() => projects.value[0] || fallbackProjects[0]);
-const secondaryProject = computed(() => projects.value[1] || fallbackProjects[1]);
-const featuredDemo = computed(() => demos.value[0] || fallbackDemos[0]);
+const featuredProject = computed(() => projects.value[0] || {});
+const secondaryProject = computed(() => projects.value[1] || {});
+const featuredDemo = computed(() => demos.value[0] || {});
 
 function normalizeTags(tags) {
   if (Array.isArray(tags)) return tags.filter(Boolean).slice(0, 4);
@@ -271,7 +174,7 @@ function normalizeArticleProject(article, index) {
   };
 }
 
-function normalizeCodeSpaceDemo(item, index) {
+function normalizeLiveDemo(item, index) {
   const url = item?.url || "";
   const sourceLink = item?.sourcelink || item?.url || "https://github.com";
   return {
@@ -297,10 +200,10 @@ function normalizeUpdate(article, index) {
 }
 
 async function loadHomeData() {
-  const [articlesRes, codeSpaceRes] = await Promise.allSettled([getAllArticles(), getAllACodeSpace()]);
+  const [articlesRes, livedemoRes] = await Promise.allSettled([getAllArticles(), getAllLiveDemos()]);
 
   const articles = articlesRes.status === "fulfilled" && Array.isArray(articlesRes.value) ? articlesRes.value : [];
-  const codeSpaces = codeSpaceRes.status === "fulfilled" && Array.isArray(codeSpaceRes.value) ? codeSpaceRes.value : [];
+  const livedemos = livedemoRes.status === "fulfilled" && Array.isArray(livedemoRes.value) ? livedemoRes.value : [];
 
   const sortedArticles = [...articles].sort((a, b) => String(b?.date || "").localeCompare(String(a?.date || "")));
   const preferredProjectArticles = sortedArticles.filter((article) => article?.category === "code-space");
@@ -315,11 +218,11 @@ async function loadHomeData() {
     .slice(0, 5)
     .map(normalizeUpdate);
 
-  const codeSpaceDemos = codeSpaces.slice(0, 4).map(normalizeCodeSpaceDemo);
+  const democards = livedemos.slice(0, 4).map(normalizeLiveDemo);
 
-  projects.value = projectArticles.length ? projectArticles : fallbackProjects;
-  updates.value = updateArticles.length ? updateArticles : fallbackUpdates;
-  demos.value = codeSpaceDemos.length ? codeSpaceDemos : fallbackDemos;
+  projects.value = projectArticles.length ? projectArticles : [];
+  updates.value = updateArticles.length ? updateArticles : [];
+  demos.value = democards.length ? democards : [];
 }
 
 function onToggleMobileMenu() {

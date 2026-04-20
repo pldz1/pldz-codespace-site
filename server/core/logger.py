@@ -27,10 +27,10 @@ class Logger():
          - (str) fileLevelL: The file output log level, the default value is 50.
          - (str) filePath: The log file directory, the default vaule is the current location.
         '''
-        cls.logger = logging.Logger('PLDZ-CODESPACE-BLOG')
+        cls.logger = logging.Logger('PLDZ-DEV-SITE')
         cls.logger.setLevel(logging.DEBUG)
         cls.formatter = logging.Formatter(
-            '[ %(levelname)s ] - PLDZ-CODESPACE-BLOG: %(message)s')
+            '[ %(levelname)s ] - PLDZ-DEV-SITE: %(message)s')
         cls.setting_log(consoleLevel, fileLevel, filePath)
 
     @classmethod

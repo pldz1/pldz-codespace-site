@@ -30,7 +30,7 @@ Cookie及类似技术
 8.1 我们可能随时更新本隐私政策，更新后会在本页面发布并注明生效日期。
 
 联系我们
-如果您对本隐私政策有任何疑问，请通过 https://github.com/pldz1/pldz-codespace-site/issues 联系我们
+如果您对本隐私政策有任何疑问，请通过 https://github.com/pldz1/pldz-dev-site/issues 联系我们
 
 
 生效日期：2025年06月17日

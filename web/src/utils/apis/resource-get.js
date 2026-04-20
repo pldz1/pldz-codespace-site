@@ -20,6 +20,6 @@ export async function getNavigation() {
  *  获取全部的代码空间项目
  * @returns {Promise<Array>} - 返回代码空间项目列表
  */
-export async function getAllACodeSpace() {
-  return apiGet(`${webSitePrefix}/codespace/all`);
+export async function getAllLiveDemos() {
+  return apiGet(`${webSitePrefix}/livedemo/all`);
 }

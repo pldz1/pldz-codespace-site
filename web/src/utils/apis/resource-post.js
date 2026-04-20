@@ -21,6 +21,6 @@ export async function setNavigation(navs) {
  * 设置代码空间导航信息
  * @param {Array} data
  */
-export async function setCodeSpace(data) {
-  return apiPost(`${webSitePrefix}/codespace/set`, { data });
+export async function setLiveDemo(data) {
+  return apiPost(`${webSitePrefix}/livedemo/set`, { data });
 }

@@ -4,7 +4,7 @@ from .website.adbanner_curd import AdBannerHandler
 from .website.navigation_curd import NavInfoHandler, NavItem
 from .website.article_crud import ArticleCrudHandler, ArticleDocument
 from .cache.cache_curd import CacheCurdHandle
-from .website.codespace_curd import CodeSpaceHandler
+from .website.livedemo_curd import LiveDemoHandler
 
 __all__ = [
     'start_watch',
@@ -15,5 +15,5 @@ __all__ = [
     'ArticleCrudHandler',
     'ArticleDocument',
     'CacheCurdHandle',
-    'CodeSpaceHandler'
+    'LiveDemoHandler'
 ]

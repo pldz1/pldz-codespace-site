@@ -18,7 +18,7 @@ from .website import (
     AD_BANNER_ROUTER,
     COMMENTS_ROUTE,
     WHITEBOARD_ROUTE,
-    CODESPACE_ROUTER,
+    LIVEDEMO_ROUTER,
 )
 
 
@@ -40,7 +40,7 @@ app.include_router(NAV_ROUTER, prefix="/api/v1")
 app.include_router(AD_BANNER_ROUTER, prefix="/api/v1")
 app.include_router(COMMENTS_ROUTE, prefix="/api/v1")
 app.include_router(WHITEBOARD_ROUTE, prefix="/api/v1")
-app.include_router(CODESPACE_ROUTER, prefix="/api/v1")
+app.include_router(LIVEDEMO_ROUTER, prefix="/api/v1")
 
 
 def start_dev():

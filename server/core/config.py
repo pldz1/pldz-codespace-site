@@ -106,12 +106,12 @@ class ProjectConfig:
         return cls.get_abs_path(TEMPLATES_PATH)
 
     @classmethod
-    def get_codespace_config_path(cls) -> str:
+    def get_livedemo_config_path(cls) -> str:
         """
-        获取CodeSpace配置的json文件
+        获取livedemo配置的json文件
         """
         resource_path = cls.get_resource_path()
-        return os.path.join(resource_path, 'website/codespace.json')
+        return os.path.join(resource_path, 'website/livedemo.json')
 
     @classmethod
     def get_db_path(cls) -> str:

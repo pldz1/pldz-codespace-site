@@ -3,6 +3,11 @@
     <div class="auth-overlay" @click="onClickOverlay">
       <!-- 已经登录的卡片信息 -->
       <div v-if="!!username" class="info-card">
+        <div class="auth-window-bar" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <!-- 头像 -->
         <div class="info-avatar">
           <img :src="avatar" alt="头像" />
@@ -26,6 +31,11 @@
 
       <!-- 登录/注册 表单 -->
       <div v-else class="auth-container">
+        <div class="auth-window-bar" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <div class="auth-header">
           <h2>{{ showRegister ? "注册" : "登录" }}</h2>
           <div class="auth-close" @click="onCloseLoginForm"></div>
@@ -181,7 +191,7 @@ function onCloseLoginForm() {
  */
 function onClickOverlay(event) {
   // 点击遮罩时关闭登录表单
-  if (event.target.classList.contains("auth-overlay") && !!username.value) {
+  if (event.target.classList.contains("auth-overlay")) {
     onCloseLoginForm();
   }
 }
@@ -232,24 +242,29 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   z-index: 10030;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(rgba(15, 23, 42, 0.62), rgba(15, 23, 42, 0.62)), linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%);
+  background-size: auto, 18px 18px, 18px 18px;
   overflow: auto;
-  padding: 24px;
+  padding: 32px 18px;
 }
 
-.auth-container {
-  width: 360px;
-  margin: 80px auto;
-  padding: 24px;
-  background: #fff;
+.auth-container,
+.info-card {
+  position: relative;
+  width: min(420px, 100%);
+  margin: auto;
+  overflow: hidden;
+  border: 2px solid #111827;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(124, 122, 122, 0.4);
-  z-index: 900;
+  background: #ffffff;
+  box-shadow: 8px 8px 0 #111827;
+  z-index: 10031;
 }
 
 .flex-center {
@@ -260,104 +275,177 @@ onBeforeUnmount(() => {
 
 .loading {
   position: absolute;
-  height: 360px;
-  z-index: 1000;
+  inset: auto;
+  min-height: 330px;
+  z-index: 10032;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.auth-window-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border-bottom: 2px solid #111827;
+  background: #e2e8f0;
+}
+
+.auth-window-bar span {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #111827;
+  background: #ffffff;
+}
+
+.auth-window-bar span:nth-child(1) {
+  background: #ef4444;
+}
+
+.auth-window-bar span:nth-child(2) {
+  background: #facc15;
+}
+
+.auth-window-bar span:nth-child(3) {
+  background: #22c55e;
 }
 
 .auth-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 16px;
+  padding: 20px 22px 8px;
 }
 
 .auth-close {
-  height: 32px;
-  width: 32px;
-
-  display: inline-block;
-  background: url("../assets/svgs/close-24.svg") no-repeat center;
+  flex: 0 0 auto;
+  height: 34px;
+  width: 34px;
+  border: 2px solid #111827;
+  border-radius: 6px;
+  background: #ffffff url("../assets/svgs/close-24.svg") no-repeat center;
+  background-size: 18px;
+  box-shadow: 3px 3px 0 #111827;
+  cursor: pointer;
 }
 
 .auth-close:hover {
-  border: 1px solid #ddd;
-  border-radius: 50%;
+  background-color: #f8fafc;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #111827;
 }
 
 .auth-container h2 {
-  margin-bottom: 16px;
-  color: #333;
+  margin: 0;
+  color: #111827;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: 0;
 }
+
+.auth-container form {
+  padding: 0 22px 22px;
+}
+
 .auth-container input {
   width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  height: 44px;
+  padding: 0 12px;
+  margin: 10px 0 0;
+  border: 2px solid #111827;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #111827;
+  font: inherit;
+  box-shadow: inset 3px 3px 0 rgba(15, 23, 42, 0.08);
 }
+
+.auth-container input:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22), inset 3px 3px 0 rgba(15, 23, 42, 0.08);
+}
+
 .auth-container button {
-  width: 48%;
-  padding: 10px;
-  margin-top: 12px;
-  border: none;
-  border-radius: 4px;
+  min-height: 42px;
+  padding: 0 14px;
+  margin-top: 0;
+  border: 2px solid #111827;
+  border-radius: 6px;
+  font-weight: 800;
   cursor: pointer;
+  box-shadow: 3px 3px 0 #111827;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.auth-container button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #111827;
+}
+
+.auth-container button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #111827;
 }
 
 .action-buttons {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 12px;
+  margin-top: 16px;
 }
+
 .auth-container .btn-register {
   background: #fff;
-  color: #007bff;
-  border: 1px solid #007bff;
+  color: #111827;
 }
+
 .auth-container .btn-login {
-  background: #007bff;
-  color: #fff;
+  background: #93c5fd;
+  color: #111827;
 }
 
 .auth-container .error {
-  color: #e74c3c;
-  margin-top: 8px;
+  min-height: 22px;
+  padding: 0 22px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .auth-container .agreement {
   font-size: 12px;
-  color: #666;
+  color: #475569;
   margin-top: 16px;
+  line-height: 1.6;
 }
+
 .auth-container .agreement a {
-  color: #007bff;
+  color: #2563eb;
+  font-weight: 700;
   text-decoration: none;
 }
 
 .info-card {
-  position: absolute;
-  width: 240px;
-  right: 0px;
-  top: 48px;
-  background-color: rgba(255, 255, 255, 0.97);
-  border: 1px solid #e5edf6;
-  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
-  border-radius: 18px;
-  padding: 18px;
-  overflow: clip;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 0 22px 22px;
 }
 
 .info-avatar {
   position: relative;
-  width: 80px;
-  height: 80px;
-  border: 3px solid #4a90e2;
-  border-radius: 50%;
+  width: 96px;
+  height: 96px;
+  margin-top: 24px;
+  border: 3px solid #111827;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
+  background: #f8fafc;
+  box-shadow: 5px 5px 0 #111827;
 }
 
 .info-avatar img {
@@ -377,11 +465,12 @@ onBeforeUnmount(() => {
   justify-content: center;
   font-size: 2rem;
   background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
   opacity: 0;
-  border-radius: 50%;
   transition: opacity 0.2s ease;
   font-weight: 700;
   user-select: none;
+  cursor: pointer;
 }
 
 .info-avatar:hover .avatar-overlay {
@@ -394,34 +483,88 @@ onBeforeUnmount(() => {
 }
 
 .info-item {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 2px solid #111827;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
   font-size: 0.9rem;
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
 .info-item span {
-  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  color: #111827;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .info-admin {
   display: inline-block;
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  background: #4a90e2;
-  border-radius: 8px;
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 2px solid #111827;
+  border-radius: 6px;
+  color: #111827;
+  background: #facc15;
+  box-shadow: 3px 3px 0 #111827;
+  font-size: 0.78rem;
+  font-weight: 800;
   cursor: pointer;
+  width: 100%;
 }
 
 .btn-logout {
-  background: #f44336;
-  color: #fff;
-  border: none;
-  width: 60px;
-  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: transparent;
+}
+
+.btn-logout button,
+button.btn-logout {
+  min-height: 40px;
+  width: 100%;
+  border: 2px solid #111827;
+  border-radius: 6px;
+  background: #fecaca;
+  color: #111827;
+  font-weight: 800;
   cursor: pointer;
+  box-shadow: 3px 3px 0 #111827;
+}
+
+@media (max-width: 480px) {
+  .auth-overlay {
+    align-items: flex-start;
+    padding-top: 92px;
+  }
+
+  .auth-header,
+  .auth-container form {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .auth-container .error {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .auth-container button {
+    width: 100%;
+  }
 }
 </style>

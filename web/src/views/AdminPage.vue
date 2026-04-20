@@ -44,7 +44,7 @@
 
           <UserMgt v-if="activeMenuKey === 'usermgt'"></UserMgt>
           <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
-          <NavMgt v-if="activeMenuKey === 'navmgt'"></NavMgt>
+
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
         </section>
       </main>
@@ -61,7 +61,6 @@ import MobileDrawer from "../components/MobileDrawer.vue";
 
 import UserMgt from "../components/admin-page/UserMgt.vue";
 import ImageMgt from "../components/admin-page/ImageMgt.vue";
-import NavMgt from "../components/admin-page/NavMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
 
 import { useRoute, useRouter } from "vue-router";
@@ -95,14 +94,6 @@ const menuItems = [
     caption: "上传与维护内容配图",
     gradient: "linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%)",
     requiresCategories: true,
-  },
-  {
-    key: "navmgt",
-    name: "网站导航管理",
-    icon: "🌐",
-    caption: "配置站点导航与展示位",
-    gradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)",
-    requiresCategories: false,
   },
   {
     key: "cachemgt",

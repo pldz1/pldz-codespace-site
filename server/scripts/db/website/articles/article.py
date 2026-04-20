@@ -24,6 +24,14 @@ def find_all_articles() -> List[T_ArticleData]:
     return docs
 
 
+def find_article_intros() -> List[T_ArticleData]:
+    with _lock:
+        data = _read_json(get_articles_db_path())
+    docs = [d for d in data.values() if d.get('meta', {}).get('serialNo', 0) == 0]
+    docs.sort(key=lambda d: d.get('meta', {}).get('category', ''))
+    return docs
+
+
 def find_article_by_id(id: str) -> Optional[T_ArticleData]:
     db = get_articles_db_path()
     with _lock:

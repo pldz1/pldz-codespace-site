@@ -12,6 +12,10 @@ from .article_crud import ArticleCrudHandler, ArticleDocument
 ARTICLES_DIR = ProjectConfig.get_articles_path()
 
 
+def _normalize_article_path(path: str) -> str:
+    return os.path.normpath(path).replace('\\', '/').replace(os.sep, '/')
+
+
 def sync_file(file_path: str):
     """同步单个 Markdown 文件的元数据到 JSON 索引（不存 content）"""
     doc: ArticleDocument = ArticleCrudHandler.get_file_doc(file_path)
@@ -32,6 +36,38 @@ def sync_file(file_path: str):
         data[doc['id']] = entry
         _write_json(db, data)
     Logger.info(f"✔ {action} 文件: {doc['path']}")
+
+
+def get_markdown_paths() -> set[str]:
+    """获取当前文章目录下所有 Markdown 文件的相对路径"""
+    paths = set()
+    for root, _, files in os.walk(ARTICLES_DIR):
+        for filename in files:
+            if not filename.lower().endswith('.md'):
+                continue
+            rel = os.path.relpath(os.path.join(root, filename), ARTICLES_DIR)
+            paths.add(_normalize_article_path(rel))
+    return paths
+
+
+def prune_missing_articles(existing_paths: set[str]) -> int:
+    """删除数据库中已不存在于文件系统的文章记录"""
+    db = get_articles_db_path()
+    with _lock:
+        data = _read_json(db)
+        stale_ids = [
+            article_id for article_id, article in data.items()
+            if _normalize_article_path(article.get('path', '')) not in existing_paths
+        ]
+
+        for article_id in stale_ids:
+            removed = data.pop(article_id, None)
+            Logger.info(f"✖ 删除失效记录: {removed.get('path', article_id) if removed else article_id}")
+
+        if stale_ids:
+            _write_json(db, data)
+
+    return len(stale_ids)
 
 
 class MarkdownEventHandler(FileSystemEventHandler):
@@ -73,7 +109,7 @@ class MarkdownEventHandler(FileSystemEventHandler):
 
 
 def initial_sync():
-    """首次启动时将已有文件全部同步"""
+    """首次启动时同步已有文件，并清理已不存在的数据库记录"""
     Logger.info("开始初次全量同步...")
     count = 0
     for root, _, files in os.walk(ARTICLES_DIR):
@@ -81,7 +117,9 @@ def initial_sync():
             if f.lower().endswith('.md'):
                 sync_file(os.path.join(root, f))
                 count += 1
-    Logger.info(f"初次同步完成，共同步 {count} 个文件。")
+
+    pruned_count = prune_missing_articles(get_markdown_paths())
+    Logger.info(f"初次同步完成，共同步 {count} 个文件，清理 {pruned_count} 条失效记录。")
 
 
 def start_watch(isWatch: bool = True):

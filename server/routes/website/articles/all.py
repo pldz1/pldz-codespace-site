@@ -26,6 +26,21 @@ async def all_articles():
 
 # =========================================================================
 
+
+async def article_intros():
+    """
+    获取每个专栏 serialNo 为 0 的导读文章列表
+    Returns:
+        : 包含专栏导读文章的列表
+    """
+    data = ArticleHandler.get_article_intros()
+    format_data = [build_all_article_format(art) for art in data]
+    res = T_All_Article_Response(data=format_data)
+    return res
+
+
+# =========================================================================
+
 class T_All_Categories_Response(BaseModel):
     data: List[str]
 

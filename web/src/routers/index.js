@@ -16,8 +16,13 @@ const router = createRouter({
       component: HomePage,
     },
     {
-      path: "/tutorials",
+      path: "/articles",
       component: TutorialsPage,
+    },
+    {
+      path: "/articles/:category",
+      component: TutorialsPage,
+      props: true,
     },
     {
       path: "/admin/:id?",

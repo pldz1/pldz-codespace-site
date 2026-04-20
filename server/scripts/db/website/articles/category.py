@@ -19,5 +19,5 @@ def find_articles_by_category(category: str) -> List[T_ArticleData]:
         if d.get('meta', {}).get('category') == category
         and d.get('meta', {}).get('serialNo', 0) != 0
     ]
-    docs.sort(key=lambda d: d.get('meta', {}).get('date', ''), reverse=True)
+    docs.sort(key=lambda d: d.get('meta', {}).get('serialNo', 0))
     return docs

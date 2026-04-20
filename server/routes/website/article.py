@@ -1,5 +1,5 @@
 import fastapi
-from .articles.all import all_articles, all_categories, all_tags
+from .articles.all import all_articles, all_categories, all_tags, article_intros
 from .articles.article import get_articles_by_id
 from .articles.tag import get_articles_by_tag
 from .articles.category import get_articles_by_category
@@ -15,6 +15,11 @@ async def api_all_categories():
 @ARTICLES_ROUTE.get("/all/article")
 async def api_all_articles():
     return await all_articles()
+
+
+@ARTICLES_ROUTE.get("/all/intro")
+async def api_article_intros():
+    return await article_intros()
 
 
 @ARTICLES_ROUTE.get("/all/tag")

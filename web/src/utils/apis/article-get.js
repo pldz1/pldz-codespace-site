@@ -9,6 +9,14 @@ export async function getAllArticles() {
 }
 
 /**
+ * 获取每个专栏的导读文章
+ * @returns {Promise<Array>}
+ */
+export async function getArticleIntros() {
+  return apiGet(`${webSitePrefix}/article/all/intro`);
+}
+
+/**
  * 获取全部的分类信息
  * @returns {Promise<Array>}
  */
@@ -30,7 +38,7 @@ export async function getTagCounts() {
  * @returns {Promise<Array>}
  */
 export async function getArticlesByCategory(categoryId) {
-  return apiGet(`${webSitePrefix}/article/category/${categoryId}`);
+  return apiGet(`${webSitePrefix}/article/category/${encodeURIComponent(categoryId)}`);
 }
 
 /**

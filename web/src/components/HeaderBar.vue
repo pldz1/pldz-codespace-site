@@ -86,7 +86,7 @@ const activeAnchor = ref("");
 
 const navItems = [
   { label: "首页", href: "/", anchor: "" },
-  { label: "教程", href: "/tutorials", anchor: "/tutorials" },
+  { label: "文章/教程", href: "/articles", anchor: "/articles" },
   { label: "白板", href: "/whiteboard", anchor: "/whiteboard" },
   { label: "Demos", href: "/codespace", anchor: "/codespace" },
 ];

@@ -1,7 +1,7 @@
 <template>
   <MobileDrawer v-model="isMobileMenuOpen" subtitle="Articles, notes, demos">
     <p>教程页</p>
-    <p>按时间和浏览量整理全部文章。</p>
+    <p>{{ isSeriesView ? "当前专栏的系列文章。" : "按专栏整理全部教程。" }}</p>
   </MobileDrawer>
 
   <HeaderBar :route-name="'教程'" @toggle-mobile-menu="onToggleMobileMenu" />
@@ -11,10 +11,11 @@
       <section class="tutorials-hero">
         <div class="hero-copy">
           <p class="page-kicker">Articles / Tutorials</p>
-          <p class="page-description">教程/文章</p>
+          <p class="page-description">{{ pageTitle }}</p>
         </div>
 
         <div class="toolbar">
+          <a v-if="isSeriesView" class="back-link" href="/articles">返回专栏</a>
           <button
             v-for="option in sortOptions"
             :key="option.value"
@@ -28,25 +29,26 @@
       </section>
 
       <section class="tutorials-summary">
-        <span>共 {{ sortedArticles.length }} 篇</span>
+        <span>共 {{ sortedArticles.length }} {{ isSeriesView ? "篇" : "个专栏" }}</span>
         <span>第 {{ currentPage }} / {{ totalPages }} 页</span>
       </section>
 
-      <section class="article-list" aria-label="文章列表">
+      <section class="article-list" :aria-label="isSeriesView ? '系列文章列表' : '专栏列表'">
         <article v-for="article in pagedArticles" :key="article.id" class="article-row">
-          <a class="article-cover" :href="`/article/${article.id}`" :aria-label="article.title">
+          <a class="article-cover" :href="getArticleLink(article)" :aria-label="article.title">
             <img :src="article.thumbnail || defaultCover" :alt="article.title" loading="lazy" decoding="async" />
           </a>
 
           <div class="article-copy">
             <div class="article-meta">
               <span class="meta-pill">{{ article.category || "others" }}</span>
+              <span v-if="isSeriesView">第 {{ article.serialNo }} 篇</span>
               <span>{{ article.date || "暂无日期" }}</span>
               <span>{{ article.views || 0 }} 次浏览</span>
             </div>
 
             <h2>
-              <a :href="`/article/${article.id}`">{{ article.title }}</a>
+              <a :href="getArticleLink(article)">{{ article.title }}</a>
             </h2>
 
             <p>{{ article.summary || "暂无摘要。" }}</p>
@@ -56,7 +58,7 @@
                 <span v-for="tag in article.tags || []" :key="tag" class="tag-chip">{{ tag }}</span>
               </div>
 
-              <a class="article-link" :href="`/article/${article.id}`">查看文章</a>
+              <a class="article-link" :href="getArticleLink(article)">{{ isSeriesView ? "查看文章" : "进入系列" }}</a>
             </div>
           </div>
         </article>
@@ -77,24 +79,41 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 import FooterBar from "../components/FooterBar.vue";
 import HeaderBar from "../components/HeaderBar.vue";
 import MobileDrawer from "../components/MobileDrawer.vue";
-import { getAllArticles } from "../utils/apis";
+import { getArticleIntros, getArticlesByCategory } from "../utils/apis";
 
 const defaultCover = "/404.jpg";
 const isMobileMenuOpen = ref(false);
-
-const sortOptions = [
-  { label: "按时间", value: "date" },
-  { label: "按浏览", value: "views" },
-];
+const route = useRoute();
 
 const sortBy = ref("date");
 const articles = ref([]);
 const currentPage = ref(1);
 const pageSize = 8;
+
+const activeCategory = computed(() => {
+  const value = route.params.category;
+  return Array.isArray(value) ? value[0] || "" : value || "";
+});
+
+const isSeriesView = computed(() => Boolean(activeCategory.value));
+const pageTitle = computed(() => (isSeriesView.value ? `${activeCategory.value} 系列` : "教程专栏"));
+const sortOptions = computed(() => {
+  const options = [
+    { label: "按时间", value: "date" },
+    { label: "按浏览", value: "views" },
+  ];
+
+  if (isSeriesView.value) {
+    return [{ label: "按序号", value: "serial" }, ...options];
+  }
+
+  return options;
+});
 
 const parseDate = (value) => {
   const time = new Date(value || "").getTime();
@@ -106,6 +125,10 @@ const sortedArticles = computed(() => {
 
   if (sortBy.value === "views") {
     return cloned.sort((a, b) => (b.views || 0) - (a.views || 0) || parseDate(b.date) - parseDate(a.date));
+  }
+
+  if (sortBy.value === "serial") {
+    return cloned.sort((a, b) => (a.serialNo || 0) - (b.serialNo || 0) || parseDate(b.date) - parseDate(a.date));
   }
 
   return cloned.sort((a, b) => parseDate(b.date) - parseDate(a.date) || (b.views || 0) - (a.views || 0));
@@ -130,6 +153,14 @@ const visiblePages = computed(() => {
   return pages;
 });
 
+const getArticleLink = (article) => {
+  if (isSeriesView.value) {
+    return `/article/${article.id}`;
+  }
+
+  return `/articles/${encodeURIComponent(article.category || "")}`;
+};
+
 const goToPage = (page) => {
   currentPage.value = Math.min(totalPages.value, Math.max(1, page));
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -139,14 +170,20 @@ const onToggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 
-onMounted(async () => {
-  const res = await getAllArticles();
+const loadArticles = async () => {
+  sortBy.value = isSeriesView.value ? "serial" : sortBy.value === "serial" ? "date" : sortBy.value;
+  const res = isSeriesView.value ? await getArticlesByCategory(activeCategory.value) : await getArticleIntros();
   articles.value = Array.isArray(res) ? res : [];
-});
+  currentPage.value = 1;
+};
+
+onMounted(loadArticles);
 
 watch(sortBy, () => {
   currentPage.value = 1;
 });
+
+watch(activeCategory, loadArticles);
 </script>
 
 <style scoped>
@@ -194,7 +231,27 @@ watch(sortBy, () => {
 .toolbar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #d9e4f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  border-color: #bfd4ff;
+  color: #1d4ed8;
 }
 
 .sort-chip {

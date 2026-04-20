@@ -2,7 +2,7 @@ from typing import List, Optional
 from typedef import T_ArticleData, T_TagCount
 
 from .articles.category import find_all_categories, find_articles_by_category
-from .articles.article import find_all_articles, find_article_by_id
+from .articles.article import find_all_articles, find_article_by_id, find_article_intros
 from .articles.tag import find_all_tag_and_counts, find_articles_by_tag
 
 
@@ -18,6 +18,10 @@ class ArticleHandler:
     @classmethod
     def get_all_articles(cls) -> List[T_ArticleData]:
         return find_all_articles()
+
+    @classmethod
+    def get_article_intros(cls) -> List[T_ArticleData]:
+        return find_article_intros()
 
     @classmethod
     def get_article_by_id(cls, article_id: str) -> Optional[T_ArticleData]:

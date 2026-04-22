@@ -7,15 +7,12 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-from core import ProjectConfig
 
 from .authorization import AUTH_ROUTER
 from .resource import RESOURCE_ROUTE
 from .website import (
     ARTICLES_ROUTE,
     IMAGES_ROUTE,
-    NAV_ROUTER,
-    AD_BANNER_ROUTER,
     COMMENTS_ROUTE,
     WHITEBOARD_ROUTE,
     LIVEDEMO_ROUTER,
@@ -36,8 +33,6 @@ app.include_router(RESOURCE_ROUTE, prefix="/api/v1")
 
 app.include_router(ARTICLES_ROUTE, prefix="/api/v1")
 app.include_router(IMAGES_ROUTE, prefix="/api/v1")
-app.include_router(NAV_ROUTER, prefix="/api/v1")
-app.include_router(AD_BANNER_ROUTER, prefix="/api/v1")
 app.include_router(COMMENTS_ROUTE, prefix="/api/v1")
 app.include_router(WHITEBOARD_ROUTE, prefix="/api/v1")
 app.include_router(LIVEDEMO_ROUTER, prefix="/api/v1")
@@ -66,31 +61,3 @@ def run_dev():
     port = int(os.environ.get('SITE_PORT', 10058))
 
     uvicorn.run(app, host=host, port=port)
-
-
-def run_main():
-    '''
-    运行服务时候挂载静态资源, 注意这个内容现在都被加入到一个进程来运行
-    '''
-    statics_path = ProjectConfig.get_statics_path()
-
-    # 挂载静态资源目录
-    @app.get("/{full_path:path}")
-    async def _(full_path: str):
-        # 构造静态文件的真实路径
-        file_path = os.path.join(statics_path, full_path)
-        # 若静态文件存在，则直接返回
-        if os.path.isfile(file_path):
-            return FileResponse(file_path)
-        # 否则返回 index.html，由前端路由接管
-        index_path = os.path.join(statics_path, "index.html")
-        return FileResponse(index_path)
-
-    # 挂载静态资源
-
-    host = os.environ.get('SITE_HOST', "127.0.0.1")
-    port = int(os.environ.get('SITE_PORT', 10058))
-
-    uvicorn.run(app,
-                host=host,
-                port=port)

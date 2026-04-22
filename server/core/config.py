@@ -74,22 +74,6 @@ class ProjectConfig:
         return cls.get_abs_path(ARTICLES_PATH)
 
     @classmethod
-    def get_adbanner_config_path(cls) -> dict:
-        """
-        获取AdBanner配置的json文件
-        """
-        resource_path = cls.get_resource_path()
-        return os.path.join(resource_path, 'website/adbanner.json')
-
-    @classmethod
-    def get_navigation_path(cls) -> str:
-        """
-        获取导航配置的json文件
-        """
-        resource_path = cls.get_resource_path()
-        return os.path.join(resource_path, 'website/navigation.json')
-
-    @classmethod
     def get_cache_path(cls) -> str:
         """
         获取缓存目录的路径
@@ -98,12 +82,12 @@ class ProjectConfig:
         return cls.get_abs_path(cache_path)
 
     @classmethod
-    def get_templates_path(cls) -> str:
-        '''
-        获得模板文件的绝对路径
-        '''
-        TEMPLATES_PATH = os.environ.get('TEMPLATES_PATH', "data/templates")
-        return cls.get_abs_path(TEMPLATES_PATH)
+    def get_webp_cache_path(cls) -> str:
+        """
+        获取缓存目录的路径
+        """
+        webp_cache_path = os.environ.get('WEBP_CACHE_PATH', 'data/webp')
+        return cls.get_abs_path(webp_cache_path)
 
     @classmethod
     def get_livedemo_config_path(cls) -> str:

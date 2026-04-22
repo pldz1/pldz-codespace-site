@@ -10,3 +10,4 @@ python-dotenv
 passlib
 bcrypt<4.1.0
 autopep8
+Pillow

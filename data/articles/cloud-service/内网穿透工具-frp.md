@@ -16,7 +16,7 @@ thumbnail: /api/v1/website/image/cloud-service/cloud-service-frp-thumbnail.png
 title: 内网穿透工具-frp
 ---
 
-# 内网穿透工具随笔
+# 内网穿透工具-frp
 
 最近折腾内网穿透，顺手记录下自己的理解，算是一篇小笔记，或许能帮到后来人。
 
@@ -95,7 +95,7 @@ title: 内网穿透工具-frp
 * 主机3跑 frp client
 * 主机1 就能通过主机2中转，访问到主机3 的 SSH
 
-![cloud-service-frp-demo-preparation](/api/v1/website/image/cloud-service/cloud-service-frp-demo-preparation.png)
+![cloud-service-frp-demo-preparation](/api/v1/website/image/cloud-service/cloud-service-frp-demo-preparation.png@raw)
 
 ---
 
@@ -127,7 +127,7 @@ remotePort = 6000
 
 ### 效果
 
-![cloud-service-frp-demo](/api/v1/website/image/cloud-service/cloud-service-frp-demo.png)
+![cloud-service-frp-demo](/api/v1/website/image/cloud-service/cloud-service-frp-demo.png@raw)
 
 这样主机1只要连 `主机2:6000`，就能直接 SSH 到主机3。简单粗暴，秒搞定。
 

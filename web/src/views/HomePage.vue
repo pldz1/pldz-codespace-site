@@ -113,7 +113,7 @@
 
         <section class="about-panel card-surface">
           <div class="about-avatar">
-            <img :src="'/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg'" alt="about avatar" />
+            <img :src="'/api/v1/website/image/avatar/admin.jpg'" alt="about avatar" />
           </div>
           <div class="about-copy">
             <p class="section-kicker">About</p>

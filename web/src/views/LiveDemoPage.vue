@@ -5,9 +5,9 @@
   <div class="main-container">
     <main class="livedemo-shell">
       <section class="livedemo-heading">
-        <div>
-          <p class="page-kicker">Code Space</p>
-          <h1>项目预览</h1>
+        <div class="hero-copy">
+          <p class="page-kicker">Code Space / Live Demos</p>
+          <p class="page-description">项目预览</p>
         </div>
         <span class="project-count">{{ mockData.length }} 个项目</span>
       </section>
@@ -163,41 +163,45 @@ onMounted(async () => {
 
 .livedemo-heading {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
   padding-bottom: 18px;
-  border-bottom: 2px solid #111827;
+  border-bottom: 1px solid #e7edf5;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 6px;
 }
 
 .page-kicker {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   color: #2563eb;
   font-size: 12px;
-  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.livedemo-heading h1 {
+.page-description {
   margin: 0;
-  color: #111827;
-  font-size: 34px;
-  line-height: 1.08;
-  letter-spacing: 0;
+  color: #0f172a;
+  font-size: 18px;
+  line-height: 1.45;
+  font-weight: 600;
 }
 
 .project-count {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 0 12px;
-  border: 2px solid #111827;
-  background: #facc15;
-  color: #111827;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #d9e4f0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #475569;
   font-size: 13px;
-  font-weight: 800;
-  box-shadow: 3px 3px 0 #111827;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -425,11 +429,8 @@ onMounted(async () => {
   .livedemo-heading {
     align-items: start;
     flex-direction: column;
-    gap: 12px;
-  }
-
-  .livedemo-heading h1 {
-    font-size: 28px;
+    gap: 14px;
+    padding-bottom: 14px;
   }
 
   .home-content {
@@ -478,6 +479,15 @@ onMounted(async () => {
     min-height: auto;
     font-size: 13px;
     line-height: 1.5;
+  }
+
+  .page-kicker {
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+
+  .page-description {
+    font-size: 16px;
   }
 
   .project-count {

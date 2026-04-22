@@ -15,7 +15,7 @@ thumbnail: /api/v1/website/image/cloud-service/cloud-service-ip-host-website-thu
 title: 搭建个人IP和端口的网站
 ---
 
-# 搭建个人IP和端口的网站 !
+# 快速用公网ip和端口搭建云服务
 
 
 ## 1. 准备工作
@@ -38,7 +38,7 @@ title: 搭建个人IP和端口的网站
    > 0.0.0.0 表示 本机所有 IPv4 网卡地址。意思就是“无论从哪个网卡、哪个 IP 进来的流量，我都接”。等价于“监听所有地址”。
    
 
-![cloud-service-host-ip-website-port-listen](/api/v1/website/image/cloud-service/cloud-service-host-ip-website-port-listen.png)
+![cloud-service-host-ip-website-port-listen](/api/v1/website/image/cloud-service/cloud-service-host-ip-website-port-listen.png@raw)
 
 ---
 
@@ -57,7 +57,7 @@ title: 搭建个人IP和端口的网站
    * 默认允许即可，限制出站通常只用于内网或高安全环境。
 
 
-![cloud-service-host-ip-website-firewall-expose](/api/v1/website/image/cloud-service/cloud-service-host-ip-website-firewall-expose.png)
+![cloud-service-host-ip-website-firewall-expose](/api/v1/website/image/cloud-service/cloud-service-host-ip-website-firewall-expose.png@raw)
 
 
 
@@ -106,7 +106,7 @@ title: 搭建个人IP和端口的网站
 2. 通过: `http://公网ip:端口` 进行公网访问
 
 
-![cloud-service-ip-host-website-preview](/api/v1/website/image/cloud-service/cloud-service-ip-host-website-preview.png)
+![cloud-service-ip-host-website-preview](/api/v1/website/image/cloud-service/cloud-service-ip-host-website-preview.png@raw)
 
 ---
 

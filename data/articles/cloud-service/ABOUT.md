@@ -10,11 +10,11 @@ serialNo: 0
 status: publish
 summary: cloud-service的随笔
 tags: []
-thumbnail: null
+thumbnail: /api/v1/website/image/cloud-service/0_category.jpg
 title: cloud-service系列文章(教程)
 ---
 
-# 🎉 前言
+# 🎉 cloud-service系列文章(教程)
 
 这是一个围绕 **云服务 / 部署 / 运维实战** 的个人知识库仓库，主要记录从 0 到 1 搭建线上服务过程中涉及的各种关键问题、解决方案和踩坑经验。
 

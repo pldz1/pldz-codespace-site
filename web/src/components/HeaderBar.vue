@@ -47,8 +47,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
-
-import { getNavigation } from "../utils/apis";
 import Toast from "../utils/toast.js";
 import LoginCard from "./LoginCard.vue";
 import SearchOverlay from "./SearchOverlay.vue";
@@ -222,9 +220,6 @@ onMounted(async () => {
   hashchangeHandler = () => syncActiveAnchor();
   window.addEventListener("hashchange", hashchangeHandler);
   syncActiveAnchor();
-
-  const res = await getNavigation();
-  navs.value = res || [];
 });
 
 onBeforeUnmount(() => {

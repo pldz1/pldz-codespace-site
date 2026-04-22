@@ -49,6 +49,7 @@
 - passlib + bcrypt
 - python-dotenv
 - python-multipart
+- Pillow：图片压缩、缩放和 WebP/GIF 动图处理
 
 后端源码位于 `server/`，主要入口是：
 
@@ -70,6 +71,7 @@
 ```text
 .
 ├── data/                      # 内容、图片、资源配置、缓存、JSON 数据库、模板产物
+├── cache/                     # 图片缩放压缩后的本地缓存，运行时自动生成
 ├── nginx/                     # Nginx 主配置和站点配置
 ├── server/                    # FastAPI 后端
 ├── web/                       # Vue 3 前端工程
@@ -230,12 +232,6 @@ server/main.py
 - 允许携带 Cookie。
 - 使用 `SITE_HOST` 和 `SITE_PORT` 启动 Uvicorn。
 
-`run_main()` 目前用于单进程挂载静态资源：
-
-- 从 `server/statics` 查找静态文件。
-- 找不到时返回 `index.html`，交给前端路由。
-- 当前 Docker/Nginx 模式主要通过 Nginx 提供前端静态文件，不依赖 `run_main()`。
-
 ## FastAPI 路由总览
 
 所有业务 API 都挂在 `/api/v1` 下。
@@ -245,8 +241,6 @@ server/main.py
 /api/v1/resource/*
 /api/v1/website/article/*
 /api/v1/website/image/*
-/api/v1/website/navs/*
-/api/v1/website/adbanner/*
 /api/v1/website/comment/*
 /api/v1/website/whiteboard/*
 /api/v1/website/livedemo/*
@@ -408,21 +402,58 @@ Router:
 prefix = /api/v1/website/image
 ```
 
-| 方法   | 路径                  | 权限     | 请求体                               | 返回                       |
-| ------ | --------------------- | -------- | ------------------------------------ | -------------------------- |
-| `GET`  | `/{category}/{image}` | 公开     | 无                                   | 图片文件                   |
-| `POST` | `/category/all`       | 管理员   | `{ category }`                       | 指定分类下图片文件名列表   |
-| `POST` | `/rename`             | 管理员   | `{ category, oldName, newName }`     | `{ flag, new_name }`       |
-| `POST` | `/delete`             | 管理员   | `{ category, name }`                 | `{ flag }`                 |
-| `POST` | `/upload/avatar`      | 登录用户 | multipart `file`, `name`             | `{ flag, url }`            |
-| `POST` | `/upload/article`     | 登录用户 | multipart `file`, `category`, `name` | `{ flag, url }`            |
-| `POST` | `/upload/check`       | 登录用户 | `{ category, name }`                 | `true/false`，表示是否可用 |
+| 方法   | 路径                                   | 权限     | 请求体                               | 返回                       |
+| ------ | -------------------------------------- | -------- | ------------------------------------ | -------------------------- |
+| `GET`  | `/{category}/{image}`                  | 公开     | 无                                   | 默认 `128x128` 压缩图片    |
+| `GET`  | `/{category}/{image}@original`         | 公开     | 无                                   | 原始图片文件               |
+| `GET`  | `/{category}/{image}@raw`              | 公开     | 无                                   | 原始图片文件               |
+| `GET`  | `/{category}/{image}@{size}`           | 公开     | 无                                   | 宽高同值的压缩图片         |
+| `GET`  | `/{category}/{image}@{width}x{height}` | 公开     | 无                                   | 指定尺寸压缩图片           |
+| `POST` | `/category/all`                        | 管理员   | `{ category }`                       | 指定分类下图片文件名列表   |
+| `POST` | `/rename`                              | 管理员   | `{ category, oldName, newName }`     | `{ flag, new_name }`       |
+| `POST` | `/delete`                              | 管理员   | `{ category, name }`                 | `{ flag }`                 |
+| `POST` | `/upload/avatar`                       | 登录用户 | multipart `file`, `name`             | `{ flag, url }`            |
+| `POST` | `/upload/article`                      | 登录用户 | multipart `file`, `category`, `name` | `{ flag, url }`            |
+| `POST` | `/upload/check`                        | 登录用户 | `{ category, name }`                 | `true/false`，表示是否可用 |
+
+图片读取接口会默认压缩输出：
+
+- 不带尺寸时默认按 `128x128` 等比缩放。
+- `@original` 或 `@raw` 返回原始文件，不进行缩放、压缩和格式转换。
+- `@1024` 表示宽高都按 `1024` 处理。
+- `@1024x768` 表示按指定宽高处理。
+- JPG / PNG / WEBP 等普通图片会保持比例缩放，不拉伸，默认输出 WebP。
+- GIF 会逐帧缩放，并重新保存为 animated WebP，保留原动画帧间隔。
+- 响应头包含 `Cache-Control: public, max-age=86400`。
+
+可选 query 参数：
+
+```text
+quality=80
+format=webp|jpeg
+```
+
+如果未显式传 `format`，后端会根据请求头 `Accept` 判断是否返回 WebP；不支持 WebP 的普通图片请求会返回 JPEG。GIF 为了保留动画，会统一返回 animated WebP。
+
+尺寸限制：
+
+- 宽高必须是合法正整数。
+- 单边最大 `2000`。
+- 非法尺寸、非法质量、非法格式返回 `400`。
 
 图片实际存储在：
 
 ```text
 data/images/{category}/{filename}
 ```
+
+压缩后的图片会缓存在项目根目录：
+
+```text
+data/webp/{image_id}_{width}x{height}.webp
+```
+
+默认质量为 `80`，缓存存在时会直接返回缓存文件，不再处理原图。
 
 头像固定使用：
 
@@ -435,69 +466,6 @@ data/images/avatar
 - 通过 `os.path.abspath()` 计算真实路径。
 - 要求最终路径必须位于 `IMAGES_PATH` 内。
 - 文件不存在返回 `404`。
-
-### 导航
-
-Router:
-
-```text
-prefix = /api/v1/website/navs
-```
-
-| 方法   | 路径   | 权限   | 请求体            | 返回         |
-| ------ | ------ | ------ | ----------------- | ------------ |
-| `GET`  | `/all` | 公开   | 无                | 导航项列表   |
-| `POST` | `/set` | 管理员 | `{ navs: [...] }` | `true/false` |
-
-配置文件：
-
-```text
-data/resources/website/navigation.json
-```
-
-导航项结构：
-
-```json
-{
-  "title": "导航标题",
-  "url": "https://example.com",
-  "new": false
-}
-```
-
-### 横幅广告
-
-Router:
-
-```text
-prefix = /api/v1/website/adbanner
-```
-
-| 方法   | 路径   | 权限   | 请求体           | 返回         |
-| ------ | ------ | ------ | ---------------- | ------------ |
-| `GET`  | `/all` | 公开   | 无               | 横幅配置列表 |
-| `POST` | `/set` | 管理员 | `{ ads: [...] }` | `true/false` |
-
-配置文件：
-
-```text
-data/resources/website/adbanner.json
-```
-
-当前前端管理表单支持的字段：
-
-```json
-{
-  "title": "标题",
-  "url": "链接",
-  "folder": "文件夹",
-  "thumbnail": "缩略图",
-  "previewgif": "预览图",
-  "sourcelink": "源码链接",
-  "date": "日期",
-  "description": "描述"
-}
-```
 
 ### Live Demo
 
@@ -810,7 +778,6 @@ web/src/components/HeaderBar.vue
   - 文章/教程
   - 白板
   - Demos
-- 额外从 `/api/v1/website/navs/all` 加载外部导航。
 - 登录后显示头像。
 - 未登录显示“登录 / 注册”。
 - 内置搜索按钮。
@@ -1125,12 +1092,19 @@ data/images/others
 
 ```text
 /api/v1/website/image/{category}/{filename}
+/api/v1/website/image/{category}/{filename}@original
+/api/v1/website/image/{category}/{filename}@raw
+/api/v1/website/image/{category}/{filename}@{size}
+/api/v1/website/image/{category}/{filename}@{width}x{height}
 ```
 
 例如：
 
 ```text
 /api/v1/website/image/cloud-service/cloud-service-frp-thumbnail.png
+/api/v1/website/image/cloud-service/cloud-service-frp-thumbnail.png@original
+/api/v1/website/image/cloud-service/cloud-service-frp-thumbnail.png@512
+/api/v1/website/image/cloud-service/cloud-service-frp-thumbnail.png@1024x768
 ```
 
 ### data/resources
@@ -1138,9 +1112,7 @@ data/images/others
 ```text
 data/resources/privacy_policy.txt
 data/resources/user_agreement.txt
-data/resources/website/navigation.json
 data/resources/website/livedemo.json
-data/resources/website/adbanner.json
 ```
 
 ### data/templates

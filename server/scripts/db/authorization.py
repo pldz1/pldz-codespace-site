@@ -42,7 +42,7 @@ class AuthorizedHandler:
 
     @classmethod
     def init_admin(cls):
-        cls.add_user(ADMIN_USERNAME, ADMIN_PASSWORD, "爬楼的猪", "/api/v1/website/image/avatar/admin@pldz1_com_00000001.jpg")
+        cls.add_user(ADMIN_USERNAME, ADMIN_PASSWORD, "爬楼的猪", "/api/v1/website/image/avatar/admin.jpg")
         Logger.info(f"✔ 初始化管理员账号: {ADMIN_USERNAME}")
 
     @classmethod

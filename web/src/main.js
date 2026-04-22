@@ -6,14 +6,9 @@ import store from "./store";
 import { createApp } from "vue";
 import { refresh } from "./utils/apis";
 
-// 异步初始化
-const initializeApp = async () => {
+const refreshAuthState = async () => {
   try {
-    window.loading?.set(96);
-
     const res = await refresh();
-
-    window.loading?.set(98);
 
     await store.dispatch("authState/update", {
       username: res?.username || "",
@@ -22,18 +17,22 @@ const initializeApp = async () => {
       isadmin: res?.isadmin || false,
     });
   } catch (error) {
-    console.error("initializeApp error:", error);
+    console.error("refreshAuthState error:", error);
+  } finally {
+    await store.dispatch("authState/ready", true);
   }
 };
 
-const bootstrap = async () => {
+const bootstrap = () => {
   try {
-    await initializeApp();
+    window.loading?.set(98);
 
     const app = createApp(App);
     app.use(store);
     app.use(router);
     app.mount("#app");
+
+    refreshAuthState();
   } finally {
     window.loading?.done();
   }

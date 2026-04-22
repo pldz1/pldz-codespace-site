@@ -33,33 +33,33 @@
               <span class="preview-card__eyebrow">Latest tutorial</span>
               <span class="preview-status">持续维护</span>
             </div>
-            <h2>{{ featuredProject.title }}</h2>
-            <p>{{ featuredProject.description }}</p>
+            <h2>{{ featuredSeries.title }}</h2>
+            <p class="preview-card__description">{{ featuredSeries.description }}</p>
             <div class="preview-tags">
-              <span v-for="tag in featuredProject.tags" :key="tag">{{ tag }}</span>
+              <span v-for="tag in featuredSeries.tags" :key="tag">{{ tag }}</span>
             </div>
-            <a class="text-link" :href="featuredProject.tutorialLink">进入教程</a>
+            <a class="text-link" :href="featuredSeries.tutorialLink">进入教程</a>
           </article>
 
           <div class="preview-grid">
-            <article class="preview-card card-surface">
+            <article class="preview-card preview-card--demo card-surface">
               <div class="preview-inline-meta">
                 <span class="preview-card__eyebrow">Live demo</span>
                 <span class="preview-status preview-status--muted">{{ featuredDemo.status === "done" ? "在线可用" : "查看详情" }}</span>
               </div>
               <h3>{{ featuredDemo.title }}</h3>
-              <p>{{ featuredDemo.description }}</p>
+              <p class="preview-card__description">{{ featuredDemo.description }}</p>
               <a class="text-link" :href="featuredDemo.demoLink" target="_blank" rel="noopener noreferrer">在线体验</a>
             </article>
 
             <article class="preview-card card-surface">
               <div class="preview-inline-meta">
                 <span class="preview-card__eyebrow">More reading</span>
-                <span class="preview-status preview-status--muted">{{ secondaryProject.tags?.[0] || "文章" }}</span>
+                <span class="preview-status preview-status--muted">{{ secondarySeries.tags?.[0] || "文章" }}</span>
               </div>
-              <h3>{{ secondaryProject.title }}</h3>
-              <p>{{ secondaryProject.description }}</p>
-              <a class="text-link" :href="secondaryProject.tutorialLink">查看文章</a>
+              <h3>{{ secondarySeries.title }}</h3>
+              <p class="preview-card__description">{{ secondarySeries.description }}</p>
+              <a class="text-link" :href="secondarySeries.tutorialLink">查看文章</a>
             </article>
           </div>
         </div>
@@ -72,13 +72,13 @@
             <h2>项目教程 / 开发记录</h2>
           </div>
           <div class="section-heading-side">
-            <p class="section-intro">主要是一些项目过程、配置折腾、工具记录，还有少量偏实验性的内容。</p>
-            <a class="section-link" href="/livedemo">查看全部项目</a>
+            <p class="section-intro">个人记录一些项目过程、配置折腾、工具记录，还有少量偏实验性的内容。</p>
+            <a class="section-link" href="/articles">查看全部项目</a>
           </div>
         </div>
 
         <div class="projects-grid">
-          <ProjectCard v-for="project in projects" :key="project.id" :project="project" />
+          <ProjectCard v-for="article in hotArticles" :key="article.id" :project="article" />
         </div>
       </section>
 
@@ -86,9 +86,12 @@
         <div class="section-heading">
           <div>
             <p class="section-kicker">Demo / Repo</p>
-            <h2>一些可直接打开的内容</h2>
+            <h2>Live Demo & 轻量的项目</h2>
           </div>
-          <p class="section-intro">偏轻一点，适合先点开看看。源码、预览和相关文章都尽量放在一起。</p>
+          <div class="section-heading-side">
+            <p class="section-intro">个人做的一些随便点开就能看、能体验的内容记录</p>
+            <a class="section-link" href="/livedemo">查看全部Live Demo</a>
+          </div>
         </div>
 
         <div class="demo-grid">
@@ -119,7 +122,7 @@
             <p class="section-kicker">About</p>
             <h2>一个长期维护的小空间</h2>
             <p>平时写点项目实现、工具脚本、页面实验和部署记录。没有特别严格的边界，想到什么就慢慢补进来。</p>
-            <a class="button-ghost button-small" href="/">About me / 了解更多</a>
+            <a class="button-ghost button-small" :href="githubLink">About me / 了解更多</a>
           </div>
         </section>
       </section>
@@ -138,16 +141,19 @@ import MobileDrawer from "../components/MobileDrawer.vue";
 import DemoCard from "../components/home-page/DemoCard.vue";
 import ProjectCard from "../components/home-page/ProjectCard.vue";
 import TimelineItem from "../components/home-page/TimelineItem.vue";
-import { getAllLiveDemos, getAllArticles } from "../utils/apis";
+import { getAllLiveDemos, getAllArticles, getArticleIntros } from "../utils/apis";
 
 const isMobileMenuOpen = ref(false);
 
-const projects = ref([]);
+const series = ref([]);
+const hotArticles = ref([]);
 const demos = ref([]);
 const updates = ref([]);
 
-const featuredProject = computed(() => projects.value[0] || {});
-const secondaryProject = computed(() => projects.value[1] || {});
+const githubLink = "https://github.com/pldz1";
+
+const featuredSeries = computed(() => series.value[0] || {});
+const secondarySeries = computed(() => series.value[1] || {});
 const featuredDemo = computed(() => demos.value[0] || {});
 
 function normalizeTags(tags) {
@@ -162,15 +168,32 @@ function normalizeTags(tags) {
   return [];
 }
 
-function normalizeArticleProject(article, index) {
+function normalizeSeriesCard(article, index) {
+  const category = article?.category || "";
+  const seriesLink = category ? `/articles/${encodeURIComponent(category)}` : "/articles";
+
   return {
-    id: article?.id || `project-${index}`,
-    title: article?.title || "未命名文章",
+    id: category || article?.id || `project-${index}`,
+    title: article?.title || "未命名专栏",
     description: article?.summary || "暂无描述",
     cover: article?.thumbnail || "",
     tags: normalizeTags(article?.tags),
-    tutorialLink: article?.id ? `/article/${article.id}` : "/",
-    repoLink: article?.github || article?.gitee || article?.csdn || `/article/${article?.id || ""}`,
+    tutorialLink: seriesLink,
+    repoLink: article?.github || article?.gitee || article?.csdn || seriesLink,
+  };
+}
+
+function normalizeHotArticle(article, index) {
+  const articleLink = article?.id ? `/article/${article.id}` : "/articles";
+
+  return {
+    id: article?.id || `hot-article-${index}`,
+    title: article?.title || "未命名文章",
+    description: article?.summary || "暂无描述",
+    cover: article?.thumbnail || "/404.jpg",
+    tags: normalizeTags(article?.tags),
+    tutorialLink: articleLink,
+    repoLink: article?.github || article?.gitee || article?.csdn || articleLink,
   };
 }
 
@@ -200,18 +223,25 @@ function normalizeUpdate(article, index) {
 }
 
 async function loadHomeData() {
-  const [articlesRes, livedemoRes] = await Promise.allSettled([getAllArticles(), getAllLiveDemos()]);
+  const [articlesRes, articleIntrosRes, livedemoRes] = await Promise.allSettled([getAllArticles(), getArticleIntros(), getAllLiveDemos()]);
 
   const articles = articlesRes.status === "fulfilled" && Array.isArray(articlesRes.value) ? articlesRes.value : [];
+  const articleIntros = articleIntrosRes.status === "fulfilled" && Array.isArray(articleIntrosRes.value) ? articleIntrosRes.value : [];
   const livedemos = livedemoRes.status === "fulfilled" && Array.isArray(livedemoRes.value) ? livedemoRes.value : [];
 
   const sortedArticles = [...articles].sort((a, b) => String(b?.date || "").localeCompare(String(a?.date || "")));
-  const preferredProjectArticles = sortedArticles.filter((article) => article?.category === "code-space");
+  const sortedSeries = [...articleIntros].sort((a, b) => String(b?.date || "").localeCompare(String(a?.date || "")));
 
-  const projectArticles = (preferredProjectArticles.length ? preferredProjectArticles : sortedArticles)
-    .filter((article) => article?.id && article?.title)
+  const seriesCards = sortedSeries
+    .filter((article) => article?.category || article?.title)
     .slice(0, 3)
-    .map(normalizeArticleProject);
+    .map(normalizeSeriesCard);
+
+  const hotArticleCards = [...articles]
+    .filter((article) => article?.id && article?.title)
+    .sort((a, b) => (b?.views || 0) - (a?.views || 0) || String(b?.date || "").localeCompare(String(a?.date || "")))
+    .slice(0, 3)
+    .map(normalizeHotArticle);
 
   const updateArticles = sortedArticles
     .filter((article) => article?.id && article?.title)
@@ -220,7 +250,8 @@ async function loadHomeData() {
 
   const democards = livedemos.slice(0, 4).map(normalizeLiveDemo);
 
-  projects.value = projectArticles.length ? projectArticles : [];
+  series.value = seriesCards.length ? seriesCards : [];
+  hotArticles.value = hotArticleCards.length ? hotArticleCards : [];
   updates.value = updateArticles.length ? updateArticles : [];
   demos.value = democards.length ? democards : [];
 }
@@ -408,6 +439,61 @@ onBeforeUnmount(() => {
   background: linear-gradient(180deg, #ffffff, #f8fafc);
 }
 
+.preview-card--demo {
+  position: relative;
+  overflow: hidden;
+  border-color: #d8e7ff;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.075), transparent 34%), linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.preview-card--demo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.16) 0 16px, transparent 16px 100%) 24px 28px / 88px 3px no-repeat,
+    linear-gradient(90deg, rgba(15, 23, 42, 0.1) 0 42px, transparent 42px 100%) 24px 46px / 132px 3px no-repeat,
+    linear-gradient(90deg, rgba(37, 99, 235, 0.11) 0 58px, transparent 58px 100%) 24px 64px / 116px 3px no-repeat,
+    linear-gradient(90deg, rgba(15, 23, 42, 0.08) 0 28px, transparent 28px 100%) 24px 82px / 94px 3px no-repeat;
+  mask-image: linear-gradient(135deg, #000 0%, transparent 62%);
+}
+
+.preview-card--demo::after {
+  content: ">";
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  color: rgba(37, 99, 235, 0.24);
+  font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", Courier, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.preview-card--demo:hover {
+  border-color: #bfd4ff;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.095), transparent 36%), linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.preview-card--demo .preview-card__eyebrow,
+.preview-card--demo h3 {
+  position: relative;
+  color: #0f172a;
+}
+
+.preview-card--demo .preview-status {
+  position: relative;
+  border: 1px solid #d8e7ff;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.preview-card--demo .preview-card__description,
+.preview-card--demo .text-link {
+  position: relative;
+}
+
 .preview-card__header {
   display: flex;
   justify-content: space-between;
@@ -468,6 +554,12 @@ onBeforeUnmount(() => {
   line-height: 1.35;
 }
 
+.preview-grid .preview-card h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .preview-card p,
 .project-card p,
 .demo-card p,
@@ -475,6 +567,13 @@ onBeforeUnmount(() => {
 .section-intro {
   color: #475569;
   line-height: 1.75;
+}
+
+.preview-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .preview-tags,

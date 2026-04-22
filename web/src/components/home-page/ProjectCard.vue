@@ -15,7 +15,7 @@
 
     <div class="card-actions">
       <a class="button-primary button-small" :href="project.tutorialLink">查看教程</a>
-      <a class="button-ghost button-small" :href="project.repoLink" target="_blank" rel="noopener noreferrer">查看源码</a>
+      <a class="button-ghost button-small" :href="project.repoLink" target="_blank" rel="noopener noreferrer">查看相关</a>
     </div>
   </article>
 </template>

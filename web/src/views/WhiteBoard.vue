@@ -1,27 +1,40 @@
 <template>
-  <!-- 顶部导航栏 -->
-  <HeaderBar :route-name="'白板'" :show-mobile-menu="false" :scroll="false"></HeaderBar>
+  <MobileDrawer v-model="isMobileMenuOpen" subtitle="Whiteboard, notes, cache">
+    <p>白板页</p>
+    <p>通过密钥匹配或创建临时白板。</p>
+  </MobileDrawer>
 
-  <!-- 主内容区 -->
-  <div class="main-container">
-    <div class="whiteboard-wrapper">
-      <div class="input-area">
+  <HeaderBar :route-name="'白板'" @toggle-mobile-menu="onToggleMobileMenu"></HeaderBar>
+
+  <div class="whiteboard-page">
+    <main class="main-container whiteboard-main">
+      <section class="whiteboard-heading">
+        <div class="hero-copy">
+          <p class="page-kicker">Tools / Whiteboard</p>
+          <p class="page-description">临时白板</p>
+        </div>
+        <span class="board-count">{{ boards.length }} 个白板</span>
+      </section>
+
+      <section class="input-area" aria-label="白板匹配">
         <div class="input-wrapper">
           <input v-model="key" type="text" placeholder="输入密钥" @keyup.enter="handleClick" />
           <button v-if="key" class="clear-btn" type="button" @click="clearKey" aria-label="清除密钥">×</button>
         </div>
         <button @click="handleClick">匹配/新建</button>
-      </div>
-      <div v-if="boards.length" class="board-selector">
+      </section>
+
+      <section v-if="boards.length" class="board-selector" aria-label="已关联白板">
         <span class="selector-label">已关联白板</span>
         <div class="key-list">
           <button v-for="item in boards" :key="item.key" class="key-chip" :class="{ active: item.key === key }" @click="selectBoard(item.key)">
             {{ item.key }}
           </button>
         </div>
-      </div>
-      <div class="board">
-        <div class="card" :class="{ empty: !selectedBoard }">
+      </section>
+
+      <section class="board" aria-label="白板内容">
+        <article class="card" :class="{ empty: !selectedBoard }">
           <div class="card-header">
             <div class="card-meta">
               <div class="card-key">密钥: {{ selectedBoard?.key || "-" }}</div>
@@ -33,11 +46,28 @@
               <button class="secondary" @click="openFullscreen" :disabled="!selectedBoard">全屏</button>
             </div>
           </div>
-          <textarea ref="editorRef" v-model="content" :readonly="!isEditing" :disabled="!selectedBoard" placeholder="请先匹配或创建白板"></textarea>
+          <textarea
+            v-if="isEditing"
+            ref="editorRef"
+            v-model="content"
+            :disabled="!selectedBoard"
+            placeholder="请先匹配或创建白板"
+            @paste="handlePaste"
+          ></textarea>
+          <div v-else class="content-preview" :class="{ empty: !selectedBoard || !content }">
+            <template v-if="selectedBoard && content">
+              <template v-for="(block, index) in contentBlocks" :key="`${block.type}-${index}`">
+                <img v-if="block.type === 'image'" class="preview-image" :src="block.value" alt="白板图片" loading="lazy" decoding="async" />
+                <pre v-else class="preview-text">{{ block.value }}</pre>
+              </template>
+            </template>
+            <span v-else>请先匹配或创建白板</span>
+          </div>
           <div class="timestamp">上次更新: {{ formatTimestamp(created) }}</div>
-        </div>
-      </div>
-    </div>
+        </article>
+      </section>
+    </main>
+
     <div v-if="showFullscreen" class="fullscreen-overlay" @click.self="closeFullscreen">
       <div class="fullscreen-panel" role="dialog" aria-modal="true">
         <div class="fullscreen-header">
@@ -45,21 +75,28 @@
           <button class="close-btn" type="button" @click="closeFullscreen" aria-label="关闭全屏">×</button>
         </div>
         <div class="fullscreen-body">
-          <pre>{{ content || "（暂无内容）" }}</pre>
+          <template v-if="content">
+            <template v-for="(block, index) in contentBlocks" :key="`fullscreen-${block.type}-${index}`">
+              <img v-if="block.type === 'image'" class="preview-image" :src="block.value" alt="白板图片" loading="lazy" decoding="async" />
+              <pre v-else class="preview-text">{{ block.value }}</pre>
+            </template>
+          </template>
+          <pre v-else class="preview-text">（暂无内容）</pre>
         </div>
         <div class="fullscreen-footer">
           <button type="button" class="exit-btn" @click="closeFullscreen">退出全屏</button>
         </div>
       </div>
     </div>
+
+    <FooterBar></FooterBar>
   </div>
-  <!-- 底部隐私数据 -->
-  <FooterBar></FooterBar>
 </template>
 
 <script setup>
 import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
+import MobileDrawer from "../components/MobileDrawer.vue";
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useStore } from "vuex";
 import Toast from "../utils/toast.js";
@@ -75,6 +112,7 @@ const created = ref("");
 const isEditing = ref(false);
 const editorRef = ref(null);
 const showFullscreen = ref(false);
+const isMobileMenuOpen = ref(false);
 const originalBodyOverflow = ref("");
 const keydownHandler = (event) => {
   if (event.key === "Escape") {
@@ -89,6 +127,31 @@ const canSave = computed(() => !!selectedBoard.value && isEditing.value);
 const displayUsername = computed(() => {
   const owner = selectedBoard.value?.username || "";
   return owner || "匿名";
+});
+const contentBlocks = computed(() => {
+  const value = content.value || "";
+  const imagePattern = /data:image\/[a-zA-Z0-9.+-]+;base64,[a-zA-Z0-9+/=]+/g;
+  const blocks = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = imagePattern.exec(value)) !== null) {
+    if (match.index > lastIndex) {
+      const text = value.slice(lastIndex, match.index);
+      if (text) {
+        blocks.push({ type: "text", value: text });
+      }
+    }
+
+    blocks.push({ type: "image", value: match[0] });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < value.length) {
+    blocks.push({ type: "text", value: value.slice(lastIndex) });
+  }
+
+  return blocks.length ? blocks : [{ type: "text", value }];
 });
 
 const formatTimestamp = (ts) => (ts ? new Date(ts).toLocaleString() : "-");
@@ -139,6 +202,69 @@ const openFullscreen = () => {
 
 const closeFullscreen = () => {
   showFullscreen.value = false;
+};
+
+const onToggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+};
+
+const insertAtCursor = (value) => {
+  const editor = editorRef.value;
+  if (!editor) {
+    content.value += value;
+    return;
+  }
+
+  const start = editor.selectionStart ?? content.value.length;
+  const end = editor.selectionEnd ?? start;
+  content.value = `${content.value.slice(0, start)}${value}${content.value.slice(end)}`;
+
+  nextTick(() => {
+    editor.focus();
+    const cursor = start + value.length;
+    editor.setSelectionRange(cursor, cursor);
+  });
+};
+
+const handlePaste = async (event) => {
+  if (!isEditing.value || !selectedBoard.value) {
+    return;
+  }
+
+  const items = Array.from(event.clipboardData?.items || []);
+  const imageItems = items.filter((item) => item.type.startsWith("image/"));
+
+  if (!imageItems.length) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const readImage = (item) =>
+    new Promise((resolve, reject) => {
+      const file = item.getAsFile();
+      if (!file) {
+        reject(new Error("无法读取剪贴板图片"));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error || new Error("图片读取失败"));
+      reader.readAsDataURL(file);
+    });
+
+  try {
+    const images = await Promise.all(imageItems.map(readImage));
+    const imageText = images.filter(Boolean).join("\n\n");
+    if (imageText) {
+      insertAtCursor(imageText);
+      Toast.success("图片已转为 Base64");
+    }
+  } catch (error) {
+    console.error("粘贴图片失败:", error);
+    Toast.error("图片转换失败，请重试");
+  }
 };
 
 const handleClick = async () => {
@@ -229,64 +355,127 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* 主容器 */
-.main-container {
-  display: flex;
-  justify-content: center;
-  padding: 68px 16px 16px 16px;
-  background-color: #f9fafb;
-  min-height: calc(100vh - 64px);
-  width: 100%;
-  min-width: 0;
-}
-.whiteboard-wrapper {
-  width: 100%;
-  max-width: 960px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+@import url("../assets/views/main-container.css");
+
+.whiteboard-page {
+  min-height: 100vh;
+  background: #f8fafc;
 }
 
-/* 输入区 */
+.main-container {
+  width: min(1120px, calc(100% - 40px));
+  max-width: 1120px;
+  display: block;
+  padding: 110px 0 72px;
+  min-height: auto;
+}
+
+.whiteboard-main {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.whiteboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e7edf5;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.page-kicker {
+  margin: 0 0 12px;
+  color: #2563eb;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-description {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.board-count {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #d9e4f0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .input-area {
   display: flex;
-  gap: 8px;
-  align-items: flex-start;
+  gap: 10px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid #dce6f2;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
 }
+
 .input-wrapper {
   position: relative;
   flex: 1;
   display: flex;
+  min-width: 0;
 }
+
 .input-area input {
   flex: 1;
-  padding: 12px 16px;
-  padding-right: 40px;
-  font-size: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  transition: border-color 0.2s;
+  height: 42px;
+  min-width: 0;
+  padding: 0 42px 0 14px;
+  font-size: 14px;
+  border: 1px solid #d9e4f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .input-area input:focus {
-  border-color: #3b82f6;
+  background: #ffffff;
+  border-color: #bfd4ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   outline: none;
 }
+
 .input-area > button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  background-color: #3b82f6;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.input-area > button:hover {
+  height: 42px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
   background-color: #2563eb;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.input-area > button:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .clear-btn {
@@ -296,10 +485,11 @@ onBeforeUnmount(() => {
   transform: translateY(-50%);
   width: 24px;
   height: 24px;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
   background: transparent;
-  color: #9ca3af;
-  font-size: 1.1rem;
+  color: #94a3b8;
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -308,78 +498,92 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 .clear-btn:hover {
-  color: #4b5563;
+  background: #eef4f9;
+  color: #475569;
 }
 
 .board-selector {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
+
 .selector-label {
+  font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: #64748b;
 }
+
 .key-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .key-chip {
-  padding: 6px 14px;
-  font-size: 0.875rem;
+  height: 32px;
+  padding: 0 13px;
+  font-size: 13px;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
-  background-color: #ffffff;
-  color: #374151;
+  border: 1px solid #d9e4f0;
+  background: rgba(255, 255, 255, 0.75);
+  color: #475569;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-.key-chip:hover {
-  border-color: #3b82f6;
-  color: #2563eb;
-}
-.key-chip.active {
-  background-color: #3b82f6;
-  border-color: #2563eb;
-  color: #ffffff;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* 画板区 */
+.key-chip:hover {
+  background: #ffffff;
+  border-color: #bfd4ff;
+  color: #1d4ed8;
+}
+
+.key-chip.active {
+  background: #eff6ff;
+  border-color: #bfd4ff;
+  color: #1d4ed8;
+}
+
 .board {
-  flex: 1;
   display: grid;
   grid-template-columns: 1fr;
-  grid-auto-rows: 1fr;
-  gap: 16px;
 }
+
 .card {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  border: 1px solid #e5e7eb;
+  min-height: 540px;
+  border: 1px solid #dce6f2;
   border-radius: 8px;
   overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
 }
+
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 16px;
+  padding: 16px 18px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e7edf5;
 }
+
 .card-meta {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  color: #4b5563;
-  font-size: 0.875rem;
+  color: #94a3b8;
+  font-size: 13px;
+  min-width: 0;
 }
+
 .card-key {
   font-weight: 600;
-  color: #111827;
+  color: #0f172a;
 }
+
 .card-actions {
   display: flex;
   gap: 8px;
@@ -387,65 +591,116 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
 }
 .card-actions button {
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  border-radius: 6px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
+
 .card-actions .primary {
-  background-color: #3b82f6;
+  background-color: #2563eb;
   color: #ffffff;
   border: 1px solid #2563eb;
 }
+
 .card-actions .primary:disabled {
   background-color: #bfdbfe;
   border-color: #bfdbfe;
   cursor: not-allowed;
 }
+
 .card-actions .primary:not(:disabled):hover {
-  background-color: #2563eb;
+  background-color: #1d4ed8;
 }
+
 .card-actions .secondary {
   background-color: #ffffff;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  color: #475569;
+  border: 1px solid #d9e4f0;
 }
+
 .card-actions .secondary:disabled {
-  color: #9ca3af;
-  border-color: #e5e7eb;
+  color: #94a3b8;
+  border-color: #e7edf5;
   cursor: not-allowed;
 }
+
 .card-actions .secondary:not(:disabled):hover {
-  border-color: #3b82f6;
-  color: #2563eb;
+  border-color: #bfd4ff;
+  color: #1d4ed8;
 }
 
 .card textarea {
   flex: 1;
-  padding: 16px;
-  font-size: 1rem;
+  min-height: 420px;
+  padding: 18px;
+  font-size: 15px;
+  line-height: 1.7;
   border: none;
   resize: none;
   outline: none;
-  background-color: #fefefe;
+  background-color: #ffffff;
+  color: #0f172a;
 }
+
 .card textarea:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
+  background-color: #f8fafc;
+  color: #94a3b8;
 }
+
+.content-preview {
+  flex: 1;
+  min-height: 420px;
+  padding: 18px;
+  overflow: auto;
+  background: #fbfdff;
+  color: #0f172a;
+}
+
+.content-preview.empty {
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  background: #f8fafc;
+}
+
+.preview-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", Courier, monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #0f172a;
+}
+
+.preview-image {
+  display: block;
+  max-width: min(100%, 860px);
+  max-height: 70vh;
+  margin: 10px 0;
+  border: 1px solid #e2eaf3;
+  border-radius: 8px;
+  background: #ffffff;
+  object-fit: contain;
+}
+
 .timestamp {
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  color: #6b7280;
-  background-color: #f9fafb;
+  padding: 10px 18px;
+  font-size: 13px;
+  color: #94a3b8;
+  background-color: #fbfdff;
   text-align: right;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e7edf5;
 }
+
 .fullscreen-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: rgba(15, 23, 42, 0.58);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -456,7 +711,7 @@ onBeforeUnmount(() => {
   width: min(1200px, 100%);
   max-height: 100%;
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
   display: flex;
   flex-direction: column;
@@ -467,7 +722,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e7edf5;
   position: sticky;
   top: 0;
   background-color: #ffffff;
@@ -476,96 +731,141 @@ onBeforeUnmount(() => {
 .fullscreen-title {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: #0f172a;
 }
+
 .close-btn {
   line-height: 1;
-  border: none;
-  background: transparent;
-  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d9e4f0;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 22px;
   cursor: pointer;
-  color: #4b5563;
-  padding: 4px;
+  color: #475569;
+  padding: 0;
 }
+
 .close-btn:hover {
-  color: #111827;
+  border-color: #bfd4ff;
+  color: #1d4ed8;
 }
+
 .fullscreen-body {
   padding: 20px;
   overflow: auto;
   flex: 1;
-  background-color: #f9fafb;
+  background-color: #f8fafc;
 }
-.fullscreen-body pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", Courier, monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #1f2937;
-}
+
 .fullscreen-footer {
   padding: 16px 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e7edf5;
   background-color: #ffffff;
   display: flex;
   justify-content: flex-end;
 }
+
 .exit-btn {
-  padding: 10px 20px;
-  background-color: #111827;
+  height: 38px;
+  padding: 0 18px;
+  background-color: #2563eb;
   color: #ffffff;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid #2563eb;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 14px;
+  font-weight: 600;
   transition: background-color 0.2s ease;
 }
+
 .exit-btn:hover {
-  background-color: #1f2937;
+  background-color: #1d4ed8;
 }
+
+@media (max-width: 900px) {
+  .main-container {
+    width: min(100% - 28px, 980px);
+    padding-top: 102px;
+  }
+}
+
 @media (max-width: 640px) {
   .main-container {
-    padding: 74px 10px 12px;
+    width: calc(100% - 24px);
+    padding: 92px 0 54px;
   }
 
-  .whiteboard-wrapper {
-    padding: 14px;
-    gap: 16px;
-    border-radius: 10px;
+  .whiteboard-main {
+    gap: 18px;
   }
+
+  .whiteboard-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 14px;
+  }
+
+  .page-kicker {
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+
+  .page-description {
+    font-size: 16px;
+  }
+
   .input-area {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    padding: 14px;
   }
   .input-wrapper {
     width: 100%;
   }
   .input-area > button {
     width: 100%;
-    padding: 12px;
   }
+
   .key-list {
     gap: 6px;
   }
+
   .card-header {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    padding: 14px;
   }
+
   .card {
-    border-radius: 10px;
+    min-height: 460px;
   }
+
   .card textarea {
     min-height: 320px;
     padding: 14px;
     font-size: 14px;
   }
+
+  .content-preview {
+    min-height: 320px;
+    padding: 14px;
+  }
+
+  .preview-image {
+    max-width: 100%;
+    max-height: 62vh;
+  }
+
   .timestamp {
     padding: 8px 14px;
     font-size: 12px;
   }
+
   .card-actions {
     flex-direction: column;
     align-items: stretch;
@@ -574,22 +874,28 @@ onBeforeUnmount(() => {
   .card-actions button {
     width: 100%;
   }
+
   .fullscreen-overlay {
     padding: 12px;
   }
+
   .fullscreen-panel {
     max-height: calc(100vh - 24px);
   }
+
   .fullscreen-header {
     padding: 12px 16px;
   }
+
   .fullscreen-body {
     padding: 16px;
   }
+
   .fullscreen-footer {
     padding: 12px 16px 16px;
     justify-content: center;
   }
+
   .exit-btn {
     width: 100%;
   }

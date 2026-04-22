@@ -43,6 +43,10 @@
 
             <div class="timeline-node" aria-hidden="true"></div>
 
+            <a class="timeline-cover" :href="getArticleLink(article)" :aria-label="article.title">
+              <img :src="article.thumbnail || defaultCover" :alt="article.title" loading="lazy" decoding="async" />
+            </a>
+
             <div class="article-copy">
               <div class="article-meta">
                 <span class="meta-pill">第 {{ article.serialNo }} 篇</span>
@@ -386,8 +390,8 @@ watch(activeCategory, loadArticles);
 .timeline-item {
   position: relative;
   display: grid;
-  grid-template-columns: 92px 52px minmax(0, 1fr);
-  gap: 0;
+  grid-template-columns: 92px 52px 180px minmax(0, 1fr);
+  gap: 0 18px;
   padding: 18px 0 24px;
 }
 
@@ -418,6 +422,30 @@ watch(activeCategory, loadArticles);
   border: 3px solid #2563eb;
   border-radius: 999px;
   background: #ffffff;
+}
+
+.timeline-cover {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  align-self: start;
+  padding: 10px;
+  border: 1px solid #e2eaf3;
+  border-radius: 8px;
+  background: #f8fafc;
+  aspect-ratio: 16 / 10;
+}
+
+.timeline-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.timeline-cover:hover img {
+  transform: scale(1.035);
 }
 
 .article-cover {
@@ -588,7 +616,8 @@ watch(activeCategory, loadArticles);
   }
 
   .timeline-item {
-    grid-template-columns: 72px 30px minmax(0, 1fr);
+    grid-template-columns: 72px 30px 148px minmax(0, 1fr);
+    gap: 0 14px;
   }
 }
 
@@ -649,6 +678,7 @@ watch(activeCategory, loadArticles);
   .timeline-item {
     grid-template-columns: 22px minmax(0, 1fr);
     padding: 14px 0 18px;
+    gap: 0;
   }
 
   .timeline-date {
@@ -667,15 +697,22 @@ watch(activeCategory, loadArticles);
 
   .timeline-node {
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 1 / span 3;
     width: 11px;
     height: 11px;
     margin-top: 4px;
   }
 
-  .timeline-item .article-copy {
+  .timeline-cover {
     grid-column: 2;
     grid-row: 2;
+    width: min(100%, 240px);
+    margin-bottom: 12px;
+  }
+
+  .timeline-item .article-copy {
+    grid-column: 2;
+    grid-row: 3;
     padding-bottom: 18px;
   }
 

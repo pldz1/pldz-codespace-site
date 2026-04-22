@@ -1,6 +1,6 @@
 <template>
   <div class="admin-page">
-    <MobileDrawer v-model="isMobileMenuOpen" subtitle="Admin, assets, navigation" :show-nav-placeholder="false">
+    <MobileDrawer v-if="hasInitializedAdmin" v-model="isMobileMenuOpen" subtitle="Admin, assets, navigation" :show-nav-placeholder="false">
       <nav class="sidebar-nav admin-sidebar-card admin-sidebar-card--mobile">
         <button
           v-for="item in menuItems"
@@ -17,7 +17,7 @@
 
     <HeaderBar @toggle-mobile-menu="onToggleMobileMenu"></HeaderBar>
 
-    <div class="main-container admin-main" :class="{ 'mobile-menu-open': isMobileMenuOpen }">
+    <div v-if="hasInitializedAdmin" class="main-container admin-main" :class="{ 'mobile-menu-open': isMobileMenuOpen }">
       <aside class="sidebar sidebar-sticky admin-sidebar">
         <nav class="sidebar-nav admin-sidebar-card">
           <button
@@ -48,6 +48,11 @@
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
         </section>
       </main>
+    </div>
+
+    <div v-else class="admin-auth-loading">
+      <div class="loading-spinner"></div>
+      <p>权限确认中...</p>
     </div>
 
     <FooterBar></FooterBar>
@@ -122,11 +127,14 @@ const allCategories = ref([]);
 const activeMenuKey = ref(defaultMenuKey);
 
 const isMobileMenuOpen = ref(false);
+const hasInitializedAdmin = ref(false);
 
 const { isLoading: isCategoriesLoading, start: startCategoriesLoading, stop: stopCategoriesLoading } = useLoading("admin.categories");
 
 const activeMenu = computed(() => routeMap[activeMenuKey.value] || routeMap[defaultMenuKey]);
 const showLoadingOverlay = computed(() => isCategoriesLoading.value && categoriesDependentMenu.has(activeMenuKey.value));
+const isAuthReady = computed(() => store.state.authState.ready);
+const isAdmin = computed(() => store.state.authState.isadmin);
 
 function onActiveCard(key) {
   if (activeMenuKey.value === key) {
@@ -188,20 +196,38 @@ function syncActiveFromRoute(id) {
   }
 }
 
-onMounted(async () => {
-  const isadmin = store.state.authState.isadmin;
-  if (!isadmin) {
-    router.push({ path: "/" });
+async function initializeAdminPage() {
+  if (!isAuthReady.value) {
     return;
   }
 
+  if (!isAdmin.value) {
+    hasInitializedAdmin.value = false;
+    router.replace({ path: "/" });
+    return;
+  }
+
+  if (hasInitializedAdmin.value) {
+    return;
+  }
+
+  hasInitializedAdmin.value = true;
   await fetchCategories();
   syncActiveFromRoute(props.id || route.params.id);
+}
+
+onMounted(() => {
+  initializeAdminPage();
 });
+
+watch([isAuthReady, isAdmin], initializeAdminPage);
 
 watch(
   () => route.params.id,
   (newId) => {
+    if (!hasInitializedAdmin.value) {
+      return;
+    }
     syncActiveFromRoute(newId);
   }
 );
@@ -209,6 +235,9 @@ watch(
 watch(
   () => props.id,
   (newId) => {
+    if (!hasInitializedAdmin.value) {
+      return;
+    }
     if (newId) {
       syncActiveFromRoute(newId);
     }
@@ -238,6 +267,16 @@ watch(
   min-width: 0;
   overflow: visible;
   transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.admin-auth-loading {
+  min-height: calc(100vh - 112px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #475569;
 }
 
 .admin-sidebar {

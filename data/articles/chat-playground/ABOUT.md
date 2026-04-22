@@ -13,10 +13,10 @@ tags:
 - AIGC
 - Playground
 thumbnail: /api/v1/website/image/chat-playground/0_category.png
-title: ABOUT
+title: 🗨️ Chat Playground v1 专栏
 ---
 
-# 🎉 Chat Playground v1 专栏
+# 🗨️ Chat Playground v1 专栏
 
 这个专栏主要记录 `chat-playground` 相关的实践内容，包括 AIGC Playground 项目的功能介绍、AI 对话和图像生成的调用方式，以及对话场景中比较关键的流式 Markdown 渲染实现。
 

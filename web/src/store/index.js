@@ -9,6 +9,7 @@ const authState = {
     username: "",
     avatar: "",
     isadmin: false,
+    ready: false,
   }),
   actions: {
     // 通过 dispatch 调用这个 action，来提交 mutation
@@ -21,6 +22,9 @@ const authState = {
     reset({ commit }) {
       commit("reset");
     },
+    ready({ commit }, value = true) {
+      commit("ready", value);
+    },
   },
   mutations: {
     // mutation 来更新 authState
@@ -32,6 +36,9 @@ const authState = {
         state.avatar = data?.avatar || "";
       }
     },
+    ready(state, value) {
+      state.ready = Boolean(value);
+    },
     avatar(state, data) {
       if (data) {
         state.avatar = data;
@@ -42,6 +49,7 @@ const authState = {
       state.username = "";
       state.avatar = "";
       state.isadmin = false;
+      state.ready = true;
     },
   },
 };

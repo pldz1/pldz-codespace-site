@@ -14,7 +14,7 @@
 
       <section class="home-content" aria-label="项目列表">
         <!-- 卡片 -->
-        <article v-for="c in mockData" :key="c.title || c.url || c.previewgif" class="code-space-card">
+        <article v-for="c in mockData" :key="c.title || c.url || c.previewgif" class="live-demo-card">
           <div class="card-window-bar" aria-hidden="true">
             <span></span>
             <span></span>
@@ -211,7 +211,7 @@ onMounted(async () => {
   gap: 34px;
 }
 
-.code-space-card {
+.live-demo-card {
   position: relative;
   display: grid;
   grid-template-rows: auto auto auto auto 1fr auto;
@@ -225,7 +225,7 @@ onMounted(async () => {
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
-.code-space-card:hover {
+.live-demo-card:hover {
   transform: translate(-2px, -2px);
   box-shadow: 8px 8px 0 #111827;
 }
@@ -409,7 +409,7 @@ onMounted(async () => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .code-space-card,
+  .live-demo-card,
   .btn {
     transition: none;
   }
@@ -438,11 +438,11 @@ onMounted(async () => {
     gap: 28px;
   }
 
-  .code-space-card {
+  .live-demo-card {
     box-shadow: 5px 5px 0 #111827;
   }
 
-  .code-space-card:hover {
+  .live-demo-card:hover {
     transform: none;
     box-shadow: 5px 5px 0 #111827;
   }
@@ -467,7 +467,7 @@ onMounted(async () => {
     width: calc(100% - 22px);
   }
 
-  .code-space-card {
+  .live-demo-card {
     border-radius: 6px;
   }
 

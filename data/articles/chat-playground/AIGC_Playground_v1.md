@@ -40,7 +40,7 @@ v1 版本对于 Python 只是提供一个存储 Sqlite 和 web server 的功能
 
 👉 在线体验地址 3: [pldz1.com](https://pldz1.com/_codespace/chat-playground_v1/index.html#/login)
 
-![v1效果预览](/api/v1/website/image/code-space/chat-playground_v1_preview.gif)
+![v1效果预览](/api/v1/website/image/live-demo/chat-playground_v1_preview.gif)
 
 ---
 

@@ -620,7 +620,6 @@ web/src/views/HomePage.vue
 数据用途：
 
 - 从全部文章中按日期排序，取最近文章作为项目/更新展示。
-- 优先选择 `category === "code-space"` 的文章作为项目教程。
 - 从 Live Demo 配置中取前 4 个作为 Demo 展示。
 - 如果接口失败或无数据，则使用组件内 fallback 数据。
 
@@ -1084,8 +1083,7 @@ server/scripts/db/connection.py
 data/images/avatar
 data/images/chat-playground
 data/images/cloud-service
-data/images/code-space
-data/images/others
+data/images/live-demo
 ```
 
 访问 URL 规则：
@@ -1506,7 +1504,6 @@ docker rmi docker.m.daocloud.io/library/nginx:1.25-alpine
 5. `data/db/articles.json` 是否生成。
 6. `serialNo` 是否符合页面预期：
    - `/articles` 只展示 `serialNo=0`。
-   - 首页项目优先取 `category=code-space`，没有则回退到最近文章。
 
 ### 图片无法显示
 

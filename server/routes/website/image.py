@@ -1,6 +1,9 @@
+import asyncio
 import hashlib
 import mimetypes
+import os
 import re
+import threading
 from pathlib import Path
 
 from fastapi import (
@@ -17,6 +20,7 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from PIL import Image, ImageSequence, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 
 from core import Logger, ProjectConfig
 from scripts.db import AuthorizedHandler
@@ -30,6 +34,26 @@ DEFAULT_IMAGE_HEIGHT = 512
 DEFAULT_IMAGE_QUALITY = 80
 CACHE_CONTROL_HEADER = {"Cache-Control": "public, max-age=86400"}
 SUPPORTED_OUTPUT_FORMATS = {"webp", "jpeg"}
+DEFAULT_IMAGE_PROCESS_CONCURRENCY = 2
+DEFAULT_WEBP_METHOD = 4
+
+
+def _get_positive_int_env(name: str, default: int) -> int:
+    try:
+        value = int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+    return value if value > 0 else default
+
+
+IMAGE_PROCESS_CONCURRENCY = _get_positive_int_env(
+    "IMAGE_PROCESS_CONCURRENCY",
+    DEFAULT_IMAGE_PROCESS_CONCURRENCY,
+)
+WEBP_METHOD = _get_positive_int_env("WEBP_METHOD", DEFAULT_WEBP_METHOD)
+_IMAGE_PROCESS_SEMAPHORE = asyncio.Semaphore(IMAGE_PROCESS_CONCURRENCY)
+_IMAGE_CACHE_LOCKS: dict[Path, asyncio.Lock] = {}
+_IMAGE_CACHE_LOCKS_GUARD = asyncio.Lock()
 
 
 def _validate_image_request(category: str, image: str) -> None:
@@ -110,7 +134,7 @@ def _save_static_image(source: Image.Image, target: Path, width: int, height: in
         resized.save(target, format="JPEG", quality=quality, optimize=True, progressive=True)
         return
 
-    resized.save(target, format="WEBP", quality=quality, method=6)
+    resized.save(target, format="WEBP", quality=quality, method=WEBP_METHOD)
 
 
 def _save_animated_webp(source: Image.Image, target: Path, width: int, height: int, quality: int) -> None:
@@ -132,11 +156,94 @@ def _save_animated_webp(source: Image.Image, target: Path, width: int, height: i
         duration=durations,
         loop=source.info.get("loop", 0),
         quality=quality,
-        method=6,
+        method=WEBP_METHOD,
     )
 
 
-def _build_image_response(
+def _read_image_job(
+    path: str,
+    category: str,
+    image: str,
+    width: int,
+    height: int,
+    quality: int,
+    selected_format: str,
+) -> tuple[Path, str, bool]:
+    with Image.open(path) as source:
+        is_animated = getattr(source, "is_animated", False)
+        if is_animated:
+            selected_format = "webp"
+
+    cache_path = _cache_file_path(category, image, width, height, quality, selected_format)
+    return cache_path, selected_format, is_animated
+
+
+def _generate_cached_image(
+    source_path: str,
+    cache_path: Path,
+    width: int,
+    height: int,
+    quality: int,
+    selected_format: str,
+    is_animated: bool,
+) -> None:
+    if cache_path.exists():
+        return
+
+    tmp_path = cache_path.with_name(
+        f".{cache_path.name}.{os.getpid()}.{threading.get_ident()}.tmp"
+    )
+    try:
+        with Image.open(source_path) as source:
+            if is_animated:
+                _save_animated_webp(source, tmp_path, width, height, quality)
+            else:
+                _save_static_image(source, tmp_path, width, height, quality, selected_format)
+        os.replace(tmp_path, cache_path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
+async def _get_cache_lock(cache_path: Path) -> asyncio.Lock:
+    async with _IMAGE_CACHE_LOCKS_GUARD:
+        lock = _IMAGE_CACHE_LOCKS.get(cache_path)
+        if lock is None:
+            lock = asyncio.Lock()
+            _IMAGE_CACHE_LOCKS[cache_path] = lock
+        return lock
+
+
+async def _ensure_cached_image(
+    source_path: str,
+    cache_path: Path,
+    width: int,
+    height: int,
+    quality: int,
+    selected_format: str,
+    is_animated: bool,
+) -> None:
+    if cache_path.exists():
+        return
+
+    cache_lock = await _get_cache_lock(cache_path)
+    async with cache_lock:
+        if cache_path.exists():
+            return
+        async with _IMAGE_PROCESS_SEMAPHORE:
+            await run_in_threadpool(
+                _generate_cached_image,
+                source_path,
+                cache_path,
+                width,
+                height,
+                quality,
+                selected_format,
+                is_animated,
+            )
+
+
+async def _build_image_response(
     category: str,
     image: str,
     width: int | None,
@@ -150,23 +257,31 @@ def _build_image_response(
     path = ImageCrudHandler.get_image_path(category, image)
 
     try:
-        with Image.open(path) as source:
-            if width is None or height is None:
-                width = DEFAULT_IMAGE_WIDTH
-                height = DEFAULT_IMAGE_HEIGHT
-            _validate_dimensions(width, height)
+        if width is None or height is None:
+            width = DEFAULT_IMAGE_WIDTH
+            height = DEFAULT_IMAGE_HEIGHT
+        _validate_dimensions(width, height)
 
-            selected_format = _select_output_format(request, output_format)
-            is_animated = getattr(source, "is_animated", False)
-            if is_animated:
-                selected_format = "webp"
-
-            cache_path = _cache_file_path(category, image, width, height, quality, selected_format)
-            if not cache_path.exists():
-                if is_animated:
-                    _save_animated_webp(source, cache_path, width, height, quality)
-                else:
-                    _save_static_image(source, cache_path, width, height, quality, selected_format)
+        selected_format = _select_output_format(request, output_format)
+        cache_path, selected_format, is_animated = await run_in_threadpool(
+            _read_image_job,
+            path,
+            category,
+            image,
+            width,
+            height,
+            quality,
+            selected_format,
+        )
+        await _ensure_cached_image(
+            path,
+            cache_path,
+            width,
+            height,
+            quality,
+            selected_format,
+            is_animated,
+        )
     except HTTPException:
         raise
     except UnidentifiedImageError:
@@ -207,7 +322,7 @@ async def api_get_resized_image(
     :param width: 目标宽度
     :param height: 目标高度
     """
-    return _build_image_response(
+    return await _build_image_response(
         category,
         image,
         _parse_dimension(width),
@@ -245,7 +360,7 @@ async def api_get_square_resized_image(
     :param size: 目标宽高
     """
     parsed_size = _parse_dimension(size)
-    return _build_image_response(
+    return await _build_image_response(
         category,
         image,
         parsed_size,
@@ -269,7 +384,7 @@ async def api_get_image(
     :param category: 图片分类
     :param image: 图片文件名
     """
-    return _build_image_response(category, image, None, None, request, quality, format)
+    return await _build_image_response(category, image, None, None, request, quality, format)
 
 
 class ImageCategoryData(BaseModel):

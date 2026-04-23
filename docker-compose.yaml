@@ -14,7 +14,7 @@ services:
       - ./:/usr/src/app:delegated
       - ./.env:/usr/src/app/.env:ro
     restart: unless-stopped
-    command: ["/usr/src/app/entrypoint.sh"]
+    command: ["python", "server/main.py"]
 
   nginx:
     image: nginx:1.25-alpine
@@ -28,7 +28,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/prod.d:/etc/nginx/conf.d:ro
-      - ./data/templates/web:/usr/share/nginx/html:ro
+      - ./data/templates:/usr/share/nginx/templates:ro
     restart: unless-stopped
 
 # 虚拟网络配置

@@ -77,7 +77,6 @@
 ├── web/                       # Vue 3 前端工程
 ├── Dockerfile                 # backend 镜像构建文件
 ├── docker-compose.yaml        # backend + nginx 编排
-├── entrypoint.sh              # 容器内多进程启动脚本
 ├── requirements.txt           # Python 依赖
 ├── .env.example               # 环境变量示例
 └── README.md                  # 当前文档
@@ -101,10 +100,8 @@ docker compose up --build
 - 浏览器访问 `http://127.0.0.1:10058`
 - Nginx 监听宿主机 `10058`
 - Nginx 把 `/api/` 代理到 backend 容器内 `10057`
-- Nginx 把 `/io/sse-markdown` 代理到 backend 容器内 `10078`
-- backend 容器通过 `entrypoint.sh` 同时启动：
-  - `python data/templates/sse-markdown/main.py`
-  - `python server/main.py`
+- Nginx 把 `/io/sse-markdown` 代理到 `data/templates/sse-markdown/index.html`
+- backend 容器通过 `python server/main.py` 启动
 
 ### 方式二：本地前后端分开开发
 
@@ -150,7 +147,6 @@ http://127.0.0.1:10058
 | `10058` | 宿主机 Nginx 或本地 FastAPI   | Docker 模式下是 Nginx 暴露端口；本地后端默认也用这个端口 |
 | `10057` | Docker backend 中的主 FastAPI | Compose 通过环境变量覆盖 `SITE_PORT=10057`               |
 | `10060` | Vite dev server               | 本地前端开发端口                                         |
-| `10078` | sse-markdown Demo 服务        | `data/templates/sse-markdown/main.py`                    |
 
 ## 环境变量
 
@@ -596,11 +592,11 @@ Nginx 生产配置中：
 
 ```nginx
 location / {
-    try_files $uri $uri/ /index.html;
+    try_files $uri $uri/ /web/index.html;
 }
 ```
 
-这保证了刷新 `/article/:id` 这类前端路由时仍然回到 `index.html`。
+这保证了刷新 `/article/:id` 这类前端路由时仍然回到 `/web/index.html`。
 
 ## 前端页面规格
 
@@ -1120,17 +1116,11 @@ data/templates/web
 data/templates/sse-markdown
 ```
 
-`data/templates/web` 是 Nginx 当前挂载的前端静态目录：
+`data/templates` 是 Nginx 当前挂载的前端静态目录：
 
 ```yaml
 volumes:
-  - ./data/templates/web:/usr/share/nginx/html:ro
-```
-
-`data/templates/sse-markdown` 是一个独立 FastAPI 静态服务：
-
-```text
-/io/sse-markdown
+  - ./data/templates:/usr/share/nginx/templates:ro
 ```
 
 ## 本地开发流程
@@ -1219,7 +1209,7 @@ docker compose down
 - 环境变量覆盖：
   - `SITE_HOST=0.0.0.0`
   - `SITE_PORT=10057`
-- 运行 `/usr/src/app/entrypoint.sh`。
+- 运行 `python server/main.py`。
 
 `nginx`：
 
@@ -1233,9 +1223,9 @@ docker compose down
 ### Nginx 路由
 
 ```text
-/                  -> /usr/share/nginx/html/index.html
+/                  -> /usr/share/nginx/templates/web/index.html
 /api/*             -> http://backend:10057
-/io/sse-markdown   -> http://backend:10078
+/io/sse-markdown   -> /usr/share/nginx/templates/sse-markdown/index.html
 ```
 
 ## 管理后台使用
@@ -1566,7 +1556,7 @@ docker rmi docker.m.daocloud.io/library/nginx:1.25-alpine
 4. 用户、评论、文章 views 当前存在 JSON 文件里。
 5. 管理后台写的是本地 JSON 配置和本地文件。
 6. 生产入口是 Nginx，前端静态文件来自 `data/templates/web`。
-7. 主后端和 `sse-markdown` Demo 在同一个 backend 容器内由 `entrypoint.sh` 同时启动。
+7. 主后端 `python server/main.py`
 8. 前端请求工具默认只返回后端 `data` 字段。
 9. 管理员权限只由用户名是否等于 `ADMIN_USERNAME` 决定。
 10. 白板是临时内存功能，不应假设它可靠持久。

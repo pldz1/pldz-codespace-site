@@ -106,7 +106,7 @@
               <p class="section-kicker">Updates / Timeline</p>
               <h2>最近更新</h2>
             </div>
-            <a class="section-link" href="/livedemo">阅读更新</a>
+            <a class="section-link" href="/articles">阅读更新</a>
           </div>
 
           <ul class="updates-list">

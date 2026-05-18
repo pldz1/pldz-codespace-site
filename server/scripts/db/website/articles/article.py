@@ -8,6 +8,11 @@ from typedef.db.article import T_ArticleData
 ARTICLES_DIR = ProjectConfig.get_articles_path()
 
 
+def _is_published(doc: T_ArticleData) -> bool:
+    """仅允许前台展示 status=publish 的文章。"""
+    return doc.get('meta', {}).get('status') == 'publish'
+
+
 def _read_content(path: str) -> str:
     """从 .md 文件读取正文内容（不含 frontmatter）"""
     from scripts.filesystem import ArticleCrudHandler
@@ -19,7 +24,10 @@ def _read_content(path: str) -> str:
 def find_all_articles() -> List[T_ArticleData]:
     with _lock:
         data = _read_json(get_articles_db_path())
-    docs = [d for d in data.values() if d.get('meta', {}).get('serialNo', 0) != 0]
+    docs = [
+        d for d in data.values()
+        if _is_published(d) and d.get('meta', {}).get('serialNo', 0) != 0
+    ]
     docs.sort(key=lambda d: d.get('meta', {}).get('date', ''), reverse=True)
     return docs
 
@@ -27,7 +35,10 @@ def find_all_articles() -> List[T_ArticleData]:
 def find_article_intros() -> List[T_ArticleData]:
     with _lock:
         data = _read_json(get_articles_db_path())
-    docs = [d for d in data.values() if d.get('meta', {}).get('serialNo', 0) == 0]
+    docs = [
+        d for d in data.values()
+        if _is_published(d) and d.get('meta', {}).get('serialNo', 0) == 0
+    ]
     docs.sort(key=lambda d: d.get('meta', {}).get('category', ''))
     return docs
 

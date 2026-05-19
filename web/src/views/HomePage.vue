@@ -18,7 +18,15 @@
           </p>
           <div class="hero-actions">
             <a class="button-primary" href="/articles">查看项目教程</a>
-            <a class="button-secondary" href="/livedemo">查看 Demo / GitHub</a>
+            <a
+              class="button-secondary"
+              href="/livedemo"
+              data-analytics-cta="live_demo"
+              data-analytics-source="home.hero"
+              data-analytics-label="查看 Demo / GitHub"
+            >
+              查看 Demo / GitHub
+            </a>
           </div>
           <!-- TODO 后续用接口换成热点内容... -->
           <ul class="hero-points">
@@ -49,7 +57,17 @@
               </div>
               <h3>{{ featuredDemo.title }}</h3>
               <p class="preview-card__description">{{ featuredDemo.description }}</p>
-              <a class="text-link" :href="featuredDemo.demoLink" target="_blank" rel="noopener noreferrer">在线体验</a>
+              <a
+                class="text-link"
+                :href="featuredDemo.demoLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-analytics-cta="live_demo"
+                data-analytics-source="home.featured_demo"
+                :data-analytics-label="featuredDemo.title || '在线体验'"
+              >
+                在线体验
+              </a>
             </article>
 
             <article class="preview-card card-surface">

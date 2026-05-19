@@ -5,6 +5,7 @@ import store from "./store";
 
 import { createApp } from "vue";
 import { refresh } from "./utils/apis";
+import { initAnalytics } from "./utils/analytics";
 
 const refreshAuthState = async () => {
   try {
@@ -32,6 +33,7 @@ const bootstrap = () => {
     app.use(router);
     app.mount("#app");
 
+    initAnalytics(router);
     refreshAuthState();
   } finally {
     window.loading?.done();

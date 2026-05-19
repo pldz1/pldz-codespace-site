@@ -16,7 +16,17 @@
     </div>
 
     <div class="demo-actions">
-      <a class="button-primary button-compact" :href="demo.demoLink" target="_blank" rel="noopener noreferrer">在线体验</a>
+      <a
+        class="button-primary button-compact"
+        :href="demo.demoLink"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-analytics-cta="live_demo"
+        :data-analytics-source="`home.demo_card.${demo.id || demo.title || 'unknown'}`"
+        :data-analytics-label="demo.title || '在线体验'"
+      >
+        在线体验
+      </a>
       <a class="button-ghost button-compact" :href="demo.repoLink" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </article>

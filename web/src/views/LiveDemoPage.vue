@@ -50,6 +50,9 @@
               @click="onGoPreview(c.url)"
               :disabled="!c.url"
               :title="c.url ? '打开预览' : '暂无预览地址'"
+              data-analytics-cta="live_demo"
+              :data-analytics-source="`livedemo.list.${c.folder || c.title || 'unknown'}`"
+              :data-analytics-label="c.title || 'Live Demo'"
             >
               打开预览
             </button>

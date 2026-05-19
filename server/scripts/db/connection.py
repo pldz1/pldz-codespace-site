@@ -40,6 +40,10 @@ def get_comments_db_path() -> str:
     return os.path.join(_get_db_dir(), 'comments.json')
 
 
+def get_analytics_db_path() -> str:
+    return os.path.join(_get_db_dir(), 'analytics.json')
+
+
 # 以下别名保持 __init__.py 导出的兼容性
 def get_article_mongo_collection():
     return get_articles_db_path()
@@ -51,3 +55,7 @@ def get_user_mongo_collection():
 
 def get_comments_mongo_collection():
     return get_comments_db_path()
+
+
+def get_analytics_collection():
+    return get_analytics_db_path()

@@ -42,9 +42,9 @@
             </div>
           </transition>
 
+          <AnalyticsMgt v-if="activeMenuKey === 'analytics'"></AnalyticsMgt>
           <UserMgt v-if="activeMenuKey === 'usermgt'"></UserMgt>
           <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
-
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
         </section>
       </main>
@@ -64,6 +64,7 @@ import HeaderBar from "../components/HeaderBar.vue";
 import FooterBar from "../components/FooterBar.vue";
 import MobileDrawer from "../components/MobileDrawer.vue";
 
+import AnalyticsMgt from "../components/admin-page/AnalyticsMgt.vue";
 import UserMgt from "../components/admin-page/UserMgt.vue";
 import ImageMgt from "../components/admin-page/ImageMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
@@ -85,9 +86,17 @@ const props = defineProps({
 
 const menuItems = [
   {
+    key: "analytics",
+    name: "数据统计",
+    icon: "chart",
+    caption: "查看 PV/UV、文章点击和按钮点击",
+    gradient: "linear-gradient(135deg, #2563eb 0%, #0f766e 100%)",
+    requiresCategories: false,
+  },
+  {
     key: "usermgt",
     name: "用户管理",
-    icon: "🤠",
+    icon: "users",
     caption: "管理后台用户权限与基础资料",
     gradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
     requiresCategories: false,
@@ -95,7 +104,7 @@ const menuItems = [
   {
     key: "imagemgt",
     name: "图片管理",
-    icon: "📷",
+    icon: "image",
     caption: "上传与维护内容配图",
     gradient: "linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%)",
     requiresCategories: true,
@@ -103,7 +112,7 @@ const menuItems = [
   {
     key: "cachemgt",
     name: "缓存资源管理",
-    icon: "💾",
+    icon: "cache",
     caption: "维护静态缓存与资源文件",
     gradient: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
     requiresCategories: false,

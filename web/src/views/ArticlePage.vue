@@ -68,6 +68,7 @@ import CommentForm from "../components/article-page/CommentForm.vue";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getArticle } from "../utils/apis";
 import { renderMarkdown } from "../utils/markdown.js";
+import { refreshAnalyticsBindings, trackArticleView } from "../utils/analytics";
 
 const props = defineProps({
   id: {
@@ -160,6 +161,11 @@ async function loadArticle() {
 
   article.value = res;
   updateRenderedContent();
+  trackArticleView({
+    articleId: res.id,
+    articleTitle: res.meta?.title || res.id,
+  });
+  refreshAnalyticsBindings();
 }
 
 function handleResize() {

@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .authorization import AUTH_ROUTER
 from .resource import RESOURCE_ROUTE
+from .analytics import ANALYTICS_ROUTER
 from .website import (
     ARTICLES_ROUTE,
     IMAGES_ROUTE,
@@ -30,6 +31,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(AUTH_ROUTER, prefix="/api/v1")
 app.include_router(RESOURCE_ROUTE, prefix="/api/v1")
+app.include_router(ANALYTICS_ROUTER, prefix="/api/v1")
 
 app.include_router(ARTICLES_ROUTE, prefix="/api/v1")
 app.include_router(IMAGES_ROUTE, prefix="/api/v1")
